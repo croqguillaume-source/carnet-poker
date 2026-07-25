@@ -1,0 +1,1856 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Carnet Poker — Le labo des trois</title>
+
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json"/>
+<meta name="theme-color" content="#0B1412"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<meta name="apple-mobile-web-app-title" content="Poker"/>
+<link rel="apple-touch-icon" href="/icon.svg"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="description" content="Carnet poker à trois — planning, étude, sessions, review des leaks, bankroll."/>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Public+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --paper:#0B1412; --paper-deep:#18302B; --card:#122220;
+    --ink:#E8E4D9; --ink-soft:#B4C2BB;
+    --olive:#1B4D40; --olive-deep:#0F2C25;
+    --clay:#4FD1A5; --clay-soft:#7FE0C0; --clay-deep:#2FA982;
+    --sage:#6FBF9E; --night:#0F2C25; --night-deep:#06100E;
+    --gold:#C9922F; --alert:#E2574C;
+    --line:#25403A; --muted:#8FA39D;
+    --shadow:rgba(0,0,0,.35);
+    --display:'Archivo Black', Impact, sans-serif;
+    --body:'Public Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;overflow-x:hidden;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");opacity:.045;mix-blend-mode:overlay;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px 70px;position:relative;z-index:1;}
+
+  /* HEADER */
+  header.top{background:linear-gradient(158deg,#13302A,#0B1412);color:var(--ink);padding:20px 0 16px;position:relative;overflow:hidden;border-bottom:1px solid var(--line);}
+  header.top::after{content:"";position:absolute;right:-50px;top:-70px;width:240px;height:240px;background:radial-gradient(circle,rgba(79,209,165,.13),transparent 68%);border-radius:50%;}
+  header.top .wrap{padding-bottom:0;}
+  .top-row{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;}
+  .kicker{font-family:var(--mono);font-weight:400;letter-spacing:.18em;text-transform:uppercase;font-size:10px;color:var(--muted);margin-bottom:6px;}
+  header.top h1{font-family:var(--display);font-weight:400;font-size:clamp(21px,4.4vw,28px);line-height:1;letter-spacing:-.02em;text-transform:uppercase;}
+  header.top h1 em{font-style:normal;color:var(--clay);}
+  .day-ring{position:relative;width:78px;height:78px;flex:0 0 78px;}
+  .day-ring svg{transform:rotate(-90deg);}
+  .day-ring .ring-bg{fill:none;stroke:rgba(232,228,217,.12);stroke-width:8;}
+  .day-ring .ring-fg{fill:none;stroke:var(--gold);stroke-width:8;stroke-linecap:round;transition:stroke-dasharray .5s cubic-bezier(.4,0,.2,1);}
+  .day-ring .ring-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:21px;color:var(--ink);}
+  .day-ring .ring-num small{font-family:var(--mono);font-size:8px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:1px;}
+  .who{display:flex;align-items:center;gap:9px;margin-top:14px;flex-wrap:wrap;}
+  .who label{font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
+  .who select{background:rgba(232,228,217,.06);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:6px 10px;font-family:var(--body);font-size:13.5px;font-weight:600;width:auto;}
+  .who select option{color:#111;background:#E8E4D9;}
+  .sync-dot{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:6px;}
+  .sync-dot i{width:7px;height:7px;border-radius:50%;background:var(--muted);display:inline-block;}
+  .sync-dot.ok i{background:var(--clay);} .sync-dot.err i{background:var(--alert);}
+
+  /* NAV */
+  nav.tabs{position:sticky;top:0;z-index:50;background:rgba(11,20,18,.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+  nav.tabs .inner{max-width:1120px;margin:0 auto;padding:0 12px;display:flex;gap:0;overflow-x:auto;scrollbar-width:none;
+    overscroll-behavior-x:contain;-webkit-overflow-scrolling:touch;touch-action:pan-x;
+    scroll-snap-type:x proximity;scroll-padding-inline:16px;}
+  nav.tabs .inner::-webkit-scrollbar{display:none;}
+  nav.tabs a{flex:0 0 auto;padding:14px 15px;font-family:var(--mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;white-space:nowrap;cursor:pointer;border-bottom:2px solid transparent;transition:.15s;display:flex;align-items:center;gap:7px;scroll-snap-align:center;}
+  @media(max-width:480px){nav.tabs a{padding:13px 11px;font-size:10px;gap:5px;}nav.tabs a .ic{width:13px;height:13px;}}
+  nav.tabs a:hover{color:var(--ink);}
+  nav.tabs a.active{color:var(--clay);border-bottom-color:var(--clay);}
+  nav.tabs a .ic{width:14px;height:14px;}
+
+  /* PANELS */
+  .panel{display:none;padding:26px 0 12px;}
+  .panel.on{display:block;animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+  @media(prefers-reduced-motion:reduce){.panel.on{animation:none;}}
+
+  .sec-label{font-family:var(--mono);font-weight:400;letter-spacing:.16em;text-transform:uppercase;font-size:10px;color:var(--clay);display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .sec-label::before{content:"";width:20px;height:1px;background:var(--clay);}
+  h2{font-family:var(--display);font-weight:400;font-size:clamp(19px,3.2vw,25px);line-height:1.2;letter-spacing:-.02em;margin-bottom:9px;}
+  h2 em{font-style:normal;color:var(--clay);}
+  h3{font-family:var(--display);font-weight:400;font-size:17px;margin-bottom:8px;}
+  h4{font-family:var(--display);font-weight:400;font-size:15px;}
+  .lead{font-size:14.5px;color:var(--ink-soft);max-width:66ch;margin-bottom:15px;}
+  .mb12{margin-bottom:12px;}.mb18{margin-bottom:18px;}.mt14{margin-top:14px;}.mt22{margin-top:22px;}
+
+  /* CARDS */
+  .card{background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 2px 14px var(--shadow);padding:18px;}
+  .grid{display:grid;gap:12px;}
+  .g2{grid-template-columns:repeat(2,1fr);}
+  .g3{grid-template-columns:repeat(3,1fr);}
+  .g4{grid-template-columns:repeat(4,1fr);}
+  @media(max-width:680px){.g2{grid-template-columns:1fr;}.g3{grid-template-columns:repeat(2,1fr);}.g4{grid-template-columns:repeat(2,1fr);}}
+
+  /* KPI */
+  .kpi{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:14px 15px;position:relative;overflow:hidden;}
+  .kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--accent,var(--sage));}
+  .kpi.clay::before{background:var(--clay);} .kpi.olive::before{background:var(--sage);} .kpi.gold::before{background:var(--gold);} .kpi.night::before{background:var(--muted);}
+  .kpi-label{font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-bottom:5px;}
+  .kpi-value{font-family:var(--mono);font-weight:700;font-size:27px;line-height:1.05;letter-spacing:-.03em;color:var(--ink);}
+  .kpi-value .unit{font-size:12px;color:var(--muted);font-weight:400;margin-left:3px;letter-spacing:0;}
+  .kpi-sub{font-family:var(--mono);font-size:11px;color:var(--muted);margin-top:5px;}
+  .kpi-sub.up{color:var(--clay);}.kpi-sub.down{color:var(--alert);}
+
+  /* FORMS */
+  .field{display:flex;flex-direction:column;gap:5px;min-width:0;}
+  .field label{font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);}
+  input,select,textarea{font-family:var(--body);font-size:14px;color:var(--ink);background:var(--paper);
+    border:1px solid var(--line);border-radius:4px;padding:9px 10px;width:100%;min-width:0;}
+  input[type=number],input[type=date]{font-family:var(--mono);font-size:13px;}
+  select option{background:#122220;color:var(--ink);}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--clay);outline-offset:1px;}
+  textarea{resize:vertical;min-height:62px;}
+  .form-row{display:flex;gap:11px;flex-wrap:wrap;align-items:flex-end;}
+  .form-row .field{flex:1 1 130px;}
+  .btn{background:var(--clay);border:1px solid var(--clay);color:#08120F;border-radius:4px;padding:10px 16px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:.15s;white-space:nowrap;}
+  .btn:hover{background:var(--clay-soft);border-color:var(--clay-soft);}
+  .btn-outline{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:4px;padding:10px 16px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:.15s;white-space:nowrap;}
+  .btn-outline:hover{background:var(--line);color:var(--ink);}
+  .btn-mini{background:transparent;border:1px solid var(--line);border-radius:3px;padding:3px 9px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--muted);cursor:pointer;transition:.15s;}
+  .btn-mini:hover{background:var(--clay);border-color:var(--clay);color:#08120F;}
+
+  /* NOTICES */
+  .notice{border-left:3px solid var(--alert);background:rgba(226,87,76,.09);border-radius:0 4px 4px 0;padding:11px 14px;font-size:14px;margin-bottom:9px;}
+  .notice b{color:var(--alert);}
+  .notice.good{border-left-color:var(--clay);background:rgba(79,209,165,.08);}
+  .notice.good b{color:var(--clay);}
+
+  /* CALENDAR */
+  .cal-nav{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;gap:10px;}
+  .cal-month-label{font-family:var(--display);font-weight:400;font-size:16px;letter-spacing:-.01em;text-transform:uppercase;}
+  .cal-grid-head{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;margin-bottom:5px;width:100%;}
+  .cal-grid-head span{font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);padding:4px 0;min-width:0;}
+  .cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;width:100%;}
+  .cal-day{aspect-ratio:1;border-radius:4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;cursor:pointer;transition:.15s;position:relative;padding:3px;min-width:0;min-height:0;border:1px solid var(--line);background:#0E1B18;}
+  .cal-day.other-month{opacity:.3;}
+  .cal-day.today{background:var(--olive);border-color:var(--olive);}
+  .cal-day.done-session{background:rgba(79,209,165,.15);border-color:var(--clay-deep);}
+  .cal-day.sel{border-color:var(--gold);}
+  .cal-day:hover:not(.today):not(.done-session){background:var(--paper-deep);}
+  .cal-num{font-family:var(--mono);font-size:12px;font-weight:400;line-height:1;color:var(--ink);}
+  .cal-session-tag{font-family:var(--mono);font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;background:var(--gold);color:#0B1412;border-radius:3px;padding:1px 4px;line-height:1.5;max-width:100%;overflow:hidden;white-space:nowrap;}
+  .cal-session-tag.done{background:var(--clay);color:#08120F;}
+  .cal-session-tag.study{background:transparent;color:var(--gold);border:1px solid var(--gold);}
+  .cal-legend{display:flex;align-items:center;gap:14px;margin-top:12px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);flex-wrap:wrap;}
+  .cl-dot{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;}
+  .cl-done{background:var(--clay);} .cl-planned{background:var(--gold);} .cl-study{background:transparent;border:1px solid var(--gold);}
+
+  /* ROWS / LISTS */
+  .row-line{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(37,64,58,.6);}
+  .row-line:last-child{border-bottom:none;}
+  .row-num{font-family:var(--mono);font-size:11px;color:var(--muted);min-width:24px;}
+  .row-main{flex:1;min-width:0;}
+  .row-title{font-size:14px;font-weight:600;}
+  .row-meta{font-size:12.5px;color:var(--muted);}
+  .checks{display:flex;gap:10px;flex-wrap:wrap;}
+  .checks label{display:flex;align-items:center;gap:4px;font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.06em;color:var(--muted);cursor:pointer;}
+  .checks input{width:auto;accent-color:var(--clay);}
+  .checks label.done{color:var(--clay);}
+
+  .tag{display:inline-block;font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.04em;padding:3px 8px;border-radius:99px;
+    border:1px solid var(--line);background:transparent;color:var(--muted);margin:0 4px 4px 0;}
+  .tag.warm{border-color:var(--gold);color:var(--gold);}
+  .tag.hot{border-color:var(--alert);color:var(--alert);}
+
+  /* TABLES */
+  .tbl-wrap{overflow-x:auto;margin-top:12px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  td{padding:9px 10px;border-bottom:1px solid rgba(37,64,58,.5);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:hover td,table tr:hover td{background:rgba(37,64,58,.22);}
+  td.num{text-align:right;font-family:var(--mono);font-size:12px;white-space:nowrap;}
+  .pos{color:var(--clay);} .neg{color:var(--alert);}
+  .empty{color:var(--muted);font-size:13.5px;padding:16px 0;}
+
+  /* BARS */
+  .lbar{display:flex;align-items:center;gap:11px;margin-bottom:7px;}
+  .lbar-name{flex:1;font-size:13.5px;min-width:0;}
+  .lbar-track{flex:1;height:5px;background:#0B1412;border:1px solid var(--line);border-radius:99px;overflow:hidden;}
+  .lbar-track i{display:block;height:100%;background:var(--gold);}
+  .lbar-track i.hot{background:var(--alert);}
+  .lbar-n{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink);min-width:18px;text-align:right;}
+
+  /* CHART */
+  .chart-card{background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 2px 14px var(--shadow);padding:18px;}
+  svg.chart{width:100%;height:auto;display:block;}
+  .chart-legend{display:flex;gap:16px;flex-wrap:wrap;margin-top:12px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+  .chart-legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px;}
+  .verdict{font-family:var(--display);font-weight:400;font-size:clamp(16px,2.6vw,20px);line-height:1.35;letter-spacing:-.02em;margin-top:16px;}
+  .verdict em{font-style:normal;color:var(--clay);}
+  .verdict-note{font-family:var(--mono);font-size:11.5px;font-weight:400;color:var(--muted);margin-top:9px;letter-spacing:0;text-transform:none;}
+
+  pre.sql{background:var(--night-deep);color:#9FD8C2;border:1px solid var(--line);border-radius:4px;padding:14px;font-family:var(--mono);font-size:11px;line-height:1.65;overflow-x:auto;white-space:pre;}
+  details summary{color:var(--clay)!important;}
+  .boot{padding:70px 16px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="top-row">
+      <div>
+        <div class="kicker">Le labo des trois</div>
+        <h1>Carnet <em>poker</em></h1>
+      </div>
+      <div class="day-ring">
+        <svg width="78" height="78" viewBox="0 0 78 78">
+          <circle class="ring-bg" cx="39" cy="39" r="33"></circle>
+          <circle class="ring-fg" id="ringFg" cx="39" cy="39" r="33" stroke-dasharray="0 208"></circle>
+        </svg>
+        <div class="ring-num"><span id="ringVal">0</span><small>Discipline</small></div>
+      </div>
+    </div>
+    <div class="who">
+      <label>Cet appareil</label>
+      <span id="meName" style="font-weight:700;font-size:15px"></span>
+      <button class="btn-mini" id="renameBtn">Renommer</button>
+      <label style="margin-left:14px">Consulter</label>
+      <select id="viewSel"></select>
+      <span class="sync-dot" id="syncDot"><i></i><span id="syncTxt">Local</span></span>
+    </div>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="inner" id="tabBar">
+    <a data-tab="dashboard" class="active"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Dashboard</a>
+    <a data-tab="calendrier"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 8h18M7 3v4m10-4v4M4 6h16v15H4z"/></svg>Calendrier</a>
+    <a data-tab="etude"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h7a2 2 0 012 2v14a2 2 0 00-2-2H4zM20 4h-7a2 2 0 00-2 2v14a2 2 0 012-2h7z"/></svg>Étude</a>
+    <a data-tab="sessions"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 5h16v14H4zM8 5v14M4 9h4M4 15h4"/></svg>Sessions</a>
+    <a data-tab="review"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.5-4.5"/></svg>Review</a>
+    <a data-tab="import"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v3h16v-3"/></svg>Import
+    </a>
+    <a data-tab="bankroll"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 7h18v12H3zM3 11h18M7 15h3"/></svg>Bankroll</a>
+  </div>
+</nav>
+
+<div class="wrap">
+<div class="boot" id="boot">Ouverture du carnet…</div>
+<div id="whoami" style="display:none">
+  <div class="panel on" style="max-width:520px;margin:40px auto">
+    <div class="sec-label">Première ouverture</div>
+    <h2>Qui utilise <em>cet appareil</em> ?</h2>
+    <p class="lead">Ce choix est fixé une fois pour toutes sur ce téléphone ou cet ordinateur. Tout ce que tu importes ira dans ton registre, sans choix à faire au moment de l'import — donc sans erreur possible. Tu pourras consulter les données des deux autres, en lecture seule.</p>
+    <div class="card"><div id="whoamiList"></div></div>
+  </div>
+</div>
+<div id="app" style="display:none">
+<div id="roBanner"></div>
+
+<!-- =================== DASHBOARD =================== -->
+<div class="panel on" data-panel="dashboard">
+  <div class="sec-label">Vue d'ensemble</div>
+  <h2>La semaine <em>en cours</em></h2>
+  <p class="lead">Le score de discipline est la seule mesure qui bouge assez vite pour servir de retour. Il ne dépend d'aucun résultat en euros, et c'est délibéré.</p>
+
+  <div class="grid g4 mb18" id="kpiGrid"></div>
+
+  <div id="alerts" class="mb18"></div>
+
+  <div class="grid g2 mb18">
+    <div class="card">
+      <div class="sec-label">Discipline des trois</div>
+      <div id="discRows"></div>
+    </div>
+    <div class="card">
+      <div class="sec-label">Ordre du jour — review du dimanche</div>
+      <p class="row-meta mt14" style="margin-bottom:8px">Un créneau fixe, une heure, généré ci-dessous. C'est le seul mécanisme de tout le carnet qui ne dépend pas du code.</p>
+      <div id="agenda"></div>
+    </div>
+  </div>
+
+  <div class="card mb18">
+    <div class="sec-label">Comparaison des trois — <span id="cmpFmt"></span></div>
+    <p class="lead mt14">Mêmes pools, mêmes formats, mêmes seuils d'échantillon. Un écart marqué sur une ligne est un sujet de discussion, pas un verdict : celui qui s'écarte a parfois raison.</p>
+    <div id="compare"></div>
+  </div>
+
+  <div class="sec-label">Ce que disent vraiment tes résultats</div>
+  <h2>Ton gain est-il <em>encore du bruit</em> ?</h2>
+  <p class="lead">La zone claire est l'endroit où atterrit 95 % du temps un joueur strictement à l'équilibre, avec exactement ton volume. Tant que ta courbe reste dedans, elle ne prouve rien — ni que tu gagnes, ni que tu perds.</p>
+  <div class="chart-card">
+    <svg class="chart" id="chart" viewBox="0 0 900 330" role="img" aria-label="Résultat cumulé en caves comparé à l'enveloppe de bruit statistique"></svg>
+    <div class="chart-legend">
+      <span><i style="background:var(--paper-deep)"></i>Zone de bruit (95 %)</span>
+      <span><i style="background:var(--clay)"></i>Résultat cumulé, en caves</span>
+      <span><i style="background:var(--line)"></i>Équilibre</span>
+    </div>
+    <p class="verdict" id="verdict"></p>
+    <div class="form-row mt14">
+      <div class="field" style="flex:0 0 190px"><label>Écart-type par tournoi (caves)</label><input type="number" id="sdIn" step="0.1" min="0.5"></div>
+      <p class="row-meta" style="flex:1 1 240px;padding-bottom:9px">2,0 : MTT à petit field. 2,5 : PKO standard. 3,0 et plus : field de 500 joueurs ou davantage.</p>
+    </div>
+  </div>
+</div>
+
+<!-- =================== CALENDRIER =================== -->
+<div class="panel" data-panel="calendrier">
+  <div class="sec-label">Planning</div>
+  <h2>Trois sessions, <em>trois créneaux d'étude</em></h2>
+  <p class="lead">Clique un jour pour le planifier, puis reviens le cocher une fois fait. Un jour prévu et non fait reste visible : c'est le but.</p>
+
+  <div class="card mb18">
+    <div class="cal-nav">
+      <button class="btn-mini" id="calPrev">◀ Mois précédent</button>
+      <span class="cal-month-label" id="calLabel"></span>
+      <button class="btn-mini" id="calNext">Mois suivant ▶</button>
+    </div>
+    <div class="cal-grid-head"><span>Lu</span><span>Ma</span><span>Me</span><span>Je</span><span>Ve</span><span>Sa</span><span>Di</span></div>
+    <div class="cal-grid" id="calGrid"></div>
+    <div class="cal-legend">
+      <span><i class="cl-dot cl-planned"></i>Session prévue</span>
+      <span><i class="cl-dot cl-done"></i>Session faite</span>
+      <span><i class="cl-dot cl-study"></i>Étude</span>
+    </div>
+  </div>
+
+  <div class="card" id="dayEditor"></div>
+</div>
+
+<!-- =================== ETUDE =================== -->
+<div class="panel" data-panel="etude">
+  <div class="sec-label">Programme</div>
+  <h2>Douze blocs, <em>dans l'ordre</em></h2>
+  <p class="lead">Un bloc par semaine. Il reste ouvert tant que les trois ne l'ont pas validé : sans base commune, les reviews à trois n'ont plus d'objet.</p>
+  <div class="card mb18" id="curriculum"></div>
+
+  <div class="sec-label">Journal</div>
+  <h2>Ce que tu as <em>réellement travaillé</em></h2>
+  <p class="lead">Une séance sans phrase actionnable ne compte pas. Le champ est obligatoire.</p>
+  <div class="card">
+    <div class="form-row">
+      <div class="field" style="flex:0 0 150px"><label>Date</label><input type="date" id="stDate"></div>
+      <div class="field" style="flex:2 1 260px"><label>Thème</label><select id="stTheme"></select></div>
+      <div class="field" style="flex:0 0 110px"><label>Minutes</label><input type="number" id="stMin" value="45" min="5" step="5"></div>
+    </div>
+    <div class="form-row mt14">
+      <div class="field" style="flex:3 1 300px"><label>Ce que j'en retiens, en une phrase actionnable</label><input id="stNote" placeholder="Ex : je 3bet trop peu depuis le BTN contre un open CO à 40bb"></div>
+      <button class="btn" id="stAdd">Ajouter</button>
+    </div>
+    <div class="tbl-wrap"><table id="stTable"></table></div>
+  </div>
+</div>
+
+<!-- =================== SESSIONS =================== -->
+<div class="panel" data-panel="sessions">
+  <div class="sec-label">Sessions</div>
+  <h2>Reconstituées <em>depuis tes imports</em></h2>
+  <p class="lead">Une session est un jour où tu as joué. Le carnet la déduit de l'historique : ni date, ni volume, ni résultat à ressaisir. Reste ce qu'aucun fichier ne contient — ton état pendant la session.</p>
+
+  <div class="card mb18">
+    <div class="sec-label">Journal de bord</div>
+    <p class="lead mt14">Le tilt et la fatigue ne sont pas dans l'historique et ne s'inventent pas après coup. Renseigne-les le soir même, sinon laisse vide : une valeur reconstituée de mémoire vaut moins que rien.</p>
+    <div class="form-row">
+      <div class="field" style="flex:0 0 160px"><label>Jour joué</label><select id="noDate"></select></div>
+      <div class="field" style="flex:1 1 150px"><label>Tilt ressenti</label><select id="noTilt">
+        <option value="">—</option><option value="0">Aucun</option><option value="1">Léger</option>
+        <option value="2">Marqué</option><option value="3">Aurait dû s'arrêter</option></select></div>
+      <div class="field" style="flex:2 1 240px"><label>Contexte</label><input id="noTxt" placeholder="Nombre de tables, fatigue, interruptions…"></div>
+      <button class="btn" id="noSave">Enregistrer</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">Historique — <span id="seFmtName"></span></div>
+    <div class="tbl-wrap"><table id="seTable"></table></div>
+  </div>
+</div>
+
+<!-- =================== REVIEW =================== -->
+<div class="panel" data-panel="review">
+  <div class="sec-label">Review</div>
+  <h2>Trois mains par session, <em>revues sous 48 h</em></h2>
+  <p class="lead">Le tracker sort les statistiques, cette page sort les décisions. Chaque fiche est rattachée à un leak nommé, et le classement se construit tout seul en dessous.</p>
+
+  <div class="card mb18">
+    <div class="form-row">
+      <div class="field" style="flex:0 0 150px"><label>Date</label><input type="date" id="hvDate"></div>
+      <div class="field" style="flex:1 1 130px"><label>Stade</label><select id="hvStage"><option>Early</option><option>Middle</option><option>Bulle</option><option>ITM</option><option>Table finale</option></select></div>
+      <div class="field" style="flex:0 0 110px"><label>Position</label><select id="hvPos"><option>EP</option><option>MP</option><option>CO</option><option>BTN</option><option>SB</option><option>BB</option></select></div>
+      <div class="field" style="flex:0 0 110px"><label>Stack (bb)</label><input type="number" id="hvStack" min="1" value="30"></div>
+      <div class="field" style="flex:2 1 240px"><label>Leak identifié</label><select id="hvLeak"></select></div>
+    </div>
+    <div class="form-row mt14">
+      <div class="field" style="flex:1 1 300px"><label>Le spot en une ligne</label><input id="hvSpot" placeholder="Ex : BTN 3bet 28bb vs open CO, call, flop KT4r, c-bet 33 %, check-raise"></div>
+      <div class="field" style="flex:1 1 300px"><label>La ligne correcte, après analyse</label><input id="hvFix" placeholder="Ex : check-back, ma range est capée sur ce flop"></div>
+      <button class="btn" id="hvAdd">Ajouter la fiche</button>
+    </div>
+  </div>
+
+  <div class="card mb18">
+    <div class="cal-nav"><div class="sec-label" style="margin:0">Mains à revoir — les plus gros mouvements</div>
+      <select id="revSort" style="width:auto"><option value="loss">Plus grosses pertes</option><option value="abs">Plus gros écarts</option><option value="win">Plus gros gains</option></select></div>
+    <p class="lead mt14">Une position suivie de « ≈ » a été déduite de la place du bouton : Betclic n'étiquette que BTN, SB et BB à table pleine. Sélectionnées par le carnet sur le résultat en jetons, pas par toi. C'est ce qui permet de tomber sur un leak que tu ne cherchais pas — les fiches que tu écris toi-même ne peuvent contenir que ce que tu sais déjà.</p>
+    <div class="tbl-wrap"><table id="revTable"></table></div>
+    <div id="replayBox"></div>
+  </div>
+
+  <div class="grid g2 mb18">
+    <div class="card">
+      <div class="sec-label">Tes leaks — <span id="lkName"></span></div>
+      <div id="leakRank" class="mt14"></div>
+      <p class="row-meta mt14">Un leak qui remonte trois fois en un mois devient le thème d'étude de la semaine suivante, quel que soit le programme prévu.</p>
+    </div>
+    <div class="card">
+      <div class="sec-label">Comparaison des trois</div>
+      <div id="leakCompare" class="mt14"></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">Fiches</div>
+    <div class="tbl-wrap"><table id="hvTable"></table></div>
+  </div>
+</div>
+
+<!-- =================== IMPORT =================== -->
+<div class="panel" data-panel="import">
+  <div class="sec-label">Import</div>
+  <h2>Dépose tes historiques, <em>le carnet fait le reste</em></h2>
+  <p class="lead">Les fichiers sont lus dans ton navigateur. Rien de brut ne part sur le serveur : seuls les agrégats par tournoi remontent dans le groupe. Les doublons sont détectés par identifiant de tournoi.</p>
+
+  <div class="card mb18">
+    <div id="drop" style="border:1px dashed var(--line);border-radius:4px;padding:26px;text-align:center;cursor:pointer;transition:.15s">
+      <div style="font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Glisse tes fichiers ici, ou clique</div>
+      <div class="row-meta" style="margin-top:7px">.txt d'historique · .csv d'export tracker · plusieurs fichiers acceptés</div>
+      <div class="row-meta" style="margin-top:9px;color:var(--clay)">Destination : registre de <b id="dropWho"></b> — aucun choix à faire, aucune erreur possible</div>
+    </div>
+    <input type="file" id="impFile" multiple accept=".txt,.csv,.log" style="display:none">
+    <div id="impReport" class="mt14"></div>
+  </div>
+
+  <div class="card mb18">
+    <div class="cal-nav"><div class="sec-label" style="margin:0">Registre — <span id="ldName"></span></div>
+      <select id="fmtSel" style="width:auto"><option value="spin">Spin</option><option value="mtt">MTT / PKO</option></select></div>
+    <div id="ledgerKpi" class="grid g4 mt14"></div>
+    <div id="ledgerVerdict"></div>
+    <div class="tbl-wrap"><table id="ldTable"></table></div>
+  </div>
+
+  <div class="card mb18">
+    <div class="sec-label">Statistiques mesurées</div>
+    <p class="lead mt14">Chaque statistique reste masquée tant que son échantillon est insuffisant. Une valeur affichée trop tôt est plus dangereuse qu'une valeur absente : c'est le même piège que la courbe de crédibilité, à l'échelle d'une fréquence.</p>
+    <div id="statGrid" class="grid g4"></div>
+  </div>
+
+  <div class="card mb18">
+    <div class="sec-label">Moteur de leaks</div>
+    <p class="lead mt14">Une règle se déclenche seulement au-dessus de son échantillon minimum. Les seuils sont provisoires et modifiables : ils devront être recalibrés sur vos pools réels, pas sur des valeurs théoriques.</p>
+    <div id="leakEngine"></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">Diagnostic de format</div>
+    <p class="lead mt14">Si un fichier n'est pas reconnu, le carnet en décrit la structure sans rien interpréter. Exporte le diagnostic et envoie-le : c'est ce qu'il faut pour écrire l'adaptateur manquant.</p>
+    <div id="diagBox"></div>
+    <div class="form-row mt14"><button class="btn-outline" id="diagExport">Exporter le diagnostic</button></div>
+  </div>
+</div>
+
+<!-- =================== BANKROLL =================== -->
+<div class="panel" data-panel="bankroll">
+  <div class="sec-label">Garde-fou</div>
+  <h2>La règle est chiffrée, <em>et elle ne se négocie pas</em></h2>
+  <p class="lead">Buy-in maximum = bankroll ÷ caves de sécurité. Un dépassement s'affiche sur le dashboard des trois, en permanence, jusqu'à ce que la bankroll rattrape le niveau joué.</p>
+
+  <div class="grid g3 mb18" id="brCards"></div>
+
+  <div class="card mb18">
+    <div class="form-row">
+      <div class="field" style="flex:0 0 170px"><label>Bankroll actuelle €</label><input type="number" id="brAmount" min="0" step="10"></div>
+      <div class="field" style="flex:2 1 260px"><label>Caves de sécurité</label><select id="brRule">
+        <option value="150">150 — MTT classique, plancher</option>
+        <option value="200" selected>200 — PKO, standard</option>
+        <option value="250">250 — PKO gros field, prudent</option>
+        <option value="300">300 — niveau « en vivre »</option>
+      </select></div>
+      <button class="btn" id="brSave">Mettre à jour</button>
+    </div>
+  </div>
+
+  <div class="card mb18">
+    <div class="sec-label">Ce que ce carnet ne fait pas</div>
+    <p style="font-size:14.5px;color:var(--ink-soft);margin-top:10px">Les statistiques de main — VPIP, PFR, fréquences de c-bet, EV ajustée — viennent de PokerTracker 4, Hold'em Manager 3 ou Hand2Note, tous autorisés sur Winamax. Le carnet gère ce qu'aucun tracker ne gère : le planning, le programme d'étude, le protocole de review, la règle de bankroll et la redevabilité à trois.</p>
+  </div>
+
+  <div class="card mb18">
+    <div class="sec-label">Synchronisation</div>
+    <p class="lead mt14">Un code de groupe, partagé entre vous trois. Chacun voit le carnet complet : sessions, leaks et écarts de bankroll des deux autres. C'est le mécanisme, pas un effet de bord.</p>
+    <div class="form-row">
+      <div class="field" style="flex:1 1 200px"><label>Code de groupe</label><input id="grpCode" placeholder="ex : les-trois-2026"></div>
+      <button class="btn" id="grpSave">Connecter</button>
+      <button class="btn-outline" id="grpPull">Récupérer maintenant</button>
+    </div>
+    <p class="row-meta mt14">Sans code, tout reste sur cet appareil. Chacun n'écrit que sa propre ligne et ses propres tournois : deux imports simultanés depuis deux postes ne peuvent plus s'effacer l'un l'autre.</p>
+    <details class="mt14"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--clay-deep)">Tables Supabase à créer une seule fois</summary>
+      <pre class="sql">create table poker_state (
+  code text not null,
+  pid  text not null,
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  primary key (code, pid)
+);
+
+create table poker_tournament (
+  code text not null,
+  pid  text not null,
+  tid  text not null,
+  data jsonb not null,
+  updated_at timestamptz not null default now(),
+  primary key (code, pid, tid)
+);
+create index on poker_tournament (code);
+
+alter table poker_state      enable row level security;
+alter table poker_tournament enable row level security;
+create policy "groupe" on poker_state
+  for all to anon using (true) with check (true);
+create policy "groupe" on poker_tournament
+  for all to anon using (true) with check (true);</pre></details>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">Données</div>
+    <div id="storeStat" class="mt14"></div>
+    <div class="form-row mt14">
+      <button class="btn-outline" id="exportBtn">Exporter en JSON</button>
+      <button class="btn-outline" id="importBtn">Importer un JSON</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none">
+      <button class="btn-outline" id="resetBtn" style="border-color:var(--clay);color:var(--clay)">Tout effacer</button>
+    </div>
+  </div>
+</div>
+
+</div>
+</div>
+
+<script>
+/* ============ CONFIG ============ */
+const SUPABASE_URL='https://csotvmnwpvezgakbhvbr.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzb3R2bW53cHZlemdha2JodmJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MDkxMDEsImV4cCI6MjA5NzE4NTEwMX0._Eh1APdr2a-4YO3P0vy-KwcN1yj_YnoOf1ChJQMgUDY';
+const TABLE='poker_group';
+const TTABLE='poker_tournament';
+const KEY='carnet-poker-v1';
+const MEKEY='carnet-poker-me';
+const GRPKEY='carnet-poker-group';
+
+const THEMES=[
+ "Ranges d'open par position et par stack (60 / 40 / 25 bb)",
+ "Math des bounties : prime-to-stack ratio et seuil d'appel",
+ "Push/fold sous 15 bb, avec ajustement bounty",
+ "Défense de BB : quel prix, quelles textures",
+ "3bet léger et construction des ranges de 4bet",
+ "C-bet : fréquence et sizing selon la texture",
+ "Turn : barreler ou checker, construire la menace",
+ "River : value fine et sélection des bluff-catchers",
+ "Pression ICM en bulle et en table finale",
+ "Isolation des tapis courts en PKO",
+ "Profil des pools low stakes : leaks de population",
+ "Multitabling, fatigue et fenêtre de jeu optimale"
+];
+const LEAKS=[
+ ["Préflop",["Open trop large en early","Cold-call trop fréquent","Sizing de 3bet inadapté","Limp ou open-limp","Fold BB excessif","Push/fold hors range","Appel trop large pour la bounty"]],
+ ["Postflop",["C-bet automatique","Overfold turn","Barrel river manquant","Value trop mince","Bluff sans équité ni fold equity","Sizing non réfléchi","Check-raise manquant"]],
+ ["Process",["Jeu hors bankroll","Trop de tables","Session trop longue","Tilt","Décision hâtive au timer"]]
+];
+const MONTHS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
+const TARGET={sessions:3,studyMin:180,hands:9};
+
+/* ME  = identite de l'appareil. Fixee une fois, jamais choisie au moment
+        d'un import : c'est ce qui rend l'erreur d'attribution impossible.
+   VIEW = joueur consulte. Les fonctions de rendu masquent ME par VIEW ;
+        OWNER() donne acces a l'identite reelle depuis leur interieur. */
+function OWNER(){return ME;}
+let DATA=null, ME='p1', VIEW='p1', GROUP='', sb=null, calRef=new Date(), selDay=null, IMPD=new Set();
+
+/* ============ UTILS ============ */
+const $=id=>document.getElementById(id);
+const uid=()=>Math.random().toString(36).slice(2,10);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const iso=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+const eur=n=>(n>=0?'+':'−')+Math.abs(n).toFixed(0)+' €';
+function weekKey(d){const t=new Date(Date.UTC(d.getFullYear(),d.getMonth(),d.getDate()));
+  const dn=(t.getUTCDay()+6)%7;t.setUTCDate(t.getUTCDate()-dn+3);
+  const f=new Date(Date.UTC(t.getUTCFullYear(),0,4));
+  const wn=1+Math.round(((t-f)/86400000-3+((f.getUTCDay()+6)%7))/7);
+  return t.getUTCFullYear()+'-W'+String(wn).padStart(2,'0');}
+const wkOf=s=>weekKey(new Date(s+'T12:00:00'));
+const P=id=>DATA.players.find(p=>p.id===id)||DATA.players[0];
+
+function blank(){return{
+  players:[{id:'p1',name:'Joueur 1',bankroll:500,rule:200},
+           {id:'p2',name:'Joueur 2',bankroll:500,rule:200},
+           {id:'p3',name:'Joueur 3',bankroll:500,rule:200}],
+  sessions:[],study:[],hands:[],tournaments:[],handstats:{},days:{},curriculum:{},sd:2.5,thresholds:{},updatedAt:0};}
+
+/* ============ PERSISTENCE ============ */
+/* Granularite calquee sur le comportement des donnees :
+   - poker_tournament : une ligne par tournoi. Ajout seul, jamais modifie
+     apres import, donc aucun conflit possible entre joueurs.
+   - poker_state : une ligne par joueur. Chacun n'ecrit que la sienne,
+     donc personne ne peut ecraser le travail d'un autre.
+   - une ligne '_shared' pour les seuils, reellement communs. */
+const T_STATE='poker_state', T_TOUR='poker_tournament', SHARED='_shared';
+const PAGE=1000, CHUNK=100;
+
+/* Suivi de ce qui reste a transmettre.
+   _s sur l'objet = deja envoye, il survit au rechargement.
+   DIRTY = le meme ensemble en memoire, pour un compte immediat a l'ecran.
+   DIRTY est reconstruit depuis _s au demarrage : une seule verite. */
+const DIRTY=new Set(), GONE=new Set();
+const TK=t=>t.pid+'|'+t.id;
+function markDirty(t){delete t._s;DIRTY.add(TK(t));}
+function rebuildDirty(){DIRTY.clear();
+  DATA.tournaments.forEach(t=>{if(t.pid===ME&&!t._s)DIRTY.add(TK(t));});
+  GONE.clear();(DATA.tomb||[]).forEach(k=>GONE.add(k));}
+/* Estimation de l'occupation locale. Les navigateurs stockent en UTF-16
+   et plafonnent autour de 5 Mo par origine. */
+function localSize(){try{return (localStorage.getItem(KEY)||'').length*2;}catch(e){return 0;}}
+
+function saveLocal(){DATA.updatedAt=Date.now();DATA.tomb=[...GONE];
+  try{localStorage.setItem(KEY,JSON.stringify(DATA));}catch(e){console.error(e);setSync('err','Stockage local plein');}}
+
+/* --- decoupage par joueur --- */
+function sliceState(pid){
+  const cur={};
+  Object.entries(DATA.curriculum||{}).forEach(([k,v])=>{if(v&&v[pid]!==undefined)cur[k]=!!v[pid];});
+  return{player:DATA.players.find(p=>p.id===pid)||null,
+    study:DATA.study.filter(x=>x.pid===pid),
+    hands:DATA.hands.filter(x=>x.pid===pid),
+    days:DATA.days[pid]||{}, notes:(DATA.notes||{})[pid]||{}, curriculum:cur,
+    pseudos:(DATA.pseudos||{})[pid]||[]};
+}
+function applyState(pid,s){
+  if(!s)return;
+  if(s.player){const i=DATA.players.findIndex(p=>p.id===pid);
+    if(i>=0)DATA.players[i]=Object.assign(DATA.players[i],s.player);}
+  DATA.study=DATA.study.filter(x=>x.pid!==pid).concat(s.study||[]);
+  DATA.hands=DATA.hands.filter(x=>x.pid!==pid).concat(s.hands||[]);
+  DATA.days[pid]=s.days||{};
+  DATA.notes=DATA.notes||{};DATA.notes[pid]=s.notes||{};
+  DATA.pseudos=DATA.pseudos||{};if(s.pseudos)DATA.pseudos[pid]=s.pseudos;
+  DATA.curriculum=DATA.curriculum||{};
+  Object.entries(s.curriculum||{}).forEach(([k,v])=>{
+    DATA.curriculum[k]=DATA.curriculum[k]||{};DATA.curriculum[k][pid]=v;});
+}
+
+let pushTimer=null, syncing=false;
+function save(){saveLocal();if(!sb||!GROUP)return;
+  clearTimeout(pushTimer);pushTimer=setTimeout(()=>pushCloud().catch(e=>console.error(e)),900);}
+
+async function pushCloud(){
+  if(!sb||!GROUP||syncing)return;
+  syncing=true;
+  try{
+    const now=new Date().toISOString();
+    // 1. mes tournois pas encore transmis, par paquets
+    const pend=DATA.tournaments.filter(t=>t.pid===ME&&!t._s);
+    for(let i=0;i<pend.length;i+=CHUNK){
+      const rows=pend.slice(i,i+CHUNK).map(t=>{const {pid,_s,...d}=t;
+        return{code:GROUP,pid:ME,tid:String(t.id),data:d,updated_at:now};});
+      const{error}=await sb.from(T_TOUR).upsert(rows,{onConflict:'code,pid,tid'});
+      if(error)throw error;
+      pend.slice(i,i+CHUNK).forEach(t=>{t._s=1;DIRTY.delete(TK(t));});
+    }
+    // 2. les suppressions en attente, regroupees par joueur
+    const parJoueur={};
+    [...GONE].forEach(k=>{const i=k.indexOf('|');
+      (parJoueur[k.slice(0,i)]=parJoueur[k.slice(0,i)]||[]).push(k.slice(i+1));});
+    for(const [pid,tids] of Object.entries(parJoueur)){
+      for(let i=0;i<tids.length;i+=CHUNK){
+        const{error}=await sb.from(T_TOUR).delete().eq('code',GROUP).eq('pid',pid)
+          .in('tid',tids.slice(i,i+CHUNK));
+        if(error)throw error;
+        tids.slice(i,i+CHUNK).forEach(x=>GONE.delete(pid+'|'+x));
+      }
+    }
+    // 3. ma ligne d'etat, et la ligne commune
+    let{error:e1}=await sb.from(T_STATE).upsert(
+      {code:GROUP,pid:ME,data:sliceState(ME),updated_at:now},{onConflict:'code,pid'});
+    if(e1)throw e1;
+    let{error:e2}=await sb.from(T_STATE).upsert(
+      {code:GROUP,pid:SHARED,data:{thresholds:DATA.thresholds||{}},updated_at:now},{onConflict:'code,pid'});
+    if(e2)throw e2;
+    saveLocal();setSync('ok','Synchronisé');
+  }catch(e){console.error(e);setSync('err','Hors ligne');}
+  finally{syncing=false;}
+}
+
+async function pullCloud(full){
+  if(!sb||!GROUP||syncing)return false;
+  syncing=true;let changed=false;
+  try{
+    // 1. etats : peu de lignes, toujours legeres
+    const{data:st,error}=await sb.from(T_STATE).select('pid,data').eq('code',GROUP);
+    if(error)throw error;
+    (st||[]).forEach(r=>{
+      if(r.pid===SHARED){if(r.data&&r.data.thresholds){DATA.thresholds=r.data.thresholds;changed=true;}return;}
+      // Regle centrale : on n'ecrase MA ligne que sur demande explicite ou
+      // au premier chargement. Sinon une version distante perimee effacerait
+      // ce que je viens de saisir.
+      if(r.pid===ME&&!full)return;
+      applyState(r.pid,r.data);changed=true;
+    });
+    // 2. tournois : on ne compare que les identifiants, puis on ne
+    //    telecharge que ce qui manque
+    const ids=[];
+    for(let from=0;;from+=PAGE){
+      const{data,error:e}=await sb.from(T_TOUR).select('pid,tid').eq('code',GROUP).range(from,from+PAGE-1);
+      if(e)throw e;
+      ids.push(...(data||[]));
+      if(!data||data.length<PAGE)break;
+    }
+    const remote=new Set(ids.map(r=>r.pid+'|'+r.tid));
+    const local=new Map(DATA.tournaments.map(t=>[t.pid+'|'+t.id,t]));
+    const missing=ids.filter(r=>!local.has(r.pid+'|'+r.tid));
+    for(let i=0;i<missing.length;i+=CHUNK){
+      const part=missing.slice(i,i+CHUNK);
+      const{data,error:e}=await sb.from(T_TOUR).select('pid,tid,data').eq('code',GROUP)
+        .in('tid',part.map(r=>r.tid));
+      if(e)throw e;
+      (data||[]).forEach(r=>{
+        if(local.has(r.pid+'|'+r.tid)||GONE.has(r.pid+'|'+r.tid))return;
+        const t=Object.assign({},r.data,{pid:r.pid,id:r.tid,_s:1});
+        DATA.tournaments.push(t);local.set(r.pid+'|'+r.tid,t);changed=true;});
+    }
+    // 3. supprime ailleurs : seulement ce qui avait ete transmis
+    const before=DATA.tournaments.length;
+    DATA.tournaments=DATA.tournaments.filter(t=>!t._s||remote.has(t.pid+'|'+t.id));
+    if(DATA.tournaments.length!==before)changed=true;
+    rebuildDirty();
+    if(changed)saveLocal();
+    setSync('ok','Synchronisé');
+  }catch(e){console.error(e);setSync('err','Hors ligne');changed=false;}
+  finally{syncing=false;}
+  return changed;
+}
+function setSync(state,txt){const d=$('syncDot');if(!d)return;
+  d.className='sync-dot '+(state||'');$('syncTxt').textContent=txt;}
+
+/* ============ DISCIPLINE ============ */
+function dayRec(pid,date){DATA.days[pid]=DATA.days[pid]||{};return DATA.days[pid][date]||null;}
+function setDay(pid,date,rec){DATA.days[pid]=DATA.days[pid]||{};
+  if(!rec||(!rec.s&&!rec.min))delete DATA.days[pid][date];else DATA.days[pid][date]=rec;}
+/* Jours de jeu deduits de l'historique importe : verifiables, non declaratifs. */
+function playDays(pid,wk){
+  const s=new Set();
+  DATA.tournaments.forEach(t=>{if(t.pid!==pid)return;
+    const d=String(t.date).slice(0,10);if(d&&(!wk||wkOf(d)===wk))s.add(d);});
+  return s;
+}
+function discipline(pid,wk){
+  const d=DATA.days[pid]||{};let mins=0,declared=0;
+  Object.keys(d).forEach(k=>{if(wkOf(k)!==wk)return;
+    if(d[k].s==='done')declared++;mins+=(+d[k].min||0);});
+  const imported=playDays(pid,wk);
+  const done=imported.size||declared;      // l'import prime sur la case cochee
+  const verified=imported.size>0;
+  const hv=DATA.hands.filter(h=>h.pid===pid&&wkOf(h.date)===wk).length;
+  const score=Math.round(Math.min(1,done/TARGET.sessions)*40
+    +Math.min(1,mins/TARGET.studyMin)*30+Math.min(1,hv/TARGET.hands)*30);
+  return{score,done,mins,hv,verified};
+}
+
+/* ============ DASHBOARD ============ */
+function renderDash(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
+  const wk=weekKey(new Date()),me=P(ME),d=discipline(ME,wk);
+  const c=2*Math.PI*33;
+  $('ringFg').setAttribute('stroke-dasharray',`${(d.score/100*c).toFixed(1)} ${c.toFixed(1)}`);
+  $('ringVal').textContent=d.score;
+
+  const TT=toursOf(ME,FMT);
+  const nT=TT.length;
+  const inv=TT.reduce((a,t)=>a+(+t.buyin||0),0);
+  const net=TT.reduce((a,t)=>a+(+t.won||0)-(+t.buyin||0),0);
+  const stMe=statsOf(ME,FMT);
+  const fired=RULES.filter(r=>{const n=+stMe[r.den]||0;if(n<r.min)return false;
+    const thr=(DATA.thresholds[FMT]||{})[r.id]??r.def[FMT];
+    const v=statVal(stMe,r);return r.op==='>'?v>thr:v<thr;}).length;
+  const measurable=RULES.filter(r=>(+stMe[r.den]||0)>=r.min).length;
+  const maxBi=me.bankroll/(me.rule||200);
+
+  $('kpiGrid').innerHTML=`
+    <div class="kpi olive"><div class="kpi-label">Discipline</div>
+      <div class="kpi-value">${d.score}<span class="unit">/100</span></div>
+      <div class="kpi-sub">${d.done}/3 sessions${d.verified?' ✓':''} · ${d.mins} min · ${d.hv} mains</div></div>
+    <div class="kpi gold"><div class="kpi-label">Leaks au-dessus du seuil</div>
+      <div class="kpi-value">${measurable?fired:'—'}<span class="unit">${measurable?'/ '+measurable+' mesurables':''}</span></div>
+      <div class="kpi-sub">${measurable?'sur '+RULES.length+' règles au total':'échantillon insuffisant partout'}</div></div>
+    <div class="kpi night"><div class="kpi-label">Volume — ${esc(FMTS[FMT])}</div>
+      <div class="kpi-value">${nT}<span class="unit">tournois</span></div>
+      <div class="kpi-sub">${inv.toFixed(0)} € engagés · net ${eur(net)}</div></div>
+    <div class="kpi clay"><div class="kpi-label">Buy-in maximum</div>
+      <div class="kpi-value">${maxBi.toFixed(2)}<span class="unit">€</span></div>
+      <div class="kpi-sub">bankroll ${me.bankroll.toFixed(0)} € ÷ ${me.rule} caves</div></div>`;
+
+  $('discRows').innerHTML=DATA.players.map(p=>{const x=discipline(p.id,wk);
+    return `<div class="lbar"><span class="lbar-name">${esc(p.name)}</span>
+      <span class="lbar-track"><i style="width:${x.score}%;background:${x.score>=70?'var(--sage)':x.score>=40?'var(--gold)':'var(--clay)'}"></i></span>
+      <span class="lbar-n">${x.score}</span></div>
+      <div class="row-meta" style="margin:-3px 0 9px 0">${x.done}/3 sessions ${x.verified?'(vérifiées par l\'import)':'(déclarées)'} · ${x.mins}/180 min d'étude · ${x.hv}/9 mains revues</div>`;}).join('');
+
+  let al='';
+  DATA.players.forEach(p=>{
+    const max=p.bankroll/(p.rule||200);
+    const bad=DATA.tournaments.filter(t=>t.pid===p.id&&+t.buyin>max)
+      .sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+    if(bad.length){const last=bad[bad.length-1];
+      al+=`<div class="notice"><b>${esc(p.name)} joue hors bankroll.</b> ${bad.length} tournoi${bad.length>1?'s':''} au-dessus du plafond de ${max.toFixed(2)} €. Le dernier : ${esc(String(last.date).slice(0,10))}, buy-in ${(+last.buyin).toFixed(2)} €.</div>`;}
+    const N=(DATA.notes||{})[p.id]||{};
+    const t=Object.values(N).filter(x=>+x.tilt>=2);
+    if(t.length>=3)al+=`<div class="notice"><b>${esc(p.name)} — tilt récurrent.</b> ${t.length} sessions notées « marqué » ou pire. Le prochain bloc d'étude porte sur la fenêtre de jeu et le nombre de tables.</div>`;
+  });
+  if(d.score>=80)al+=`<div class="notice good"><b>Semaine tenue.</b> ${d.score}/100. C'est ce chiffre-là qui prédit le résultat dans deux ans, pas celui de la semaine.</div>`;
+  // Inactivité : un joueur qui n'a rien importé depuis 14 jours
+  DATA.players.forEach(p2=>{
+    const last=DATA.tournaments.filter(t=>t.pid===p2.id)
+      .reduce((a,t)=>Math.max(a,t.imported||0),0);
+    if(last&&Date.now()-last>14*86400000)
+      al+=`<div class="notice"><b>${esc(p2.name)} — aucun import depuis ${Math.floor((Date.now()-last)/86400000)} jours.</b> Le carnet ne sert à rien sans données récentes.</div>`;
+  });
+  $('alerts').innerHTML=al;
+
+  $('sdIn').value=DATA.sd;
+  drawChart();
+  renderCompare();
+}
+
+/* Comparaison des trois sur le meme format : ce qu'aucun tracker ne fait,
+   et la seule raison objective d'ouvrir ce carnet plutot que PT4. */
+function renderCompare(){
+  const box=$('compare');if(!box)return;
+  const rows=Object.entries(GATES).concat([['speed',['Temps/décision','dt_n',150]]]);
+  const data=DATA.players.map(p=>({p,s:statsOf(p.id,FMT)}));
+  const any=data.some(d=>d.s.hands>0);
+  if(!any){box.innerHTML='<p class="empty">Aucun historique importé. La comparaison apparaît dès que l\'un de vous importe un fichier.</p>';return;}
+  box.innerHTML=`<div class="tbl-wrap"><table><tr><th>Indicateur</th>${data.map(d=>`<th class="num">${esc(d.p.name)}</th>`).join('')}</tr>`+
+    rows.map(([k,[lbl,den,min]])=>{
+      const vals=data.map(d=>{const n=+d.s[den]||0;
+        if(n<min)return{txt:`— <span style="color:var(--muted)">(${n})</span>`,v:null};
+        const v=k==='speed'?d.s.dt/d.s.dt_n:100*(+d.s[k]||0)/n;
+        return{txt:v.toFixed(k==='speed'?1:0)+(k==='speed'?' s':' %'),v};});
+      const ok=vals.filter(x=>x.v!==null).map(x=>x.v);
+      const spread=ok.length>1?Math.max(...ok)-Math.min(...ok):null;
+      return `<tr><td>${esc(lbl)}${spread!==null&&spread>0?` <span class="row-meta">écart ${spread.toFixed(k==='speed'?1:0)}</span>`:''}</td>`+
+        vals.map(x=>`<td class="num">${x.txt}</td>`).join('')+'</tr>';}).join('')+
+    `<tr><td>Tournois importés</td>${data.map(d=>`<td class="num">${toursOf(d.p.id,FMT).length}</td>`).join('')}</tr></table></div>`;
+}
+
+/* Ordre du jour genere : le rendez-vous hebdomadaire est le seul mecanisme
+   de la liste qui ne depende pas du code, mais il a besoin d'un support. */
+function renderAgenda(){
+  const box=$('agenda');if(!box)return;
+  const wk=weekKey(new Date());
+  const items=DATA.players.map(p=>{
+    const s=statsOf(p.id,FMT);
+    const fired=RULES.filter(r=>{const n=+s[r.den]||0;if(n<r.min)return false;
+      const thr=(DATA.thresholds[FMT]||{})[r.id]??r.def[FMT];
+      const v=statVal(s,r);return r.op==='>'?v>thr:v<thr;});
+    const reps=allReplays(p.id,FMT).sort((a,b)=>a.d-b.d);
+    const worst=reps[0];
+    const d=discipline(p.id,wk);
+    return{p,fired,worst,d};});
+  box.innerHTML=items.map(x=>`<div class="row-line">
+      <div class="row-main">
+        <div class="row-title">${esc(x.p.name)} <span class="row-meta">— discipline ${x.d.score}/100</span></div>
+        <div class="row-meta">${x.fired.length
+          ? 'À traiter : '+x.fired.map(r=>esc(r.lbl)+' (bloc '+String(r.bloc).padStart(2,'0')+')').join(' · ')
+          : 'Aucun leak au-dessus du seuil, ou échantillon encore insuffisant.'}</div>
+        <div class="row-meta">${x.worst
+          ? `Main à présenter : ${esc(x.worst.tdate)} ${esc(x.worst.ts)}, ${esc(x.worst.pos||'')} ${Math.round(x.worst.stack/x.worst.bb)}bb, ${x.worst.d} bb`
+          : 'Aucune main importée.'}</div>
+      </div></div>`).join('');
+}
+
+function drawChart(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
+  const svg=$('chart'),W=900,H=330,ml=56,mr=18,mt=30,mb=30;
+  const T=DATA.tournaments.filter(t=>t.pid===ME&&t.fmt===FMT&&t.res!==false)
+    .sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+  let n=0,cum=0;const pts=[{n:0,cum:0}];
+  T.forEach(t=>{const bi=+t.buyin||1;n+=1;cum+=((+t.won||0)-bi)/bi;pts.push({n,cum});});
+  let sdAuto=null;
+  if(T.length>=30){const r=T.map(t=>{const bi=+t.buyin||1;return ((+t.won||0)-bi)/bi;});
+    const m=r.reduce((a,b)=>a+b,0)/r.length;
+    sdAuto=Math.sqrt(r.reduce((a,b)=>a+(b-m)*(b-m),0)/(r.length-1));}
+  const N=n,sd=sdAuto||(+DATA.sd||2.5),nMax=Math.max(N,120);
+  const sdEl=$('sdIn');if(sdEl&&sdAuto)sdEl.value=sdAuto.toFixed(2);
+  const band=k=>1.96*sd*Math.sqrt(k);
+  const yMax=Math.max(band(nMax),Math.abs(cum))*1.12||10;
+  const X=k=>ml+(k/nMax)*(W-ml-mr);
+  const Y=v=>mt+(1-(v+yMax)/(2*yMax))*(H-mt-mb);
+  let up='',dn='';
+  for(let i=0;i<=60;i++){const k=nMax*i/60;up+=(i?' L':'M')+X(k).toFixed(1)+' '+Y(band(k)).toFixed(1);}
+  for(let i=60;i>=0;i--){const k=nMax*i/60;dn+=' L'+X(k).toFixed(1)+' '+Y(-band(k)).toFixed(1);}
+  const line=pts.map((p,i)=>(i?'L':'M')+X(p.n).toFixed(1)+' '+Y(p.cum).toFixed(1)).join(' ');
+  const grid=[-yMax,-yMax/2,0,yMax/2,yMax].map(v=>
+    `<line x1="${ml}" x2="${W-mr}" y1="${Y(v).toFixed(1)}" y2="${Y(v).toFixed(1)}" stroke="${v===0?'#4E6D64':'#22403A'}" stroke-width="${v===0?1.3:.8}" ${v===0?'':'stroke-dasharray="3 5"'}/>
+     <text x="${ml-9}" y="${(Y(v)+4).toFixed(1)}" text-anchor="end" fill="#8FA39D" font-family="JetBrains Mono" font-size="11" font-weight="600">${v.toFixed(0)}</text>`).join('');
+  const xt=[0,.25,.5,.75,1].map(f=>`<text x="${X(nMax*f).toFixed(1)}" y="${H-11}" text-anchor="middle" fill="#8FA39D" font-family="JetBrains Mono" font-size="11" font-weight="600">${Math.round(nMax*f)}</text>`).join('');
+  svg.innerHTML=`<path d="${up}${dn} Z" fill="#1E3B34"/>${grid}${xt}
+    <text x="${ml}" y="${mt-8}" fill="#8FA39D" font-family="JetBrains Mono" font-size="10" letter-spacing="1.6">CAVES CUMULÉES</text>
+    <text x="${W-mr}" y="${mt-8}" text-anchor="end" fill="#8FA39D" font-family="JetBrains Mono" font-size="10" letter-spacing="1.6">TOURNOIS JOUÉS</text>
+    ${N>0?`<path d="${line}" fill="none" stroke="#4FD1A5" stroke-width="2.4" stroke-linejoin="round" stroke-linecap="round"/>`:''}`;
+
+  const v=$('verdict');
+  if(N===0){v.innerHTML=`Aucune session enregistrée. La courbe démarre à la <em>première saisie</em>.`;return;}
+  const roi=(cum/N)*100,se=(sd/Math.sqrt(N))*100,lo=roi-1.96*se,hi=roi+1.96*se;
+  const inside=Math.abs(cum)<band(N);
+  v.innerHTML=inside
+    ? `Après <em>${N} tournois</em>, ton ROI ressort à ${roi.toFixed(0)} %, mais l'intervalle va de ${lo.toFixed(0)} % à ${hi.toFixed(0)} %. Tu es encore <em>indistinguable d'un joueur à l'équilibre</em>.`
+    : `Après <em>${N} tournois</em>, ta courbe sort de la zone de bruit. ROI estimé ${roi.toFixed(0)} %, intervalle de ${lo.toFixed(0)} % à ${hi.toFixed(0)} %.`;
+  if(inside&&Math.abs(cum)>0){
+    const need=Math.ceil(Math.pow(1.96*sd/Math.abs(cum/N),2));
+    v.innerHTML+=`<div class="verdict-note">À ce rythme de gain, il faudrait environ ${need.toLocaleString('fr-FR')} tournois pour que le résultat devienne concluant.</div>`;}
+}
+
+/* ============ CALENDRIER ============ */
+function renderCal(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
+  IMPD=playDays(ME,null);
+  const y=calRef.getFullYear(),m=calRef.getMonth();
+  $('calLabel').textContent=MONTHS[m]+' '+y;
+  const first=new Date(y,m,1),start=(first.getDay()+6)%7;
+  const nd=new Date(y,m+1,0).getDate(),ndPrev=new Date(y,m,0).getDate();
+  const today=iso(new Date());let html='';
+  const cell=(date,other)=>{
+    const r=Object.assign({},dayRec(ME,date)||{});
+    if(IMPD.has(date))r.s='done';
+    const cls=['cal-day'];if(other)cls.push('other-month');
+    if(date===today)cls.push('today');
+    if(r.s==='done')cls.push('done-session');
+    if(date===selDay)cls.push('sel');
+    let tag='';
+    if(r.s==='done')tag='<span class="cal-session-tag done">Faite</span>';
+    else if(r.s==='plan')tag='<span class="cal-session-tag">Prévue</span>';
+    else if(r.min)tag='<span class="cal-session-tag study">'+r.min+'′</span>';
+    return `<div class="${cls.join(' ')}" data-d="${date}"><span class="cal-num">${+date.slice(8)}</span>${tag}</div>`;};
+  for(let i=start-1;i>=0;i--)html+=cell(iso(new Date(y,m-1,ndPrev-i)),true);
+  for(let i=1;i<=nd;i++)html+=cell(iso(new Date(y,m,i)),false);
+  const rest=(7-((start+nd)%7))%7;
+  for(let i=1;i<=rest;i++)html+=cell(iso(new Date(y,m+1,i)),true);
+  $('calGrid').innerHTML=html;
+  $('calGrid').querySelectorAll('.cal-day').forEach(el=>el.onclick=()=>{selDay=el.dataset.d;renderCal();renderEditor();});
+  renderEditor();
+}
+function renderEditor(){
+  const box=$('dayEditor');
+  if(VIEW!==ME){box.innerHTML=`<p class="empty">Calendrier de ${esc(P(VIEW).name)}, en lecture seule.</p>`;return;}
+  if(!selDay){box.innerHTML=`<p class="empty">Sélectionne un jour dans le calendrier pour le planifier.</p>`;return;}
+  const r=dayRec(ME,selDay)||{s:null,min:0,theme:''};
+  box.innerHTML=`<div class="sec-label">${esc(selDay)} — ${esc(P(ME).name)}</div>
+    <div class="form-row mt14">
+      <div class="field" style="flex:1 1 180px"><label>Session de jeu</label><select id="edS">
+        <option value="">Rien de prévu</option>
+        <option value="plan"${r.s==='plan'?' selected':''}>Prévue</option>
+        <option value="done"${r.s==='done'?' selected':''}>Faite</option></select></div>
+      <div class="field" style="flex:0 0 130px"><label>Étude (min)</label><input type="number" id="edMin" min="0" step="5" value="${+r.min||0}"></div>
+      <div class="field" style="flex:2 1 240px"><label>Thème travaillé</label><select id="edTheme">
+        <option value="">—</option>${THEMES.map(t=>`<option${r.theme===t?' selected':''}>${esc(t)}</option>`).join('')}</select></div>
+      <button class="btn" id="edSave">Enregistrer</button>
+    </div>`;
+  $('edSave').onclick=()=>{
+    setDay(ME,selDay,{s:$('edS').value||null,min:+$('edMin').value||0,theme:$('edTheme').value});
+    save();renderCal();renderDash();};
+}
+
+/* ============ ETUDE ============ */
+function renderStudy(){
+  $('curriculum').innerHTML=THEMES.map((t,i)=>{
+    const done=DATA.curriculum[i]||{};
+    return `<div class="row-line"><span class="row-num">${String(i+1).padStart(2,'0')}</span>
+      <div class="row-main"><div class="row-title">${esc(t)}</div></div>
+      <div class="checks">${DATA.players.map(p=>`<label class="${done[p.id]?'done':''}">
+        <input type="checkbox" data-c="${i}" data-p="${p.id}" ${done[p.id]?'checked':''} ${p.id===ME?'':'disabled'}>${esc(p.name.slice(0,7))}</label>`).join('')}</div></div>`;}).join('');
+  $('curriculum').querySelectorAll('input').forEach(cb=>cb.onchange=()=>{
+    if(cb.dataset.p!==ME)return;
+    const i=cb.dataset.c;DATA.curriculum[i]=DATA.curriculum[i]||{};
+    DATA.curriculum[i][cb.dataset.p]=cb.checked;save();renderStudy();});
+
+  const rows=DATA.study.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,40);
+  $('stTable').innerHTML=`<tr><th>Date</th><th>Joueur</th><th>Thème</th><th class="num">Min</th><th>À retenir</th><th></th></tr>`+
+    (rows.length?rows.map(r=>`<tr><td class="num">${esc(r.date)}</td><td>${esc(P(r.pid).name)}</td>
+      <td>${esc(r.theme)}</td><td class="num">${r.min}</td><td>${esc(r.note)}</td>
+      <td>${r.pid===OWNER()?`<button class="btn-mini" data-del-st="${r.id}">×</button>`:''}</td></tr>`).join('')
+     :`<tr><td colspan="6" class="empty">Aucune séance. Ajoute la première ci-dessus.</td></tr>`);
+  $('stTable').querySelectorAll('[data-del-st]').forEach(b=>b.onclick=()=>{
+    DATA.study=DATA.study.filter(x=>x.id!==b.dataset.delSt);save();renderStudy();});
+}
+
+/* ============ SESSIONS ============ */
+function sessionsOf(pid){
+  const by={};
+  DATA.tournaments.forEach(t=>{if(t.pid!==pid)return;
+    const d=String(t.date).slice(0,10);if(!d)return;
+    const s=by[d]||(by[d]={date:d,n:0,hands:0,inv:0,won:0,fmts:new Set(),dt:0,dtn:0});
+    s.n++;s.hands+=(+t.hands||0);s.inv+=(+t.buyin||0);s.won+=(+t.won||0);
+    s.fmts.add(t.fmt);s.dt+=(+(t.st||{}).dt||0);s.dtn+=(+(t.st||{}).dt_n||0);});
+  return Object.values(by).sort((a,b)=>b.date.localeCompare(a.date));
+}
+function renderSessions(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
+  const S=sessionsOf(ME);
+  $('seFmtName').textContent=P(ME).name;
+  const sel=$('noDate');
+  if(sel)sel.innerHTML=S.length?S.map(s=>`<option value="${s.date}">${s.date}</option>`).join('')
+    :'<option value="">aucun jour joué</option>';
+  DATA.notes=DATA.notes||{};
+  const N=DATA.notes[ME]||{};
+  $('seTable').innerHTML=`<tr><th>Jour</th><th class="num">Tournois</th><th>Format</th><th class="num">Mains</th>
+    <th class="num">Engagé</th><th class="num">Net</th><th class="num">s/décision</th><th>Tilt</th><th>Contexte</th></tr>`+
+    (S.length?S.slice(0,40).map(s=>{const net=s.won-s.inv,no=N[s.date]||{};
+      const tl=['Aucun','Léger','Marqué','Aurait dû s\'arrêter'][no.tilt];
+      return `<tr><td class="num">${esc(s.date)}</td><td class="num">${s.n}</td>
+      <td>${[...s.fmts].map(f=>esc(FMTS[f]||f)).join(', ')}</td><td class="num">${s.hands}</td>
+      <td class="num">${s.inv.toFixed(2)} €</td><td class="num ${net>=0?'pos':'neg'}">${eur(net)}</td>
+      <td class="num">${s.dtn?(s.dt/s.dtn).toFixed(1):'—'}</td>
+      <td>${no.tilt!==undefined&&no.tilt!==''?`<span class="tag ${+no.tilt>=2?'hot':''}">${esc(tl)}</span>`:'<span class="row-meta">—</span>'}</td>
+      <td>${esc(no.txt||'')}</td></tr>`;}).join('')
+     :`<tr><td colspan="9" class="empty">Aucune session. Importe un historique dans l'onglet Import : les sessions s'en déduisent.</td></tr>`);
+}
+
+/* ============ REVIEW ============ */
+let REVSORT='loss', OPENREP=null;
+function allReplays(pid,fmt){
+  const out=[];
+  DATA.tournaments.forEach(t=>{if(t.pid!==pid||(fmt&&t.fmt!==fmt)||!t.rep)return;
+    t.rep.forEach(r=>out.push(Object.assign({tid:t.id,tdate:String(t.date).slice(0,10),
+      game:t.game},r)));});
+  return out;
+}
+function renderReplays(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
+  let R=allReplays(ME,FMT);
+  R.sort((a,b)=>REVSORT==='loss'?a.d-b.d:REVSORT==='win'?b.d-a.d:Math.abs(b.d)-Math.abs(a.d));
+  $('revTable').innerHTML=`<tr><th>Jour</th><th>Heure</th><th>Position</th><th class="num">Tapis</th>
+    <th>Main</th><th>Tableau</th><th class="num">Résultat</th><th></th></tr>`+
+    (R.length?R.slice(0,25).map((r,i)=>`<tr><td class="num">${esc(r.tdate)}</td><td class="num">${esc(r.ts)}</td>
+      <td>${esc(r.pos||'—')}${r.posInf?'<span class="row-meta"> ≈</span>':''}</td><td class="num">${(r.stack/r.bb).toFixed(0)} bb</td>
+      <td style="font-family:var(--mono);font-size:12px">${esc(r.hole||'—')}</td>
+      <td style="font-family:var(--mono);font-size:12px">${esc(r.board||'pas de flop')}</td>
+      <td class="num ${r.d>=0?'pos':'neg'}">${r.d>=0?'+':''}${r.d} bb</td>
+      <td><button class="btn-mini" data-rep="${i}">Rejouer</button></td></tr>`).join('')
+     :`<tr><td colspan="8" class="empty">Aucune main enregistrée pour ce format. Importe un historique dans l'onglet Import.</td></tr>`);
+  $('revTable').querySelectorAll('[data-rep]').forEach(b=>b.onclick=()=>{
+    OPENREP=R[+b.dataset.rep];renderReplayBox();});
+  if(OPENREP&&!R.some(x=>x.i===OPENREP.i))OPENREP=null;
+  renderReplayBox();
+}
+function renderReplayBox(){
+  const box=$('replayBox');if(!box)return;
+  if(!OPENREP){box.innerHTML='';return;}
+  const r=OPENREP;
+  const ST={PF:'Préflop',F:'Flop',T:'Turn',R:'River'};
+  let cur=null,body='';
+  r.a.forEach(a=>{
+    if(a.s!==cur){cur=a.s;
+      body+=`<div style="font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--clay);margin:11px 0 5px">${ST[a.s]||a.s}</div>`;}
+    const mine=a.p==='moi';
+    body+=`<div style="font-size:13px;padding:2px 0;color:${mine?'var(--ink)':'var(--muted)'}">
+      <span style="font-weight:${mine?600:400}">${esc(a.p)}</span> — ${esc(a.v)}${a.m?' '+a.m:''}${a.ai?' <span class="tag hot" style="margin:0">tapis</span>':''}</div>`;
+  });
+  box.innerHTML=`<div class="card mt14" style="background:var(--paper)">
+    <div class="cal-nav"><div class="sec-label" style="margin:0">${esc(r.tdate)} · ${esc(r.ts)} · ${esc(r.game)}</div>
+      <button class="btn-mini" id="repClose">Fermer</button></div>
+    <div class="row-meta mt14">À table : ${r.seats.map(s=>`${esc(s.n)} ${(s.s/r.bb).toFixed(0)}bb${s.p?' ('+esc(s.p)+')':''}`).join(' · ')}</div>
+    <div class="row-meta">Ma main <b style="font-family:var(--mono)">${esc(r.hole||'—')}</b> · tableau <b style="font-family:var(--mono)">${esc(r.board||'pas de flop')}</b> · blindes ${r.bb/2}/${r.bb} · ${r.sd?'abattage':'pas d\'abattage'}</div>
+    ${body}
+    <div class="row-meta mt14" style="color:${r.d>=0?'var(--clay)':'var(--alert)'};font-weight:600">Résultat : ${r.d>=0?'+':''}${r.d} bb</div>
+    <div class="form-row mt14"><button class="btn" id="repFiche">Créer la fiche de review</button></div></div>`;
+  $('repClose').onclick=()=>{OPENREP=null;renderReplayBox();};
+  $('repFiche').onclick=()=>{
+    $('hvDate').value=r.tdate;
+    $('hvStack').value=Math.round(r.stack/r.bb);
+    const p=(r.pos||'').split(' ').filter(x=>['EP','MP','CO','BTN','SB','BB'].includes(x));
+    if(p.length)$('hvPos').value=p[p.length-1];
+    $('hvSpot').value=`${r.pos||''} ${Math.round(r.stack/r.bb)}bb [${r.hole}]${r.board?' — tableau '+r.board:''} — ${r.d>=0?'+':''}${r.d}bb`;
+    const f=$('hvFix');f.focus();
+    if(f.scrollIntoView)f.scrollIntoView({behavior:'smooth',block:'center'});};
+}
+
+function renderReview(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
+  renderReplays();
+  $('lkName').textContent=P(ME).name;
+  const mine=DATA.hands.filter(h=>h.pid===ME),c={};
+  mine.forEach(h=>c[h.leak]=(c[h.leak]||0)+1);
+  const ranked=Object.entries(c).sort((a,b)=>b[1]-a[1]);
+  $('leakRank').innerHTML=ranked.length?ranked.map(([l,k])=>
+    `<div class="lbar"><span class="lbar-name">${esc(l)}</span>
+     <span class="lbar-track"><i class="${k>=3?'hot':''}" style="width:${(k/ranked[0][1])*100}%"></i></span>
+     <span class="lbar-n">${k}</span></div>`).join('')
+    :`<p class="empty">Aucune fiche. Tague trois mains à la prochaine session et remplis-les sous 48 h.</p>`;
+
+  $('leakCompare').innerHTML=DATA.players.map(p=>{
+    const h=DATA.hands.filter(x=>x.pid===p.id),cc={};
+    h.forEach(x=>cc[x.leak]=(cc[x.leak]||0)+1);
+    const top=Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    return `<div class="mb12"><div class="row-title">${esc(p.name)} <span class="row-meta">— ${h.length} fiche${h.length>1?'s':''}</span></div>
+      <div style="margin-top:5px">${top.length?top.map(([l,k])=>`<span class="tag ${k>=3?'hot':'warm'}">${esc(l)} ×${k}</span>`).join(''):'<span class="row-meta">—</span>'}</div></div>`;}).join('');
+
+  const rows=DATA.hands.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,50);
+  $('hvTable').innerHTML=`<tr><th>Date</th><th>Joueur</th><th>Stade</th><th>Pos</th><th class="num">Stack</th>
+    <th>Leak</th><th>Spot</th><th>Ligne correcte</th><th></th></tr>`+
+    (rows.length?rows.map(h=>`<tr><td class="num">${esc(h.date)}</td><td>${esc(P(h.pid).name)}</td>
+      <td>${esc(h.stage)}</td><td>${esc(h.pos)}</td><td class="num">${h.stack} bb</td><td>${esc(h.leak)}</td>
+      <td>${esc(h.spot)}</td><td>${esc(h.fix)}</td>
+      <td>${h.pid===OWNER()?`<button class="btn-mini" data-del-hv="${h.id}">×</button>`:''}</td></tr>`).join('')
+     :`<tr><td colspan="9" class="empty">Aucune fiche pour l'instant.</td></tr>`);
+  $('hvTable').querySelectorAll('[data-del-hv]').forEach(b=>b.onclick=()=>{
+    DATA.hands=DATA.hands.filter(x=>x.id!==b.dataset.delHv);save();renderReview();renderDash();});
+}
+
+/* ============ BANKROLL ============ */
+function renderStore(){
+  const box=$('storeStat');if(!box)return;
+  const oct=localSize(), mo=oct/1048576;
+  const nT=DATA.tournaments.length, nR=DATA.tournaments.reduce((a,t)=>a+((t.rep||[]).length),0);
+  const par=nT?Math.round(oct/nT):0;
+  const reste=par?Math.max(0,Math.floor((5*1048576-oct)/par)):0;
+  box.innerHTML=`<div class="lbar"><span class="lbar-name">Stockage local occupé</span>
+      <span class="lbar-track"><i class="${mo>4?'hot':''}" style="width:${Math.min(100,mo/5*100).toFixed(1)}%"></i></span>
+      <span class="lbar-n">${mo.toFixed(2)} Mo</span></div>
+    <p class="row-meta">${nT} tournois, ${nR} mains rejouables, ${par} octets par tournoi en moyenne.
+    Marge avant saturation : environ ${reste.toLocaleString('fr-FR')} tournois. Au-delà, les rejeux les plus anciens
+    sont purgés automatiquement ; les résultats et les statistiques ne le sont jamais.
+    ${DIRTY.size?`<br>${DIRTY.size} tournoi${DIRTY.size>1?'s':''} en attente d'envoi.`:''}</p>`;
+}
+function renderBankroll(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
+  $('brCards').innerHTML=DATA.players.map(p=>{
+    const max=p.bankroll/(p.rule||200);
+    const net=DATA.tournaments.filter(t=>t.pid===p.id)
+      .reduce((a,t)=>a+(+t.won||0)-(+t.buyin||0),0);
+    const over=DATA.tournaments.some(t=>t.pid===p.id&&+t.buyin>max);
+    return `<div class="kpi ${over?'clay':'olive'}"><div class="kpi-label">${esc(p.name)}</div>
+      <div class="kpi-value">${p.bankroll.toFixed(0)}<span class="unit">€</span></div>
+      <div class="kpi-sub">Plafond ${max.toFixed(2)} € · ${p.rule} caves</div>
+      <div class="kpi-sub ${net>=0?'up':'down'}">Net cumulé ${eur(net)}</div></div>`;}).join('');
+  const me=P(ME);$('brAmount').value=me.bankroll;$('brRule').value=me.rule||200;
+}
+
+
+/* ============ IMPORT : ADAPTATEURS ============ */
+const GATES={vpip:['VPIP','hands',200],pfr:['PFR','hands',200],threebet:['3bet','face_raise',80],
+  fold_vs_raise:['Fold vs relance','face_raise',80],cbet:['C-bet flop','cbet_opp',60]};
+/* Seuils provisoires, par format. Un 3-max de Spin et un MTT à table pleine
+   n'ont pas les mêmes fréquences normales : le même seuil pour les deux est une erreur. */
+const RULES=[
+ {id:'r1',lbl:"Tu foldes trop face à une relance",stat:'fold_vs_raise',den:'face_raise',op:'>',def:{spin:66,mtt:62},min:80,bloc:5},
+ {id:'r2',lbl:"Tu 3bet trop peu",stat:'threebet',den:'face_raise',op:'<',def:{spin:9,mtt:6},min:80,bloc:5},
+ {id:'r3',lbl:"VPIP trop large",stat:'vpip',den:'hands',op:'>',def:{spin:55,mtt:26},min:200,bloc:1},
+ {id:'r4',lbl:"Écart VPIP–PFR trop grand (trop de call préflop)",stat:'gap',den:'hands',op:'>',def:{spin:14,mtt:8},min:200,bloc:1},
+ {id:'r5',lbl:"C-bet automatique",stat:'cbet',den:'cbet_opp',op:'>',def:{spin:78,mtt:70},min:60,bloc:6},
+ {id:'r6',lbl:"Décisions trop rapides (jeu au timer)",stat:'speed',den:'dt_n',op:'<',def:{spin:2.5,mtt:3.5},min:150,bloc:12}
+];
+const FMTS={spin:'Spin',mtt:'MTT / PKO'};
+let FMT=localStorage.getItem('carnet-poker-fmt')||'spin';
+
+function detectFormat(txt,name){
+  if(/^\*\*\* HEADER \*\*\*/m.test(txt)&&/Site:\s*Betclic/i.test(txt))return 'betclic';
+  if(/^Winamax Poker - Tournament summary/m.test(txt))return 'winamax-summary';
+  if(/^Winamax Poker/m.test(txt))return 'winamax';
+  if(/^PokerStars/m.test(txt))return 'stars';
+  if(/\.csv$/i.test(name)||/^[^\n]*[;,][^\n]*[;,]/.test(txt.split('\n')[0]||''))return 'csv';
+  return 'inconnu';
+}
+
+function parseBetclic(txt){
+  const blocks=txt.split(/^-{6,}\s*$/m).filter(b=>/\*\*\* HEADER \*\*\*/.test(b));
+  const hands=[];let badSeats=0;
+  blocks.forEach(b=>{
+    const H={seats:[],actions:[],summary:[],hdr:{},hole:{},board:[]};let sec=null;
+    b.split('\n').forEach(raw=>{
+      const line=raw.replace(/\s+$/,'');if(!line)return;
+      const s=line.match(/^\*\*\* (.+?) \*\*\*(.*)$/);
+      if(s){sec=s[1].trim();
+        const c=(s[2]||'').match(/\[(.*?)\]/);
+        if(c&&['FLOP','TURN','RIVER'].includes(sec))H.board=c[1].split(/\s+/);
+        return;}
+      if(sec==='HEADER'){const i=line.indexOf(':');if(i>0)H.hdr[line.slice(0,i).trim()]=line.slice(i+1).trim();}
+      else if(sec==='HOLE CARDS'){const i=line.indexOf(':');
+        if(i>0)H.hole[line.slice(0,i).trim()]=line.slice(i+1).trim().replace(/[\[\]]/g,'');}
+      else if(sec==='PLAYERS'){
+        // "Seat 2: nom (167844)" ou, en PKO, "Seat 2: nom (167844, €2.60 bounty)"
+        const m=line.match(/^Seat\s+(\d+)\s*:\s*(.+?)\s*\((\d[\d\s]*)(?:\s*,\s*€\s*([\d.,]+)\s*bounty)?\)(?:\s*\[(.*?)\])?\s*$/);
+        if(m){const tags=(m[5]||'').split(/\s+/).filter(Boolean);
+          H.seats.push({seat:+m[1],name:m[2],stack:parseFloat(m[3].replace(/\s/g,''))||0,
+            bounty:m[4]?parseFloat(m[4].replace(',','.')):0,
+            pos:tags.filter(t=>t!=='Hero'),hero:tags.includes('Hero')});}
+        else if(/^Seat/i.test(line))badSeats++;
+      }
+      else if(['PRE-FLOP','FLOP','TURN','RIVER'].includes(sec)){
+        const m=line.match(/^(\d\d:\d\d:\d\d) - (.+?): (Posts SB|Posts BB|Posts Ante|Posts ante|Raises to|Calls|Bets|Checks|Folds|Sits out|Sits in|Disconnected|Reconnected)\s*([\d.]+)?(.*)$/);
+        if(m)H.actions.push({t:m[1],p:m[2],street:sec,act:m[3],amt:+(m[4]||0),allin:/all-in/.test(m[5]||'')});
+      }
+      else if(sec==='SUMMARY')H.summary.push(line);
+    });
+    inferPos(H.seats);
+    hands.push(H);
+  });
+  hands.badSeats=badSeats;
+  return hands;
+}
+
+/* Reconstitution des jetons d'une main.
+   Modele : "Raises to X" est un montant absolu sur la street, "Calls"/"Bets"
+   et les blinds sont des increments. L'excedent non couvert par les
+   adversaires est rendu : on ne plafonne que si le pot annonce le confirme.
+   Verifie sur 38/38 mains et 36/36 enchainements de tapis. */
+function chipsOf(H){
+  const street={},put={},ante={};
+  H.actions.forEach(a=>{
+    // L'ante n'appartient pas au tour d'encheres : "Raises to X" fixe le
+    // total MISE de la street et effacerait l'ante s'il etait compte dedans.
+    if(/^Posts Ante$/i.test(a.act)){ante[a.p]=(ante[a.p]||0)+a.amt;return;}
+    const s=street[a.street]=street[a.street]||{};
+    if(/^Posts/i.test(a.act)||a.act==='Calls'||a.act==='Bets')s[a.p]=(s[a.p]||0)+a.amt;
+    else if(a.act==='Raises to')s[a.p]=a.amt;
+  });
+  Object.values(street).forEach(s=>Object.entries(s).forEach(([p,v])=>put[p]=(put[p]||0)+v));
+  Object.entries(ante).forEach(([p,v])=>put[p]=(put[p]||0)+v);
+  const won={};
+  H.summary.forEach(l=>{
+    const m=l.match(/^(.+?) wins (?:main|(?:\d+\w*\s+)?side) pot of ([\d\s]+)/)
+          ||l.match(/^(.+?) collected ([\d\s]+) from/);
+    if(m)won[m[1]]=(won[m[1]]||0)+parseFloat(m[2].replace(/\s/g,''));});
+  const pot=+(H.hdr['Total Pot']||0);
+  let sum=Object.values(put).reduce((a,x)=>a+x,0),capped=false;
+  if(sum!==pot){
+    const e=Object.entries(put).sort((a,b)=>b[1]-a[1]);
+    if(e.length>1&&e[0][1]>e[1][1]){put[e[0][0]]=e[1][1];capped=true;
+      sum=Object.values(put).reduce((a,x)=>a+x,0);}
+  }
+  return{put,won,pot,ok:sum===pot,capped};
+}
+/* En 3-max, Betclic etiquette les trois positions. A table pleine, seuls
+   BTN, SB et BB le sont : le reste se deduit de la distance au bouton.
+   Ces positions sont marquees comme deduites, pas mesurees. */
+function inferPos(seats){
+  const s=seats.slice().sort((a,b)=>(a.seat||0)-(b.seat||0)), n=s.length;
+  const bi=s.findIndex(x=>x.pos.includes('BTN'));
+  if(bi<0||n<3)return;
+  s.forEach((x,i)=>{
+    if(x.pos.length)return;
+    const off=(i-bi+n)%n;
+    x.pos=[off===0?'BTN':off===1?'SB':off===2?'BB'
+      :off===n-1?'CO':(off===n-2&&n>=6)?'MP':'EP'];
+    x.inferred=true;
+  });
+}
+function applySummary(t,s){
+  t.finish=s.finish; t.won=s.won||0; t.field=s.players||0;
+  if(s.bounty){t.bounty=s.bounty;t.ko=t.ko||1;}
+  if(s.buyin)t.buyin=s.buyin;
+  if(s.date&&!t.date)t.date=s.date;
+  t.res=true;
+}
+const REP_PER_T=5, REP_KEEP=50;
+function money(s){const m=String(s||'').match(/[\d]+[.,]?\d*/g);
+  return m?m.reduce((a,x)=>a+parseFloat(x.replace(',','.')),0):0;}
+const blankSt=()=>({hands:0,vpip:0,pfr:0,face_raise:0,threebet:0,fold_vs_raise:0,
+  flop_seen:0,cbet_opp:0,cbet:0,dt:0,dt_n:0});
+
+/* Chaque tournoi porte ses propres compteurs : le dédoublonnage protège
+   les statistiques autant que le registre. */
+function aggregate(hands){
+  let hero=null;
+  for(const H of hands){const s=H.seats.find(x=>x.hero);if(s){hero=s.name;break;}}
+  const esc2=s=>String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+  const tour={};
+  hands.forEach(H=>{
+    const g=H.hdr['Game ID']||H.hdr['Tournament ID']||'?';
+    const mode=(H.hdr['Game Mode']||'').toLowerCase();
+    const t=tour[g]||(tour[g]={id:g,site:'Betclic',game:H.hdr['Game Name']||'',
+      mode:H.hdr['Game Mode']||'',fmt:mode.includes('spin')?'spin':'mtt',
+      date:(H.hdr['Date & Time']||'').slice(0,16),
+      buyin:money(H.hdr['Buy In']),prize:money(H.hdr['Prize pool']),
+      mult:H.hdr['Multiplier']||'',seats:0,hands:0,finish:null,won:0,st:blankSt(),
+      rep:[],chipErr:0});
+    const st=t.st;
+    t.hands++;t.seats=Math.max(t.seats,H.seats.length);
+    if(!t.date&&H.hdr['Date & Time'])t.date=H.hdr['Date & Time'].slice(0,16);
+    if(hero)H.summary.forEach(l=>{
+      const m=l.match(new RegExp('^'+esc2(hero)+' finished (\\d+)\\w*(?: and wins €?\\s*([\\d.,]+)(?: EUR)?)?'));
+      if(m){t.finish=+m[1];t.won+=parseFloat(String(m[2]||0).replace(',','.'));}
+      // "X wins €1.34 for eliminating Y and its own bounty increases from ..."
+      const b=l.match(new RegExp('^'+esc2(hero)+' wins €\\s*([\\d.,]+) for eliminating','i'));
+      if(b){const v=parseFloat(b[1].replace(',','.'));t.won+=v;t.bounty=(t.bounty||0)+v;t.ko=(t.ko||0)+1;}
+    });
+    const me=H.seats.find(x=>x.name===hero);if(!me)return;
+    // resultat de la main en jetons, puis en grosses blindes
+    const C=chipsOf(H);
+    if(!C.ok)t.chipErr++;
+    const bb=parseFloat(String(H.hdr['Blinds']||'0/0').split('/')[1])||0;
+    const dChips=(C.won[hero]||0)-(C.put[hero]||0);
+    if(C.ok&&bb>0){
+      t.rep.push({i:(H.hdr['Hand ID']||'').slice(-6),
+        ts:(H.hdr['Date & Time']||'').slice(11,19),
+        d:Math.round(dChips/bb*10)/10, bb, stack:me.stack,
+        pos:(me.pos||[]).join(' '), posInf:!!me.inferred, hole:H.hole[hero]||'',
+        board:H.board.join(' '),
+        sd:H.summary.some(l=>/shows/.test(l)),
+        seats:H.seats.map(s=>({n:s.name===hero?'moi':s.name,s:s.stack,p:(s.pos||[]).join(' ')})),
+        a:H.actions.filter(x=>!/^(Sits|Disconnected|Reconnected)/.test(x.act))
+          .map(x=>({s:x.street[0]+(x.street==='PRE-FLOP'?'F':''),
+                    p:x.p===hero?'moi':x.p,v:x.act,m:x.amt,ai:x.allin}))});
+    }
+    const seq=H.actions.filter(a=>a.street==='PRE-FLOP'&&!/^Posts/i.test(a.act)&&
+      !['Sits out','Sits in','Disconnected','Reconnected'].includes(a.act));
+    const mine=H.actions.filter(a=>a.p===hero);
+    const pre=seq.filter(a=>a.p===hero);
+    st.hands++;
+    if(pre.some(a=>['Calls','Raises to','Bets'].includes(a.act)))st.vpip++;
+    if(pre.some(a=>a.act==='Raises to'))st.pfr++;
+    for(let i=0;i<seq.length;i++){
+      const a=seq[i];if(a.p!==hero)continue;
+      if(!seq.slice(0,i).some(x=>x.act==='Raises to'))continue;
+      st.face_raise++;
+      if(a.act==='Raises to')st.threebet++;else if(a.act==='Folds')st.fold_vs_raise++;
+      break;
+    }
+    const raisers=seq.filter(a=>a.act==='Raises to').map(a=>a.p);
+    const aggr=raisers.length?raisers[raisers.length-1]:null;
+    const fl=mine.filter(a=>a.street==='FLOP');
+    if(fl.length){st.flop_seen++;
+      if(aggr===hero){st.cbet_opp++;if(fl[0].act==='Bets')st.cbet++;}}
+    const s2=t2=>{const[x,y,z]=t2.split(':').map(Number);return x*3600+y*60+z;};
+    H.actions.forEach((a,i)=>{if(a.p!==hero||i===0)return;
+      const d=s2(a.t)-s2(H.actions[i-1].t);
+      if(d>=0&&d<=60){st.dt+=d;st.dt_n++;}});
+  });
+  const out=Object.values(tour);
+  // on ne garde que les plus gros mouvements de jetons de chaque tournoi
+  out.forEach(t=>{t.rep.sort((a,b)=>Math.abs(b.d)-Math.abs(a.d));
+    t.rep=t.rep.slice(0,REP_PER_T);});
+  return{hero,tournaments:out};
+}
+
+function diagnose(txt,name){
+  const lines=txt.split('\n');const secs={},keys={},verbs={};
+  lines.forEach(l=>{
+    const s=l.match(/^\*\*\* (.+?) \*\*\*/);if(s)secs[s[1].trim()]=(secs[s[1].trim()]||0)+1;
+    const k=l.match(/^([A-Za-z][A-Za-z &']{2,24}):\s/);if(k)keys[k[1]]=(keys[k[1]]||0)+1;
+    const v=l.match(/[-:]\s*[^:]+:\s*([A-Za-z][A-Za-z ]{2,14}?)(?:\s+[\d.]|$)/);if(v)verbs[v[1].trim()]=(verbs[v[1].trim()]||0)+1;
+  });
+  const top=o=>Object.entries(o).sort((a,b)=>b[1]-a[1]).slice(0,14);
+  return{name,taille:txt.length,lignes:lines.length,format:detectFormat(txt,name),
+    premieres_lignes:lines.slice(0,12),sections:top(secs),cles_entete:top(keys),verbes:top(verbs)};
+}
+
+
+/* ---------- ADAPTATEUR WINAMAX ----------
+   Format sans rapport avec Betclic. Trois ecarts structurants :
+   - aucun horodatage par action : le temps par decision est indisponible ;
+   - le resultat du tournoi n'est pas dans le fichier de mains, il vit
+     dans le fichier _summary, apparie par identifiant de tournoi ;
+   - l'excedent non paye est rendu via une ligne "collected ... from side
+     pot", donc tout est deja compte : aucun plafonnement a appliquer.
+   Les mains sont normalisees vers la meme forme interne que Betclic,
+   pour qu'aggregate() et chipsOf() restent uniques. */
+const WACT=/^(.+?) (folds|checks|calls|bets|raises|posts|shows|collected|wins)\b(.*)$/;
+/* "1.80€ + 0.20€" ou, en PKO, "0.45€ + 0.45€ + 0.10€" : on somme tout. */
+function sommeEuros(s){
+  return (String(s).match(/[\d]+(?:[.,][\d]+)?(?=\s*€)/g)||[])
+    .reduce((a,x)=>a+parseFloat(x.replace(',','.')),0);
+}
+
+function parseWinamax(txt){
+  const blocks=txt.split(/\n\s*\n/).filter(b=>/^Winamax Poker - Tournament/m.test(b));
+  const hands=[];let badSeats=0;
+  blocks.forEach(b=>{
+    const H={seats:[],actions:[],summary:[],hdr:{},hole:{},board:[]};
+    let sec='HEAD',hero=null,btnSeat=null;
+    const lines=b.split('\n');
+    for(const raw of lines){
+      const line=raw.replace(/\s+$/,'');if(!line)continue;
+
+      const head=line.match(/^Winamax Poker - Tournament "(.+?)"\s+buyIn:\s*(.+?)\s+level:\s*(\d+)\s+-\s+HandId:\s*#(\S+)\s+-\s+.*?\(([\d/]+)\)\s+-\s+(\d{4}\/\d\d\/\d\d \d\d:\d\d:\d\d)/);
+      if(head){
+        const bl=head[5].split('/').map(Number);
+        H.hdr['Game Name']=head[1];
+        // En PKO le buy-in a trois composantes : droit + prime + rake.
+        H.hdr['Buy In']=sommeEuros(head[2]).toFixed(2);
+        H.hdr['Hand ID']=head[4];
+        H.hdr['Ante']=bl.length===3?bl[0]:0;
+        H.hdr['Blinds']=(bl.length===3?bl[1]+'/'+bl[2]:bl[0]+'/'+bl[1]);
+        H.hdr['Date & Time']=head[6].replace(/\//g,'-');
+        H.hdr['Game Mode']='Tournament';
+        continue;
+      }
+      const tbl=line.match(/^Table:\s*'(.+?)\((\d+)\)#\S*'\s+(\d+)-max.*?Seat #(\d+) is the button/);
+      if(tbl){H.hdr['Game ID']=tbl[2];H.hdr['Max']=+tbl[3];btnSeat=+tbl[4];continue;}
+
+      const st=line.match(/^\*\*\* (.+?) \*\*\*(.*)$/);
+      if(st){
+        const n=st[1].trim();
+        sec=n==='ANTE/BLINDS'?'PRE-FLOP':n==='SHOW DOWN'?'SHOWDOWN':n;
+        const c=(st[2]||'').match(/\[([^\]]*)\]\s*$/);
+        if(c&&['FLOP','TURN','RIVER'].includes(n))H.board=H.board.concat(c[1].split(/\s+/).filter(Boolean));
+        continue;
+      }
+      if(sec==='HEAD'||sec==='PRE-FLOP'||sec==='FLOP'||sec==='TURN'||sec==='RIVER'||sec==='SHOWDOWN'||sec==='SUMMARY'){
+        const seat=line.match(/^Seat (\d+):\s*(.+?)\s*\((\d+)(?:,\s*([\d.,]+)€?\s*bounty)?\)\s*$/);
+        if(seat&&sec!=='SUMMARY'){
+          H.seats.push({seat:+seat[1],name:seat[2],stack:+seat[3],
+            bounty:seat[4]?parseFloat(seat[4].replace(',','.')):0,pos:[],hero:false});
+          continue;
+        }
+        if(sec==='SUMMARY'){H.summary.push(line);continue;}
+      }
+      const dealt=line.match(/^Dealt to (.+?) \[(.+?)\]\s*$/);
+      if(dealt){hero=dealt[1];H.hole[hero]=dealt[2];continue;}
+
+      const m=line.match(WACT);
+      if(!m)continue;
+      const who=m[1],verb=m[2],tail=(m[3]||'').trim();
+      const allin=/and is all-in/.test(tail);
+      const num=s=>{const x=s.match(/[\d]+/);return x?+x[0]:0;};
+      let act=null,amt=0;
+      if(verb==='folds')act='Folds';
+      else if(verb==='checks')act='Checks';
+      else if(verb==='calls'){act='Calls';amt=num(tail);}
+      else if(verb==='bets'){act='Bets';amt=num(tail);}
+      else if(verb==='raises'){const r=tail.match(/[\d]+\s+to\s+([\d]+)/);act='Raises to';amt=r?+r[1]:num(tail);}
+      else if(verb==='posts'){
+        if(/ante/.test(tail)){act='Posts Ante';amt=num(tail);}
+        else if(/small blind/.test(tail)){act='Posts SB';amt=num(tail);}
+        else if(/big blind/.test(tail)){act='Posts BB';amt=num(tail);}
+      }
+      else if(verb==='collected'){H.summary.push(line);continue;}
+      else continue;
+      if(act)H.actions.push({t:'',p:who,street:sec==='SHOWDOWN'?'RIVER':sec,act,amt,allin});
+    }
+    if(hero){const h=H.seats.find(s=>s.name===hero);if(h)h.hero=true;else badSeats++;}
+    // positions : Winamax ne donne que le siege du bouton
+    if(btnSeat!=null){
+      const ord=H.seats.slice().sort((a,b)=>a.seat-b.seat),n=ord.length;
+      const bi=ord.findIndex(s=>s.seat===btnSeat);
+      if(bi>=0&&n>=2)ord.forEach((s,i)=>{
+        const off=(i-bi+n)%n;
+        s.pos=[n===2?(off===0?'SB':'BB')
+          :off===0?'BTN':off===1?'SB':off===2?'BB'
+          :off===n-1?'CO':(off===n-2&&n>=6)?'MP':'EP'];
+        s.inferred=off>2;
+      });
+    }
+    H.hdr['Total Pot']=(()=>{const t=b.match(/^Total pot (\d+)/m);return t?+t[1]:0;})();
+    hands.push(H);
+  });
+  hands.badSeats=badSeats;
+  return hands;
+}
+
+/* Le fichier _summary porte le classement et la dotation, absents du
+   fichier de mains. Appariement par identifiant de tournoi. */
+function parseWinamaxSummary(txt){
+  const out=[];
+  txt.split(/(?=Winamax Poker - Tournament summary)/).forEach(b=>{
+    const id=b.match(/Tournament summary\s*:\s*(.+?)\((\d+)\)/);
+    if(!id)return;
+    const bi=b.match(/Buy-In\s*:\s*(.+)/);
+    const fin=b.match(/You finished in (\d+)\w*\s+place/i);
+    const pp=b.match(/Prizepool\s*:\s*([\d.,]+)/);
+    const reg=b.match(/Registered players\s*:\s*(\d+)/);
+    const won=b.match(/You won\s*([\d.,]+)/i);
+    const bty=b.match(/You won Bounty\s*([\d.,]+)/i);
+    const st=b.match(/Tournament started\s+(\d{4}\/\d\d\/\d\d \d\d:\d\d:\d\d)/);
+    out.push({tid:id[2],game:id[1].trim(),
+      buyin:bi?sommeEuros(bi[1]):0,
+      finish:fin?+fin[1]:null, prizepool:pp?parseFloat(pp[1].replace(',','.')):0,
+      players:reg?+reg[1]:0, won:(won?parseFloat(won[1].replace(',','.')):0)+(bty?parseFloat(bty[1].replace(',','.')):0),
+      bounty:bty?parseFloat(bty[1].replace(',','.')):0,
+      date:st?st[1].replace(/\//g,'-').slice(0,16):''});
+  });
+  return out;
+}
+
+/* ============ IMPORT : TRAITEMENT ============ */
+let LAST_DIAG=[];
+async function handleFiles(files){
+  const rep=[];LAST_DIAG=[];
+  const batch=(DATA.batch||0)+1;DATA.batch=batch;
+  for(const f of files){
+    let txt='';try{txt=await f.text();}catch(e){rep.push(`<div class="notice"><b>${esc(f.name)}</b> — fichier illisible.</div>`);continue;}
+    const fmt=detectFormat(txt,f.name);
+    LAST_DIAG.push(diagnose(txt,f.name));
+    if(fmt==='winamax-summary'){
+      // Le resume porte le classement, absent du fichier de mains.
+      const S=parseWinamaxSummary(txt);
+      DATA.pending=DATA.pending||{};
+      let liees=0;const parTid={};
+      S.forEach(s=>{(parTid[s.tid]=parTid[s.tid]||[]).push(s);});
+      Object.entries(parTid).forEach(([tid,list])=>{
+        list.forEach((s,k)=>{
+          const key=tid+(k?'#'+(k+1):'');
+          DATA.pending[key]=s;
+          const t=DATA.tournaments.find(x=>x.pid===ME&&x.id===key);
+          if(t){applySummary(t,s);markDirty(t);liees++;}
+        });
+      });
+      const multi=Object.entries(parTid).filter(([,l])=>l.length>1);
+      rep.push(`<div class="notice good"><b>${esc(f.name)}</b> — ${S.length} résumé${S.length>1?'s':''} lu${S.length>1?'s':''}, ${liees} rattaché${liees>1?'s':''} à un tournoi déjà importé.${multi.length?`<br><b>À vérifier :</b> le tournoi ${multi.map(([t,l])=>esc(t)+' apparaît '+l.length+' fois (places '+l.map(x=>x.finish).join(', ')+')').join(' ; ')}. Compté comme autant de réentrées, donc autant de buy-ins. Corrige à la main si ce n'est pas le cas.`:''}</div>`);
+      save();continue;
+    }
+    if(fmt!=='betclic'&&fmt!=='winamax'){
+      rep.push(`<div class="notice"><b>${esc(f.name)}</b> — format « ${fmt} » non pris en charge. Structure relevée dans le diagnostic, en bas de page.</div>`);continue;}
+    const hands=fmt==='winamax'?parseWinamax(txt):parseBetclic(txt);
+    if(!hands.length){rep.push(`<div class="notice"><b>${esc(f.name)}</b> — aucune main reconnue.</div>`);continue;}
+    const {hero,tournaments}=aggregate(hands);
+    // Le pseudo du fichier doit correspondre a celui de l'appareil.
+    // Cela intercepte l'import de l'historique d'un autre, ce qu'aucun
+    // choix manuel de joueur ne saurait detecter.
+    DATA.pseudos=DATA.pseudos||{};
+    if(hero){
+      const proprio=Object.keys(DATA.pseudos).find(pid=>(DATA.pseudos[pid]||[]).includes(hero));
+      if(proprio&&proprio!==OWNER()){
+        rep.push(`<div class="notice"><b>${esc(f.name)} — import refusé.</b> Le pseudo « ${esc(hero)} » appartient au registre de ${esc(P(proprio).name)}. Cet appareil est celui de ${esc(P(OWNER()).name)}. Rien n'a été ajouté.</div>`);
+        continue;
+      }
+      if(!proprio){
+        DATA.pseudos[OWNER()]=DATA.pseudos[OWNER()]||[];
+        if(!DATA.pseudos[OWNER()].includes(hero))DATA.pseudos[OWNER()].push(hero);
+      }
+    }
+    let added=0,dup=0,noSeat=0,repaired=0;
+    tournaments.forEach(t=>{
+      const ex=DATA.tournaments.find(x=>x.id===t.id&&x.pid===ME);
+      if(ex){
+        // tournoi importé avant la segmentation par format : on le complète au lieu de l'ignorer
+        if(!ex.st){Object.assign(ex,t,{pid:ME,src:f.name,batch,imported:Date.now()});markDirty(ex);repaired++;}
+        else dup++;
+        return;}
+      if(!t.seats)noSeat++;
+      const nt=Object.assign({pid:ME,src:f.name,batch,imported:Date.now()},t);
+      // Winamax : le fichier de mains ne porte pas le classement.
+      if(fmt==='winamax'){
+        nt.res=false;nt.won=null;
+        const s=(DATA.pending||{})[nt.id];
+        if(s)applySummary(nt,s);
+      }else nt.res=true;
+      DATA.tournaments.push(nt);markDirty(nt);added++;});
+    const warn=[];
+    if(hands.badSeats)warn.push(`${hands.badSeats} ligne${hands.badSeats>1?'s':''} de siège illisible${hands.badSeats>1?'s':''}`);
+    if(noSeat)warn.push(`${noSeat} tournoi sans joueur identifié`);
+    rep.push(`<div class="notice ${warn.length?'':'good'}"><b>${esc(f.name)}</b> — ${hands.length} mains, hero « ${esc(hero||'?')} ». ${added} tournoi${added>1?'s':''} ajouté${added>1?'s':''}${dup?`, ${dup} doublon${dup>1?'s':''} ignoré${dup>1?'s':''} (registre et statistiques)`:''}${repaired?`, ${repaired} tournoi${repaired>1?'s':''} complété${repaired>1?'s':''} avec ses statistiques`:''}${warn.length?`. À vérifier : ${warn.join(', ')}.`:'.'}</div>`);
+  }
+  pruneReplays();
+  save();$('impReport').innerHTML=rep.join('');renderAll();
+}
+function pruneReplays(){
+  // Sous la contrainte des 5 Mo, on sacrifie les rejeux les plus anciens.
+  // Resultats et statistiques ne sont jamais purges.
+  let garde=REP_KEEP;
+  while(localSize()>4.2*1048576&&garde>5){garde=Math.floor(garde/2);
+    DATA.players.forEach(p=>{
+      DATA.tournaments.filter(t=>t.pid===p.id&&t.rep&&t.rep.length)
+        .sort((a,b)=>String(b.date).localeCompare(String(a.date)))
+        .slice(garde).forEach(t=>{t.rep=[];markDirty(t);});});
+    saveLocal();
+  }
+  DATA.players.forEach(p=>{
+    const ts=DATA.tournaments.filter(t=>t.pid===p.id&&t.rep&&t.rep.length)
+      .sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    ts.slice(REP_KEEP).forEach(t=>{if(t.rep&&t.rep.length){t.rep=[];markDirty(t);}});
+  });
+}
+
+/* ============ IMPORT : AGRÉGATS ============ */
+function toursOf(pid,fmt){return DATA.tournaments.filter(t=>t.pid===pid&&(!fmt||t.fmt===fmt))
+  .sort((a,b)=>String(a.date).localeCompare(String(b.date)));}
+function statsOf(pid,fmt,maxBatch){
+  const acc=blankSt();
+  toursOf(pid,fmt).forEach(t=>{if(maxBatch&&(t.batch||0)>=maxBatch)return;
+    const s=t.st||{};Object.keys(acc).forEach(k=>acc[k]+=(+s[k]||0));});
+  return acc;
+}
+function statVal(s,rule){
+  if(rule.stat==='gap')return s.hands?100*((+s.vpip||0)-(+s.pfr||0))/s.hands:0;
+  if(rule.stat==='speed')return s.dt_n?s.dt/s.dt_n:0;
+  const n=+s[rule.den]||0;return n?100*(+s[rule.stat]||0)/n:0;
+}
+
+/* ============ IMPORT : RENDU ============ */
+function renderImport(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
+  const dw=$('dropWho');if(dw)dw.textContent=P(OWNER()).name;
+  const dz0=$('drop');if(dz0)dz0.style.opacity=1;
+  $('ldName').textContent=P(ME).name;
+  const sel=$('fmtSel');
+  if(sel&&sel.value!==FMT)sel.value=FMT;
+  const Tous=toursOf(ME,FMT);
+  const sansRes=Tous.filter(t=>t.res===false).length;
+  const T=Tous.filter(t=>t.res!==false), n=T.length, spin=FMT==='spin';
+  const inv=T.reduce((a,t)=>a+(+t.buyin||0),0);
+  const won=T.reduce((a,t)=>a+(+t.won||0),0);
+  const itm=T.filter(t=>+t.won>0).length;
+  const wins=T.filter(t=>t.finish===1).length;
+  const r=T.map(t=>{const bi=+t.buyin||1;return ((+t.won||0)-bi)/bi;});
+  const mean=n?r.reduce((a,b)=>a+b,0)/n:0;
+  const sd=n>1?Math.sqrt(r.reduce((a,b)=>a+(b-mean)*(b-mean),0)/(n-1)):0;
+  const ciR=n?1.96*(sd/Math.sqrt(n))*100:0, roi=mean*100;
+  const mults=T.map(t=>parseFloat(String(t.mult||'').replace(/[^\d.]/g,''))).filter(x=>x>0);
+  const eM=mults.length?mults.reduce((a,b)=>a+b,0)/mults.length:0;
+  const seuil=eM?100/eM:0, p=n?wins/n:0, ciW=n?1.96*Math.sqrt(p*(1-p)/n)*100:0;
+  const gate=(ok,html,sub)=>`<div class="kpi ${ok?'clay':'night'}">${html}<div class="kpi-sub">${sub}</div></div>`;
+
+  $('ledgerKpi').innerHTML=`
+    <div class="kpi olive"><div class="kpi-label">${esc(FMTS[FMT])} importés</div><div class="kpi-value">${n}</div>
+      <div class="kpi-sub">${inv.toFixed(0)} € engagés · ${T.reduce((a,t)=>a+(+t.hands||0),0)} mains</div></div>
+    <div class="kpi ${won-inv>=0?'clay':'gold'}"><div class="kpi-label">Net constaté</div>
+      <div class="kpi-value">${(won-inv>=0?'+':'−')+Math.abs(won-inv).toFixed(0)}<span class="unit">€</span></div>
+      <div class="kpi-sub">fait acquis, pas une performance</div></div>`+
+    (spin
+      ? gate(n>=400,`<div class="kpi-label">Taux de victoire</div>
+          <div class="kpi-value">${n>=400?(p*100).toFixed(0)+'<span class="unit">%</span>':'—'}</div>`,
+          n>=400?`± ${ciW.toFixed(1)} pts · ${wins} sur ${n}`:`n = ${n} / 400 requis · ${wins} victoire${wins>1?'s':''}`)
+      + gate(mults.length>=1000,`<div class="kpi-label">Seuil de rentabilité</div>
+          <div class="kpi-value">${mults.length>=1000?seuil.toFixed(1)+'<span class="unit">%</span>':'—'}</div>`,
+          mults.length>=1000?`multiplicateur moyen ${eM.toFixed(2)}`:`n = ${mults.length} / 1000 requis · estimateur à queue lourde`)
+      : (T.some(t=>t.ko)
+        ? `<div class="kpi olive"><div class="kpi-label">Primes encaissées</div>
+            <div class="kpi-value">${T.reduce((a,t)=>a+(+t.bounty||0),0).toFixed(2)}<span class="unit">€</span></div>
+            <div class="kpi-sub">${T.reduce((a,t)=>a+(+t.ko||0),0)} élimination(s) · ${(T.reduce((a,t)=>a+(+t.bounty||0),0)/Math.max(1,inv)*100).toFixed(0)} % des mises</div></div>`
+        : gate(n>=200,`<div class="kpi-label">ROI</div>
+          <div class="kpi-value">${n>=200?roi.toFixed(0)+'<span class="unit">%</span>':'—'}</div>`,
+          n>=200?`± ${ciR.toFixed(0)} pts à 95 %`:`n = ${n} / 200 requis`))
+      + gate(n>=200,`<div class="kpi-label">Places payées</div>
+          <div class="kpi-value">${n>=200?((itm/n)*100).toFixed(0)+'<span class="unit">%</span>':'—'}</div>`,
+          n>=200?`${itm} sur ${n}`:`n = ${n} / 200 requis`));
+
+  let v='';
+  if(!n)v=`Aucun tournoi de ce format importé.`;
+  else if(spin&&n<400)v=`Sur ${n} spin${n>1?'s':''}, aucun chiffre de performance n'est lisible : il en faut environ 400 pour le taux de victoire. ${eM?`Le multiplicateur moyen observé vaut ${eM.toFixed(2)}, ce qui est impossible sur la durée — au-delà de 3, le jeu serait gagnant avant même de jouer. C'est la preuve directe que ${mults.length} tournois ne suffisent pas à estimer cette moyenne, dominée par des multiplicateurs rares et élevés.`:''}`;
+  else if(spin)v=`Taux de victoire ${(p*100).toFixed(1)} % ± ${ciW.toFixed(1)} pts contre un seuil de ${seuil.toFixed(1)} %. ${(p*100-ciW>seuil)?'Rentable, et la marge sort du bruit.':(p*100+ciW<seuil)?'Perdant, et l\'écart sort du bruit.':'Compatible avec l\'équilibre : rien n\'est tranché.'}`;
+  else if(n<200)v=`Sur ${n} tournoi${n>1?'s':''}, le ROI n'est pas une information. Le net est un fait comptable, pas une mesure de niveau.`;
+  else v=`ROI ${roi.toFixed(1)} % ± ${ciR.toFixed(1)} pts. ${(roi-ciR>0)?'Sort du bruit.':(roi+ciR<0)?'Négatif hors bruit : niveau ou sélection de tournois en cause.':'Encore compatible avec l\'équilibre.'}`;
+  // Une place dans les 15 % de tete d'un champ connu sans le moindre gain
+  // signale plus souvent une lecture ratee qu'une realite.
+  const louches=T.filter(t=>t.field&&t.finish&&t.finish<=t.field*0.15&&!(+t.won));
+  $('ledgerVerdict').innerHTML=(louches.length?`<div class="notice" style="margin-top:14px"><b>${louches.length} résultat${louches.length>1?'s':''} à vérifier.</b> Place dans les 15 % de tête d'un champ connu, mais gain nul : ${louches.slice(0,3).map(t=>`${esc(t.game)} ${t.finish}<sup>e</sup> sur ${t.field}`).join(', ')}${louches.length>3?'…':''}. Compare avec l'historique de ton compte : si tu as bien encaissé, c'est le carnet qui lit mal.</div>`:'')
+    +(sansRes?`<div class="notice" style="margin-top:14px"><b>${sansRes} tournoi${sansRes>1?'s':''} sans résultat.</b> Le fichier de mains Winamax ne contient pas le classement : il vit dans le fichier <code>_summary</code> du même tournoi. Ces tournois sont exclus du net et du ROI tant qu'il manque, plutôt que comptés comme perdus.</div>`:'')
+    +`<p class="verdict" style="font-size:15px;margin-top:16px">${v}</p>`;
+
+  const rows=Tous.slice().reverse().slice(0,40);
+  const pko=T.some(t=>t.ko);
+  $('ldTable').innerHTML=`<tr><th>Date</th><th>Épreuve</th><th class="num">À table</th><th class="num">Champ</th><th class="num">Buy-in</th>
+    <th class="num">Place</th>${pko?'<th class="num">Primes</th>':''}<th class="num">Gain</th><th class="num">Net</th><th class="num">Mains</th><th></th></tr>`+
+    (rows.length?rows.map(t=>{const net=(+t.won||0)-(+t.buyin||0);
+      void net;
+      return `<tr><td class="num">${esc(String(t.date).slice(0,10))}</td><td>${esc(t.game)}${t.mult?' '+esc(t.mult):''}</td>
+      <td class="num">${t.seats||'—'}</td><td class="num">${t.field||'—'}</td><td class="num">${(+t.buyin).toFixed(2)} €</td>
+      <td class="num">${t.finish||'—'}</td>${pko?`<td class="num">${t.ko?`${(+t.bounty).toFixed(2)} € · ${t.ko} KO`:'—'}</td>`:''}<td class="num">${t.res===false?'<span class="row-meta">résumé manquant</span>':(+t.won).toFixed(2)+' €'}</td>
+      <td class="num ${t.res===false?'':(net>=0?'pos':'neg')}">${t.res===false?'—':eur(net)}</td><td class="num">${t.hands}</td>
+      <td>${ME===OWNER()?`<button class="btn-mini" data-del-t="${esc(t.id)}">×</button>`:''}</td></tr>`;}).join('')
+     :`<tr><td colspan="11" class="empty">Aucun tournoi de ce format. Dépose un fichier d'historique ci-dessus.</td></tr>`);
+  $('ldTable').querySelectorAll('[data-del-t]').forEach(b=>b.onclick=()=>{
+    if(VIEW!==OWNER())return;
+    GONE.add(OWNER()+'|'+b.dataset.delT);
+    DATA.tournaments=DATA.tournaments.filter(x=>!(x.id===b.dataset.delT&&x.pid===OWNER()));
+    save();renderImport();renderDash();});
+
+  const s=statsOf(ME,FMT);
+  $('statGrid').innerHTML=Object.entries(GATES).map(([k,[lbl,den,min]])=>{
+    const nn=+s[den]||0,ok=nn>=min,val=nn?100*(+s[k]||0)/nn:0;
+    return `<div class="kpi ${ok?'clay':'night'}"><div class="kpi-label">${lbl}</div>
+      <div class="kpi-value">${ok?val.toFixed(0)+'<span class="unit">%</span>':'—'}</div>
+      <div class="kpi-sub">n = ${nn} / ${min} requis</div></div>`;}).join('')+
+    `<div class="kpi gold"><div class="kpi-label">Temps par décision</div>
+      <div class="kpi-value">${s.dt_n>=150?(s.dt/s.dt_n).toFixed(1)+'<span class="unit">s</span>':'—'}</div>
+      <div class="kpi-sub">n = ${s.dt_n||0} / 150 requis</div></div>`;
+
+  renderRules(s);
+  $('diagBox').innerHTML=LAST_DIAG.length?LAST_DIAG.map(d=>
+    `<div class="mt14"><div class="row-title">${esc(d.name)} <span class="row-meta">— format ${esc(d.format)}, ${d.lignes} lignes</span></div>
+     <div style="margin-top:6px">${d.sections.map(([k,x])=>`<span class="tag">${esc(k)} ×${x}</span>`).join('')||'<span class="row-meta">aucune section balisée</span>'}</div>
+     <div style="margin-top:4px">${d.cles_entete.map(([k,x])=>`<span class="tag warm">${esc(k)} ×${x}</span>`).join('')}</div></div>`).join('')
+    :`<p class="empty">Aucun fichier analysé dans cette session.</p>`;
+}
+
+function renderRules(s){
+  DATA.thresholds=DATA.thresholds||{};DATA.thresholds[FMT]=DATA.thresholds[FMT]||{};
+  const prev=statsOf(ME,FMT,DATA.batch||0);
+  $('leakEngine').innerHTML=RULES.map(r=>{
+    const nn=+s[r.den]||0, thr=DATA.thresholds[FMT][r.id]??r.def[FMT];
+    const v=statVal(s,r), ok=nn>=r.min;
+    const fired=ok&&(r.op==='>'?v>thr:v<thr);
+    const pn=+prev[r.den]||0;
+    const delta=(pn>=r.min)?(v-statVal(prev,r)):null;
+    const unit=r.stat==='speed'?' s':' %';
+    return `<div class="row-line">
+      <div class="row-main">
+        <div class="row-title" style="color:${fired?'var(--alert)':ok?'var(--ink)':'var(--muted)'}">${esc(r.lbl)}</div>
+        <div class="row-meta">${ok?`mesuré ${v.toFixed(1)}${unit}`:'échantillon insuffisant'} · n = ${nn}/${r.min} · bloc ${String(r.bloc).padStart(2,'0')}${delta!==null?` · évolution ${delta>=0?'+':'−'}${Math.abs(delta).toFixed(1)}${unit}`:''}</div>
+      </div>
+      <div class="field" style="flex:0 0 120px"><label>Seuil ${r.op}</label>
+        <input type="number" step="0.5" value="${thr}" data-thr="${r.id}"></div>
+    </div>`;}).join('');
+  $('leakEngine').querySelectorAll('[data-thr]').forEach(i=>i.onchange=()=>{
+    DATA.thresholds[FMT][i.dataset.thr]=+i.value;save();renderRules(statsOf(ME,FMT));});
+}
+
+/* ============ RENDER ALL ============ */
+function renderAll(){fillWho();renderImport();renderDash();renderCal();renderStudy();
+  renderSessions();renderReview();renderBankroll();renderAgenda();renderStore();
+  const c=$('cmpFmt');if(c)c.textContent=FMTS[FMT];}
+function fillWho(){
+  $('meName').textContent=P(ME).name;
+  const w=$('viewSel');
+  w.innerHTML=DATA.players.map(p=>`<option value="${p.id}">${esc(p.name)}${p.id===ME?' (moi)':''}</option>`).join('');
+  w.value=VIEW;
+  $('roBanner').innerHTML = VIEW===ME ? '' :
+    `<div class="notice" style="margin-top:18px"><b>Lecture seule.</b> Tu consultes les données de ${esc(P(VIEW).name)}. Tes imports et tes saisies iront dans ton registre, celui de ${esc(P(ME).name)}.</div>`;
+}
+
+/* ============ INIT ============ */
+function fillStatics(){
+  $('stTheme').innerHTML=THEMES.map(t=>`<option>${esc(t)}</option>`).join('');
+  $('hvLeak').innerHTML=LEAKS.map(([g,list])=>
+    `<optgroup label="${g}">${list.map(l=>`<option>${esc(l)}</option>`).join('')}</optgroup>`).join('');
+  const t=iso(new Date());['stDate','hvDate'].forEach(id=>$(id).value=t);
+  selDay=t;
+}
+
+document.querySelectorAll('#tabBar a').forEach(a=>a.onclick=()=>{
+  document.querySelectorAll('#tabBar a').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.remove('on'));
+  a.classList.add('active');
+  document.querySelector(`.panel[data-panel="${a.dataset.tab}"]`).classList.add('on');
+  window.scrollTo({top:0,behavior:'smooth'});});
+
+async function init(){
+  try{const raw=localStorage.getItem(KEY);DATA=raw?JSON.parse(raw):blank();}catch(e){DATA=blank();}
+  if(!DATA||!DATA.players)DATA=blank();
+  DATA.days=DATA.days||{};DATA.curriculum=DATA.curriculum||{};DATA.sd=DATA.sd||2.5;
+  DATA.tournaments=DATA.tournaments||[];DATA.thresholds=DATA.thresholds||{};DATA.batch=DATA.batch||0;DATA.notes=DATA.notes||{};DATA.tomb=DATA.tomb||[];DATA.pseudos=DATA.pseudos||{};
+  if(DATA.handstats){delete DATA.handstats;}
+  DATA.tournaments.forEach(t=>{if(!t.fmt)t.fmt=/spin/i.test((t.mode||'')+' '+(t.game||''))?'spin':'mtt';
+    if(t.players&&!t.seats){t.seats=t.players;delete t.players;}});
+  ME=localStorage.getItem(MEKEY)||'p1';
+  GROUP=localStorage.getItem(GRPKEY)||'';
+  $('grpCode').value=GROUP;
+
+  if(window.supabase&&GROUP){
+    try{sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+      await pullCloud(true);await pushCloud();}
+    catch(e){setSync('err','Hors ligne');}
+  }else setSync('','Local');
+
+  rebuildDirty();
+  fillStatics();
+  $('boot').style.display='none';
+
+  // L'identite de l'appareil se choisit une seule fois, avant toute saisie.
+  const claimed=localStorage.getItem(MEKEY);
+  if(!claimed){
+    $('whoami').style.display='block';
+    $('whoamiList').innerHTML=DATA.players.map(p=>
+      `<div class="row-line"><div class="row-main"><div class="row-title">${esc(p.name)}</div></div>
+       <button class="btn" data-claim="${p.id}">C'est moi</button></div>`).join('');
+    $('whoamiList').querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>{
+      ME=b.dataset.claim;VIEW=ME;localStorage.setItem(MEKEY,ME);
+      $('whoami').style.display='none';$('app').style.display='block';
+      rebuildDirty();renderAll();});
+    return;
+  }
+  ME=claimed;VIEW=ME;
+  $('app').style.display='block';
+  renderAll();
+
+  $('viewSel').onchange=e=>{VIEW=e.target.value;OPENREP=null;renderAll();};
+  $('renameBtn').onclick=()=>{const n=prompt('Ton nom sur cet appareil',P(ME).name);
+    if(!n)return;P(ME).name=n.trim().slice(0,20);save();renderAll();};
+  $('sdIn').onchange=e=>{DATA.sd=Math.max(.5,+e.target.value||2.5);save();renderDash();};
+
+  $('calPrev').onclick=()=>{calRef=new Date(calRef.getFullYear(),calRef.getMonth()-1,1);renderCal();};
+  $('calNext').onclick=()=>{calRef=new Date(calRef.getFullYear(),calRef.getMonth()+1,1);renderCal();};
+
+  $('stAdd').onclick=()=>{
+    const note=$('stNote').value.trim();
+    if(!note){alert("Écris la phrase à retenir. Une séance sans conclusion actionnable ne compte pas.");return;}
+    const date=$('stDate').value,min=+$('stMin').value||0,theme=$('stTheme').value;
+    DATA.study.push({id:uid(),pid:ME,date,theme,min,note});
+    const r=dayRec(ME,date)||{s:null,min:0,theme:''};
+    setDay(ME,date,{s:r.s,min:(+r.min||0)+min,theme});
+    $('stNote').value='';save();renderStudy();renderCal();renderDash();};
+
+  $('noDate').onchange=()=>{const d=$('noDate').value;
+    const n=((DATA.notes||{})[ME]||{})[d]||{};
+    $('noTilt').value=n.tilt??'';$('noTxt').value=n.txt||'';};
+
+  $('hvAdd').onclick=()=>{
+    const spot=$('hvSpot').value.trim(),fix=$('hvFix').value.trim();
+    if(!spot||!fix){alert("Le spot et la ligne correcte sont obligatoires tous les deux. Une main sans conclusion n'est pas une review.");return;}
+    DATA.hands.push({id:uid(),pid:ME,date:$('hvDate').value,stage:$('hvStage').value,pos:$('hvPos').value,
+      stack:+$('hvStack').value||0,leak:$('hvLeak').value,spot,fix});
+    $('hvSpot').value='';$('hvFix').value='';save();renderReview();renderDash();};
+
+  $('brSave').onclick=()=>{const me=P(ME);me.bankroll=+$('brAmount').value||0;
+    me.rule=+$('brRule').value;save();renderBankroll();renderDash();};
+
+  $('grpSave').onclick=async()=>{
+    GROUP=$('grpCode').value.trim().toLowerCase().replace(/\s+/g,'-');
+    localStorage.setItem(GRPKEY,GROUP);
+    if(!GROUP){sb=null;setSync('','Local');return;}
+    if(!window.supabase){setSync('err','Supabase absent');return;}
+    sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
+    await pullCloud(true);await pushCloud();renderAll();};
+  $('grpPull').onclick=async()=>{if(await pullCloud(true))renderAll();};
+
+  $('fmtSel').onchange=e=>{FMT=e.target.value;localStorage.setItem('carnet-poker-fmt',FMT);
+    OPENREP=null;renderAll();};
+  $('revSort').onchange=e=>{REVSORT=e.target.value;renderReplays();};
+  $('noSave').onclick=()=>{
+    const d=$('noDate').value;if(!d){alert("Aucun jour joué : importe d'abord un historique.");return;}
+    DATA.notes=DATA.notes||{};DATA.notes[ME]=DATA.notes[ME]||{};
+    DATA.notes[ME][d]={tilt:$('noTilt').value,txt:$('noTxt').value.trim()};
+    $('noTxt').value='';save();renderSessions();renderDash();};
+  const dz=$('drop');
+  dz.onclick=()=>$('impFile').click();
+  dz.ondragover=e=>{e.preventDefault();dz.style.borderColor='var(--clay)';dz.style.background='rgba(79,209,165,.05)';};
+  dz.ondragleave=()=>{dz.style.borderColor='var(--line)';dz.style.background='transparent';};
+  dz.ondrop=e=>{e.preventDefault();dz.style.borderColor='var(--line)';dz.style.background='transparent';
+    if(e.dataTransfer.files.length)handleFiles([...e.dataTransfer.files]);};
+  $('impFile').onchange=e=>{if(e.target.files.length)handleFiles([...e.target.files]);e.target.value='';};
+  $('diagExport').onclick=()=>{
+    if(!LAST_DIAG.length){alert("Analyse d'abord un fichier : le diagnostic se construit à l'import.");return;}
+    const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(LAST_DIAG,null,2)],{type:'application/json'}));
+    a.download='diagnostic-format.json';a.click();};
+
+  $('exportBtn').onclick=()=>{const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'}));
+    a.download='carnet-poker.json';a.click();};
+  $('importBtn').onclick=()=>$('importFile').click();
+  $('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;
+    const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);
+      if(!d.players)throw new Error('format');DATA=d;save();renderAll();}
+      catch(err){alert("Fichier illisible. Attendu : un export JSON de ce carnet.");}};r.readAsText(f);};
+  $('resetBtn').onclick=()=>{if(!confirm("Effacer les données des trois joueurs ? L'action est définitive."))return;
+    DATA.tournaments.forEach(t=>GONE.add(TK(t)));
+    DIRTY.clear();DATA=blank();save();renderAll();};
+
+  setInterval(()=>{if(sb&&GROUP)pullCloud(false).then(ok=>{if(ok)renderAll();});},45000);
+}
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,11 @@
+{
+  "name": "Carnet Poker",
+  "short_name": "Poker",
+  "start_url": "/carnet-poker.html",
+  "display": "standalone",
+  "background_color": "#0B1412",
+  "theme_color": "#0B1412",
+  "icons": [
+    {"src": "/icon.svg", "sizes": "any", "type": "image/svg+xml"}
+  ]
+}
