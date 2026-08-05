@@ -548,6 +548,64 @@
   </div>
 
   <div class="card mb18">
+    <div class="sec-label">Sauvegarde en ligne</div>
+    <p class="lead mt14">Facultatif. Sans code, tout reste dans ce navigateur — et disparaît avec lui : historique effacé, nouveau téléphone, mode privé. Avec un code, ton carnet est répliqué en ligne et tu retrouves les mêmes données sur ton téléphone et sur ton ordinateur.</p>
+    <div id="syncOff"></div>
+    <div class="form-row">
+      <div class="field" style="flex:1 1 240px"><label>Ton code personnel</label><input id="grpCode" placeholder="ex : thomas-7f3k2p" autocomplete="off"></div>
+      <button class="btn" id="grpSave">Connecter</button>
+      <button class="btn-outline" id="grpGen">Proposer un code</button>
+      <button class="btn-outline" id="grpPull">Tout récupérer</button>
+    </div>
+    <div class="notice mt14" style="border-left-color:var(--gold);background:rgba(201,146,47,.08)">
+      <b>Ce code est ta seule clé — traite-le comme un mot de passe.</b> Il n'y a pas de compte et pas de connexion :
+      qui possède le code voit le carnet, et deux personnes qui choisissent le même code mélangent leurs données.
+      Prends celui que propose le bouton ci-dessus plutôt qu'un mot devinable, note-le quelque part, et ne le partage pas.
+      Le serveur est celui de Guillaume : il peut techniquement y lire ce que tu y écris, et un autre carnet de ce groupe
+      le pourrait aussi en devinant ton code — c'est pour ça qu'il doit rester long et aléatoire.
+      Si ça te gêne, laisse le champ vide et sers-toi de l'export JSON plus bas — le carnet fonctionne entièrement hors ligne.
+    </div>
+    <p class="row-meta mt14"><b style="color:var(--ink)">Plusieurs appareils, c'est prévu.</b> Le cas courant : tu importes tes historiques sur l'ordinateur, tu consultes sur le téléphone. Mets le même code sur les deux et tout circule dans les deux sens — tournois, fiches, séances, calendrier, notes, bankroll. Tu peux écrire des deux côtés, y compris une fiche notée sur le canapé juste après la session : rien n'écrase rien. Chaque enregistrement porte sa date de dernière modification, et la synchro les fusionne un par un plutôt que de remplacer le tout. Compte une minute pour qu'un changement traverse, ou clique « Tout récupérer » pour ne pas attendre.</p>
+    <p class="row-meta mt14">La seule limite : si tu modifies <b>la même fiche</b> sur les deux appareils sans qu'ils se soient parlé entre-temps, c'est la version la plus récente qui l'emporte, en entier. Deux fiches différentes, ou deux champs différents modifiés à des moments différents, ne se marchent jamais dessus. Et une suppression est bien une suppression : elle est mémorisée pendant six mois, donc elle ne revient pas par la porte de l'autre appareil.</p>
+    <details class="mt14"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--clay-deep)">Pour Guillaume : tables Supabase, à créer une seule fois</summary>
+      <pre class="sql">create table poker_state (
+  code text not null,
+  pid  text not null,
+  data jsonb not null default '{}'::jsonb,
+  updated_at timestamptz not null default now(),
+  primary key (code, pid)
+);
+
+create table poker_tournament (
+  code text not null,
+  pid  text not null,
+  tid  text not null,
+  data jsonb not null,
+  updated_at timestamptz not null default now(),
+  primary key (code, pid, tid)
+);
+create index on poker_tournament (code);
+
+alter table poker_state      enable row level security;
+alter table poker_tournament enable row level security;
+create policy "groupe" on poker_state
+  for all to anon using (true) with check (true);
+create policy "groupe" on poker_tournament
+  for all to anon using (true) with check (true);</pre></details>
+  </div>
+
+  <div class="card mb18">
+    <div class="sec-label">Données</div>
+    <div id="storeStat" class="mt14"></div>
+    <div class="form-row mt14">
+      <button class="btn-outline" id="exportBtn">Exporter en JSON</button>
+      <button class="btn-outline" id="importBtn">Importer un JSON</button>
+      <input type="file" id="importFile" accept="application/json" style="display:none">
+      <button class="btn-outline" id="resetBtn" style="border-color:var(--clay);color:var(--clay)">Tout effacer</button>
+    </div>
+  </div>
+
+  <div class="card mb18">
     <div class="cal-nav"><div class="sec-label" style="margin:0">Ton registre</div>
       <select id="fmtSel" style="width:auto"><option value="spin">Spin</option><option value="mtt">MTT / PKO</option></select></div>
     <div id="ledgerKpi" class="grid g4 mt14"></div>
@@ -609,67 +667,11 @@
     <div id="brLog"></div>
   </div>
 
-  <div class="card mb18">
+  <div class="card">
     <div class="sec-label">Ce que ce carnet ne fait pas</div>
     <p style="font-size:14.5px;color:var(--ink-soft);margin-top:10px">Ce n'est pas un tracker. Les statistiques de main fines — EV ajustée, équité par range, HUD en temps réel — viennent de PokerTracker 4, Hold'em Manager 3 ou Hand2Note. Le carnet fait ce qu'aucun tracker ne fait : il tient le planning, le programme d'étude, le protocole de review, la règle de bankroll, et il refuse d'afficher un chiffre tant que l'échantillon ne le porte pas. C'est ce dernier point qui compte le plus : la plupart des joueurs prennent des décisions sur des statistiques calculées à partir de trop peu de mains.</p>
   </div>
 
-  <div class="card mb18">
-    <div class="sec-label">Sauvegarde en ligne</div>
-    <p class="lead mt14">Facultatif. Sans code, tout reste dans ce navigateur — et disparaît avec lui : historique effacé, nouveau téléphone, mode privé. Avec un code, ton carnet est répliqué en ligne et tu retrouves les mêmes données sur ton téléphone et sur ton ordinateur.</p>
-    <div id="syncOff"></div>
-    <div class="form-row">
-      <div class="field" style="flex:1 1 240px"><label>Ton code personnel</label><input id="grpCode" placeholder="ex : thomas-7f3k2p" autocomplete="off"></div>
-      <button class="btn" id="grpSave">Connecter</button>
-      <button class="btn-outline" id="grpGen">Proposer un code</button>
-      <button class="btn-outline" id="grpPull">Tout récupérer</button>
-    </div>
-    <div class="notice mt14" style="border-left-color:var(--gold);background:rgba(201,146,47,.08)">
-      <b>Ce code est ta seule clé — traite-le comme un mot de passe.</b> Il n'y a pas de compte et pas de connexion :
-      qui possède le code voit le carnet, et deux personnes qui choisissent le même code mélangent leurs données.
-      Prends celui que propose le bouton ci-dessus plutôt qu'un mot devinable, note-le quelque part, et ne le partage pas.
-      Le serveur est celui de Guillaume : il peut techniquement y lire ce que tu y écris, et un autre carnet de ce groupe
-      le pourrait aussi en devinant ton code — c'est pour ça qu'il doit rester long et aléatoire.
-      Si ça te gêne, laisse le champ vide et sers-toi de l'export JSON plus bas — le carnet fonctionne entièrement hors ligne.
-    </div>
-    <p class="row-meta mt14"><b style="color:var(--ink)">Comment ça se comporte.</b> Tes tournois importés partent au fil de l'eau, et redescendent seuls sur tes autres appareils. En revanche, tes saisies — fiches de review, séances d'étude, calendrier, notes de session — ne sont récupérées d'un autre appareil qu'au chargement de la page ou en cliquant « Tout récupérer ». C'est délibéré : sans ce garde-fou, une version distante plus ancienne écraserait ce que tu viens de taper.</p>
-    <details class="mt14"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--clay-deep)">Pour Guillaume : tables Supabase, à créer une seule fois</summary>
-      <pre class="sql">create table poker_state (
-  code text not null,
-  pid  text not null,
-  data jsonb not null default '{}'::jsonb,
-  updated_at timestamptz not null default now(),
-  primary key (code, pid)
-);
-
-create table poker_tournament (
-  code text not null,
-  pid  text not null,
-  tid  text not null,
-  data jsonb not null,
-  updated_at timestamptz not null default now(),
-  primary key (code, pid, tid)
-);
-create index on poker_tournament (code);
-
-alter table poker_state      enable row level security;
-alter table poker_tournament enable row level security;
-create policy "groupe" on poker_state
-  for all to anon using (true) with check (true);
-create policy "groupe" on poker_tournament
-  for all to anon using (true) with check (true);</pre></details>
-  </div>
-
-  <div class="card">
-    <div class="sec-label">Données</div>
-    <div id="storeStat" class="mt14"></div>
-    <div class="form-row mt14">
-      <button class="btn-outline" id="exportBtn">Exporter en JSON</button>
-      <button class="btn-outline" id="importBtn">Importer un JSON</button>
-      <input type="file" id="importFile" accept="application/json" style="display:none">
-      <button class="btn-outline" id="resetBtn" style="border-color:var(--clay);color:var(--clay)">Tout effacer</button>
-    </div>
-  </div>
 </div>
 
 </div>
@@ -763,7 +765,8 @@ function blank(){return{
   schemaVersion:SCHEMA,
   players:[{id:MOI,name:'Moi',bankroll:500,rule:200}],
   sessions:[],study:[],hands:[],tournaments:[],days:{},notes:{},curriculum:{},
-  sd:2.5,thresholds:{},pseudos:{},tomb:[],batch:0,updatedAt:0};}
+  sd:2.5,thresholds:{},pseudos:{},tomb:[],batch:0,updatedAt:0,
+  ts:{},tomb2:{}};}
 
 /* ============ SCHEMA ET MIGRATIONS ============
    Regle du chantier : tout nouveau champ ajoute a un objet existant
@@ -775,7 +778,7 @@ function blank(){return{
    - champ optionnel d'un enregistrement       -> repli au point de lecture,
      commente sur place (ex : t.st.pos absent = tournoi importe avant 2d).
    Jamais de `??` disperse dans le rendu pour rattraper une structure. */
-const SCHEMA=2;
+const SCHEMA=3;
 
 /* Chaque entree fait passer de la version cle-1 a la version cle.
    Elles sont cumulatives : un carnet en v1 traverse 2, puis 3, etc. */
@@ -791,6 +794,27 @@ const MIGRATIONS={
       // `players` renomme en `seats` (nombre de sieges, pas le champ du tournoi)
       if(t.players&&!t.seats){t.seats=t.players;delete t.players;}
     });
+  },
+  /* v3 — dates de modification par enregistrement, pour la fusion entre
+     appareils. Tout ce qui existe deja est date de MAINTENANT : on ne sait pas
+     quand ces enregistrements ont ete ecrits, et les laisser a zero les ferait
+     perdre systematiquement face au moindre enregistrement distant date.
+     Consequence a connaitre : le premier appareil a ouvrir cette version gagne
+     les egalites sur les enregistrements que les deux possedent deja. Sans
+     effet en pratique — s'ils sont des deux cotes, c'est qu'ils sont
+     identiques. */
+  3(d){
+    const now=Date.now();
+    d.ts=d.ts||{}; d.tomb2=d.tomb2||{};
+    const marque=k=>{if(d.ts[k]===undefined)d.ts[k]=now;};
+    (d.study||[]).forEach(x=>marque('study|'+x.id));
+    (d.hands||[]).forEach(x=>marque('hands|'+x.id));
+    Object.values(d.days||{}).forEach(m=>Object.keys(m||{}).forEach(k=>marque('days|'+k)));
+    Object.values(d.notes||{}).forEach(m=>Object.keys(m||{}).forEach(k=>marque('notes|'+k)));
+    Object.keys(d.curriculum||{}).forEach(i=>marque('curric|'+i));
+    Object.entries(d.thresholds||{}).forEach(([f,o])=>
+      Object.keys(o||{}).forEach(r=>marque('thr|'+f+'|'+r)));
+    marque('player'); marque('pseudos');
   }
 };
 
@@ -830,6 +854,9 @@ function shapeUp(d){
   d.tournaments=d.tournaments||[]; d.days=d.days||{}; d.notes=d.notes||{};
   d.curriculum=d.curriculum||{}; d.thresholds=d.thresholds||{};
   d.pseudos=d.pseudos||{}; d.tomb=d.tomb||[];
+  // Dates de modification et pierres tombales : indispensables a la fusion,
+  // et toujours presentes, meme sur un carnet vierge.
+  d.ts=d.ts||{}; d.tomb2=d.tomb2||{};
   d.sd=+d.sd||2.5; d.batch=+d.batch||0;
   // Hypothese de dispersion du pool (etape 8). Locale comme `sd`, non
   // synchronisee : c'est un reglage de lecture, pas une donnee de jeu.
@@ -865,7 +892,69 @@ function localSize(){try{return (localStorage.getItem(KEY)||'').length*2;}catch(
 function saveLocal(){DATA.updatedAt=Date.now();DATA.tomb=[...GONE];
   try{localStorage.setItem(KEY,JSON.stringify(DATA));}catch(e){console.error(e);setSync('err','Stockage local plein');}}
 
-/* --- decoupage par joueur --- */
+/* ============ FUSION MULTI-APPAREILS ============
+   Les tournois n'ont jamais pose de probleme : une ligne chacun, ecriture
+   additive, deux appareils ne peuvent pas se marcher dessus. Les SAISIES, si —
+   fiches, seances, calendrier, notes, bankroll — tiennent toutes dans une seule
+   ligne d'etat. Tant qu'elle etait envoyee et appliquee en bloc, le dernier
+   appareil a ecrire effacait le travail de l'autre, en silence.
+
+   Le remede tient en trois pieces :
+
+   1. DATA.ts — une date de derniere modification par enregistrement, sous une
+      cle stable ('hands|<id>', 'days|<date>'...). C'est elle qui tranche.
+   2. DATA.tomb2 — les pierres tombales. Sans elles, un enregistrement supprime
+      ici ressusciterait a la premiere synchro depuis l'appareil qui l'a encore.
+      Une absence ne vaut PAS une suppression : il faut l'avoir dite.
+   3. La fusion elle-meme, enregistrement par enregistrement.
+
+   Ce qui reste en dernier-ecrivain-gagne, faute de mieux : la bankroll, la
+   regle et le prenom. Ce sont des valeurs uniques — il n'y a rien a y fusionner,
+   et changer sa bankroll sur deux appareils dans la meme minute n'a pas de
+   reponse juste. Tout le reste fusionne vraiment. */
+
+/* Cles suivies, et leur contenu serialise. Un seul endroit decrit ce qui compte
+   comme « un enregistrement », et sliceState / la detection de changement s'y
+   referent tous les deux. */
+function etatCles(){
+  const m=new Map();
+  DATA.study.forEach(x=>m.set('study|'+x.id,JSON.stringify(x)));
+  DATA.hands.forEach(x=>m.set('hands|'+x.id,JSON.stringify(x)));
+  const d=DATA.days[MOI]||{};
+  Object.keys(d).forEach(k=>m.set('days|'+k,JSON.stringify(d[k])));
+  const n=(DATA.notes||{})[MOI]||{};
+  Object.keys(n).forEach(k=>m.set('notes|'+k,JSON.stringify(n[k])));
+  Object.keys(DATA.curriculum||{}).forEach(k=>
+    m.set('curric|'+k,JSON.stringify(!!(DATA.curriculum[k]||{})[MOI])));
+  Object.entries(DATA.thresholds||{}).forEach(([f,o])=>
+    Object.keys(o||{}).forEach(r=>m.set('thr|'+f+'|'+r,JSON.stringify(o[r]))));
+  m.set('player',JSON.stringify(DATA.players[0]||null));
+  m.set('pseudos',JSON.stringify((DATA.pseudos||{})[MOI]||[]));
+  return m;
+}
+
+/* Instantane du dernier etat connu. Comparer a lui plutot que d'appeler un
+   touch() a chaque endroit qui ecrit : il y a une trentaine de points
+   d'ecriture dans ce fichier, et il suffirait d'en oublier un pour qu'une
+   saisie ne parte jamais. Ici, aucun chemin ne peut passer au travers. */
+const SNAP=new Map();
+function resnap(m){SNAP.clear();(m||etatCles()).forEach((v,k)=>SNAP.set(k,v));}
+function stampChanges(){
+  const cur=etatCles(), now=Date.now();
+  cur.forEach((v,k)=>{if(SNAP.get(k)!==v)DATA.ts[k]=now;});
+  SNAP.forEach((v,k)=>{if(!cur.has(k)){DATA.tomb2[k]=now;delete DATA.ts[k];}});
+  resnap(cur);
+}
+
+/* Les pierres tombales ne peuvent pas grandir indefiniment. Six mois : au-dela,
+   un appareil reste hors ligne plus longtemps que ca ressuscitera ce qu'il
+   croit encore vivant. C'est un compromis assume, pas une garantie. */
+const TOMB_JOURS=180;
+function purgeTombes(){
+  const lim=Date.now()-TOMB_JOURS*86400000;
+  Object.keys(DATA.tomb2).forEach(k=>{if((+DATA.tomb2[k]||0)<lim)delete DATA.tomb2[k];});
+}
+
 function sliceState(pid){
   const cur={};
   Object.entries(DATA.curriculum||{}).forEach(([k,v])=>{if(v&&v[pid]!==undefined)cur[k]=!!v[pid];});
@@ -873,24 +962,118 @@ function sliceState(pid){
     study:DATA.study.filter(x=>x.pid===pid),
     hands:DATA.hands.filter(x=>x.pid===pid),
     days:DATA.days[pid]||{}, notes:(DATA.notes||{})[pid]||{}, curriculum:cur,
-    pseudos:(DATA.pseudos||{})[pid]||[]};
+    pseudos:(DATA.pseudos||{})[pid]||[],
+    // Les seuils voyageaient dans une ligne '_shared', heritee du carnet a
+    // trois ou ils etaient reellement communs. Ici ils sont personnels : ils
+    // rejoignent la ligne de leur proprietaire, et fusionnent comme le reste.
+    thresholds:DATA.thresholds||{},
+    ts:DATA.ts, tomb2:DATA.tomb2};
 }
-function applyState(pid,s){
-  if(!s)return;
-  if(s.player){const i=DATA.players.findIndex(p=>p.id===pid);
-    if(i>=0)DATA.players[i]=Object.assign(DATA.players[i],s.player);}
-  DATA.study=DATA.study.filter(x=>x.pid!==pid).concat(s.study||[]);
-  DATA.hands=DATA.hands.filter(x=>x.pid!==pid).concat(s.hands||[]);
-  DATA.days[pid]=s.days||{};
-  DATA.notes=DATA.notes||{};DATA.notes[pid]=s.notes||{};
-  DATA.pseudos=DATA.pseudos||{};if(s.pseudos)DATA.pseudos[pid]=s.pseudos;
-  DATA.curriculum=DATA.curriculum||{};
-  Object.entries(s.curriculum||{}).forEach(([k,v])=>{
-    DATA.curriculum[k]=DATA.curriculum[k]||{};DATA.curriculum[k][pid]=v;});
+
+/* Un enregistrement est mort si sa pierre tombale est au moins aussi recente
+   que lui. Egalite comprise : supprimer puis ne rien faire ne doit pas laisser
+   la version distante gagner sur un ex aequo de milliseconde. */
+function estMort(k,ts){const t=+DATA.tomb2[k]||0;return t>0&&t>=ts;}
+
+/* Liste d'enregistrements identifies par `id`. */
+function fusionListe(nom,locale,distante,tsR){
+  const par=new Map();
+  locale.forEach(x=>par.set(String(x.id),{rec:x,ts:+DATA.ts[nom+'|'+x.id]||0}));
+  (distante||[]).forEach(x=>{
+    const id=String(x.id), ex=par.get(id), t=+tsR[nom+'|'+id]||0;
+    if(!ex||t>ex.ts)par.set(id,{rec:x,ts:t});
+  });
+  const out=[];
+  par.forEach(({rec,ts},id)=>{
+    const k=nom+'|'+id;
+    if(estMort(k,ts))return;
+    DATA.ts[k]=ts;out.push(rec);
+  });
+  return out;
+}
+
+/* Dictionnaire dont chaque cle est un enregistrement (calendrier, notes...). */
+function fusionMap(nom,locale,distante,tsR,cle){
+  const out={}, L=locale||{}, R=distante||{};
+  new Set([...Object.keys(L),...Object.keys(R)]).forEach(c=>{
+    const k=cle?cle(c):nom+'|'+c;
+    const tl=+DATA.ts[k]||0, tr=+tsR[k]||0;
+    const aL=L[c]!==undefined, aR=R[c]!==undefined;
+    let val,ts;
+    if(aR&&(!aL||tr>tl)){val=R[c];ts=tr;}
+    else if(aL){val=L[c];ts=tl;}
+    else return;
+    if(estMort(k,ts))return;
+    out[c]=val;DATA.ts[k]=ts;
+  });
+  return out;
+}
+
+/* Fusionne une ligne d'etat distante dans DATA. Rend true si quelque chose a
+   bouge — l'appelant sait alors qu'il doit redessiner. */
+function mergeState(s){
+  if(!s)return false;
+  const avant=JSON.stringify(sliceState(MOI));
+  const tsR=s.ts||{}, tbR=s.tomb2||{};
+  // Pierres tombales : on retient la plus recente des deux cotes, avant tout
+  // le reste — c'est ce qui permet a estMort() de trancher pendant la fusion.
+  Object.keys(tbR).forEach(k=>{if(!((+DATA.tomb2[k]||0)>=(+tbR[k]||0)))DATA.tomb2[k]=+tbR[k];});
+
+  DATA.study=fusionListe('study',DATA.study,s.study,tsR);
+  DATA.hands=fusionListe('hands',DATA.hands,s.hands,tsR);
+  DATA.days[MOI]=fusionMap('days',DATA.days[MOI],s.days,tsR);
+  DATA.notes=DATA.notes||{};
+  DATA.notes[MOI]=fusionMap('notes',DATA.notes[MOI],s.notes,tsR);
+
+  // Curriculum : douze booleens, une date chacun.
+  const curL={};Object.keys(DATA.curriculum||{}).forEach(i=>{
+    const v=(DATA.curriculum[i]||{})[MOI];if(v!==undefined)curL[i]=!!v;});
+  const curF=fusionMap('curric',curL,s.curriculum,tsR);
+  DATA.curriculum={};Object.keys(curF).forEach(i=>{DATA.curriculum[i]={[MOI]:!!curF[i]};});
+
+  // Seuils : un par regle et par format, donc fusionnables un a un.
+  const plat=o=>{const m={};Object.entries(o||{}).forEach(([f,r])=>
+    Object.entries(r||{}).forEach(([id,v])=>m[f+'|'+id]=v));return m;};
+  const thrF=fusionMap('thr',plat(DATA.thresholds),plat(s.thresholds),tsR,c=>'thr|'+c);
+  DATA.thresholds={};Object.entries(thrF).forEach(([c,v])=>{
+    const i=c.indexOf('|');const f=c.slice(0,i);
+    (DATA.thresholds[f]=DATA.thresholds[f]||{})[c.slice(i+1)]=v;});
+
+  // Pseudos : jamais retires a l'usage, l'union suffit et evite qu'un appareil
+  // qui n'a vu qu'un seul compte efface l'autre.
+  DATA.pseudos=DATA.pseudos||{};
+  DATA.pseudos[MOI]=[...new Set([...(DATA.pseudos[MOI]||[]),...(s.pseudos||[])])];
+
+  /* Joueur. Prenom, bankroll et regle sont des valeurs uniques : le plus
+     recent gagne en bloc, il n'y a rien a fusionner. `ruleLog` fait exception —
+     c'est un historique date, donc l'union par date le reconstitue sans perte,
+     meme si les deux appareils y ont ajoute des entrees chacun de leur cote. */
+  if(s.player){
+    const moi=DATA.players[0], tl=+DATA.ts.player||0, tr=+tsR.player||0;
+    const parDate={};
+    [...(s.player.ruleLog||[]),...(moi.ruleLog||[])].forEach(e=>{
+      if(!e||!e.date)return;
+      // a date egale, on garde la version du cote le plus recemment modifie
+      if(parDate[e.date]===undefined||tl>=tr)parDate[e.date]=e;});
+    if(tr>tl){DATA.players[0]=Object.assign(moi,s.player);DATA.ts.player=tr;}
+    DATA.players[0].ruleLog=Object.values(parDate)
+      .sort((a,b)=>String(a.date).localeCompare(String(b.date)));
+    DATA.players[0].id=MOI;
+  }
+
+  // Dates de modification : on retient la plus recente des deux cotes.
+  Object.keys(tsR).forEach(k=>{if(!((+DATA.ts[k]||0)>=(+tsR[k]||0)))DATA.ts[k]=+tsR[k];});
+  purgeTombes();
+  resnap();   // le fusionne devient la reference : sans ca, le prochain
+              // stampChanges() re-daterait a maintenant tout ce qui vient
+              // d'arriver, et cet appareil gagnerait toutes les comparaisons.
+  return JSON.stringify(sliceState(MOI))!==avant;
 }
 
 let pushTimer=null, syncing=false;
-function save(){saveLocal();if(!sb||!GROUP)return;
+/* stampChanges() AVANT saveLocal() : les dates de modification font partie des
+   donnees, et un rechargement de page ne doit pas les perdre. */
+function save(){stampChanges();saveLocal();if(!sb||!GROUP)return;
   clearTimeout(pushTimer);pushTimer=setTimeout(()=>pushCloud().catch(e=>console.error(e)),900);}
 
 async function pushCloud(){
@@ -919,14 +1102,21 @@ async function pushCloud(){
         tids.slice(i,i+CHUNK).forEach(x=>GONE.delete(pid+'|'+x));
       }
     }
-    // 3. ma ligne d'etat, et la ligne commune
-    let{error:e1}=await sb.from(T_STATE).upsert(
+    /* 3. Ma ligne d'etat. On RELIT la version distante et on la fusionne avant
+       d'ecrire : c'est le geste qui rend le multi-appareils sur. Sans lui, un
+       telephone reste ouvert depuis ce matin, qui n'a donc pas vu les fiches
+       ecrites sur le PC entre-temps, les effacerait a la premiere saisie —
+       cette ligne est envoyee en entier, pas champ par champ. */
+    const{data:cur,error:e0}=await sb.from(T_STATE).select('data')
+      .eq('code',GROUP).eq('pid',ME).maybeSingle();
+    if(e0)throw e0;
+    const fusionne=cur&&cur.data?mergeState(cur.data):false;
+    const{error:e1}=await sb.from(T_STATE).upsert(
       {code:GROUP,pid:ME,data:sliceState(ME),updated_at:now},{onConflict:'code,pid'});
     if(e1)throw e1;
-    let{error:e2}=await sb.from(T_STATE).upsert(
-      {code:GROUP,pid:SHARED,data:{thresholds:DATA.thresholds||{}},updated_at:now},{onConflict:'code,pid'});
-    if(e2)throw e2;
     saveLocal();setSync('ok','Synchronisé');
+    // La fusion a pu faire descendre du distant : l'ecran serait perime.
+    if(fusionne)renderAll();
   }catch(e){console.error(e);setSync('err','Hors ligne');}
   finally{syncing=false;}
 }
@@ -938,14 +1128,24 @@ async function pullCloud(full){
     // 1. etats : peu de lignes, toujours legeres
     const{data:st,error}=await sb.from(T_STATE).select('pid,data').eq('code',GROUP);
     if(error)throw error;
+    /* La fusion etant sure, il n'y a plus de raison d'attendre une demande
+       explicite pour appliquer sa propre ligne : le carnet a trois sautait
+       cette etape sur les pulls automatiques parce qu'appliquer voulait dire
+       remplacer, et qu'une version distante perimee aurait efface une saisie
+       en cours. Ici on fusionne enregistrement par enregistrement — la saisie
+       locale, plus recente, gagne d'elle-meme. Le pull des 45 s fait donc
+       enfin descendre les fiches et les seances, pas seulement les tournois.
+       `full` ne sert plus qu'a distinguer un « Tout recuperer » manuel.
+       Une ligne '_shared' ne peut venir que d'une version anterieure a la
+       fusion : on la lit encore pour ne pas perdre ses seuils, on ne l'ecrit
+       plus jamais. */
     (st||[]).forEach(r=>{
-      if(r.pid===SHARED){if(r.data&&r.data.thresholds){DATA.thresholds=r.data.thresholds;changed=true;}return;}
-      // Regle centrale : on n'ecrase MA ligne que sur demande explicite ou
-      // au premier chargement. Sinon une version distante perimee effacerait
-      // ce que je viens de saisir.
-      if(r.pid===ME&&!full)return;
-      applyState(r.pid,r.data);changed=true;
+      if(!r.data)return;
+      if(r.pid===SHARED){if(mergeState({thresholds:r.data.thresholds}))changed=true;return;}
+      if(r.pid!==ME)return;                       // solo : aucune autre ligne n'est la mienne
+      if(mergeState(r.data))changed=true;
     });
+    void full;
     // 2. tournois : on ne compare que les identifiants, puis on ne
     //    telecharge que ce qui manque
     const ids=[];
@@ -2784,6 +2984,11 @@ async function init(){
   // passe par migrate() pour que la structure ait un seul point de verite.
   let raw=null;try{raw=localStorage.getItem(KEY);}catch(e){}
   try{DATA=migrate(raw?JSON.parse(raw):blank());}catch(e){console.error(e);DATA=blank();}
+  /* Instantane de reference, pris AVANT la moindre synchro. Sans lui, le
+     premier stampChanges() verrait tout le carnet comme neuf et re-daterait
+     chaque enregistrement a maintenant — cet appareil gagnerait alors toutes
+     les comparaisons, ce qui est exactement le comportement qu'on corrige. */
+  resnap();
   GROUP=localStorage.getItem(GRPKEY)||'';
   $('grpCode').value=GROUP;
 
@@ -2941,6 +3146,7 @@ function wireApp(){
   $('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;
     if(!confirm("Importer ce fichier REMPLACE tout le contenu actuel du carnet — il ne le complète pas. Exporte d'abord une sauvegarde si tu as un doute.\n\nContinuer ?")){
       e.target.value='';return;}
+    const avantImport=[...etatCles().keys()];
     const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);
       if(!d.players)throw new Error('format');
       // Une sauvegarde peut dater d'un schema anterieur : meme chemin qu'au
@@ -2948,6 +3154,17 @@ function wireApp(){
       // un export du carnet a trois s'importe donc, ampute des deux autres.
       DATA=migrate(d);
       localStorage.setItem(MEKEY,P(ME).name);
+      /* Une sauvegarde restauree remplace tout : on repart de son instantane,
+         puis on re-date l'ensemble pour que cette version-la gagne la prochaine
+         fusion. C'est le sens de « restaurer » — sinon le distant, plus recent,
+         effacerait aussitot ce qu'on vient de remettre. */
+      const now=Date.now(), apres=etatCles();
+      apres.forEach((v,k)=>{DATA.ts[k]=now;});
+      // Ce que la sauvegarde ne contient pas doit MOURIR, pas seulement
+      // disparaitre de l'ecran : sans pierre tombale, la copie en ligne le
+      // ferait revenir a la synchro suivante, et la restauration serait vaine.
+      avantImport.forEach(k=>{if(!apres.has(k))DATA.tomb2[k]=now;});
+      resnap(apres);
       rebuildDirty();save();renderAll();}
       catch(err){alert("Fichier illisible. Attendu : un export JSON de ce carnet.");}};
     r.readAsText(f);e.target.value='';};
@@ -2955,7 +3172,19 @@ function wireApp(){
     if(!confirm("Effacer tout le carnet : tournois, fiches, étude, calendrier, bankroll. L'action est définitive et vaut aussi pour la copie en ligne si tu as un code.\n\nContinuer ?"))return;
     if(!confirm("Dernière confirmation. Rien ne sera récupérable."))return;
     DATA.tournaments.forEach(t=>GONE.add(TK(t)));
-    DIRTY.clear();const nom=P(ME).name;DATA=blank();P(ME).name=nom;
+    /* Effacer ne suffit pas : sans pierre tombale, chaque enregistrement
+       redescendrait a la premiere synchro depuis la copie en ligne — ou depuis
+       l'autre appareil. On declare donc tout mort avant de repartir a vide, et
+       on conserve ces declarations dans le carnet neuf. */
+    const now=Date.now(), tombes={};
+    etatCles().forEach((v,k)=>{tombes[k]=now;});
+    Object.assign(tombes,DATA.tomb2);
+    DIRTY.clear();const nom=P(ME).name;
+    DATA=blank();DATA.tomb2=tombes;P(ME).name=nom;
+    // Le carnet neuf doit gagner la prochaine fusion, sinon la version
+    // distante du joueur — prenom, bankroll — reviendrait par-dessus.
+    etatCles().forEach((v,k)=>{DATA.ts[k]=now+1;});
+    resnap();
     save();renderAll();};
 }
 init();
