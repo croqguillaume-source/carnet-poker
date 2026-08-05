@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Carnet Poker — Accueil</title>
+<meta name="description" content="Carnet poker individuel : sessions, leaks, étude, bankroll. Deux outils, un carnet et un guide." />
+<meta name="theme-color" content="#0B1412" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Public+Sans:wght@300;400;600;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<!--
+  Page d'accueil, volontairement PAS une redirection : contrairement au carnet
+  a trois, ceux qui arrivent ici ne connaissent ni l'outil ni son vocabulaire.
+  Les envoyer directement dans l'application les mettrait devant huit onglets
+  vides sans leur dire a quoi ils servent.
+
+  Chemins RELATIFS partout : le site est publie dans un sous-dossier, un chemin
+  commencant par une barre oblique pointerait a la racine du domaine.
+-->
+<style>
+  :root{
+    --paper:#0B1412; --card:#122220; --ink:#E8E4D9; --ink-soft:#B4C2BB;
+    --clay:#4FD1A5; --clay-soft:#7FE0C0; --sage:#6FBF9E; --gold:#C9922F;
+    --line:#25403A; --muted:#8FA39D; --olive:#1B4D40;
+    --display:'Archivo Black',Impact,sans-serif;
+    --body:'Public Sans',-apple-system,BlinkMacSystemFont,Segoe UI,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);
+    font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased;min-height:100vh;}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+    opacity:.045;mix-blend-mode:overlay;}
+  .w{max-width:760px;margin:0 auto;padding:0 20px 70px;position:relative;z-index:1;}
+  header{background:linear-gradient(158deg,#13302A,#0B1412);border-bottom:1px solid var(--line);
+    padding:46px 0 34px;position:relative;overflow:hidden;}
+  header::after{content:"";position:absolute;right:-50px;top:-70px;width:260px;height:260px;
+    background:radial-gradient(circle,rgba(79,209,165,.14),transparent 68%);border-radius:50%;}
+  header .w{padding-bottom:0;}
+  .kicker{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:8px;}
+  h1{font-family:var(--display);font-weight:400;font-size:clamp(26px,6vw,40px);line-height:1.05;
+    letter-spacing:-.02em;text-transform:uppercase;}
+  h1 em{font-style:normal;color:var(--clay);}
+  .sub{color:var(--ink-soft);font-size:16px;max-width:56ch;margin-top:14px;}
+  .sec-label{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+    color:var(--clay);display:flex;align-items:center;gap:9px;margin:38px 0 12px;}
+  .sec-label::before{content:"";width:20px;height:1px;background:var(--clay);}
+  .cards{display:grid;gap:14px;grid-template-columns:1fr 1fr;}
+  @media(max-width:640px){.cards{grid-template-columns:1fr;}}
+  a.tile{display:block;text-decoration:none;color:inherit;background:var(--card);
+    border:1px solid var(--line);border-radius:4px;padding:22px;transition:.15s;
+    box-shadow:0 2px 14px rgba(0,0,0,.35);}
+  a.tile:hover{border-color:var(--clay);transform:translateY(-2px);}
+  a.tile .n{font-family:var(--mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--muted);}
+  a.tile h2{font-family:var(--display);font-weight:400;font-size:20px;text-transform:uppercase;
+    letter-spacing:-.01em;margin:6px 0 8px;}
+  a.tile:hover h2{color:var(--clay);}
+  a.tile p{font-size:14px;color:var(--ink-soft);}
+  a.tile .go{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--clay);margin-top:14px;display:block;}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:20px;
+    box-shadow:0 2px 14px rgba(0,0,0,.35);}
+  .steps{counter-reset:s;}
+  .st{display:flex;gap:14px;padding:12px 0;border-bottom:1px solid rgba(37,64,58,.6);}
+  .st:last-child{border-bottom:none;}
+  .st::before{counter-increment:s;content:counter(s);flex:0 0 26px;height:26px;border-radius:50%;
+    background:var(--olive);color:var(--clay);font-family:var(--mono);font-size:11px;font-weight:700;
+    display:flex;align-items:center;justify-content:center;}
+  .st b{display:block;font-size:14.5px;margin-bottom:2px;}
+  .st span{font-size:13.5px;color:var(--muted);}
+  .note{border-left:3px solid var(--gold);background:rgba(201,146,47,.08);border-radius:0 4px 4px 0;
+    padding:13px 16px;font-size:14px;color:var(--ink-soft);margin-top:14px;}
+  .note b{color:var(--ink);}
+  .foot{margin-top:44px;padding-top:16px;border-top:1px solid var(--line);
+    font-size:12.5px;color:var(--muted);}
+</style>
+</head>
+<body>
+<header>
+  <div class="w">
+    <div class="kicker">Sessions · leaks · étude · bankroll</div>
+    <h1>Carnet <em>poker</em></h1>
+    <p class="sub">Deux pages, aucune installation, rien à créer comme compte. Tes historiques de mains sont lus dans ton navigateur et n'en sortent pas.</p>
+  </div>
+</header>
+
+<div class="w">
+  <div class="sec-label">Les deux outils</div>
+  <div class="cards">
+    <a class="tile" href="carnet.html">
+      <span class="n">L'application</span>
+      <h2>Le carnet</h2>
+      <p>Tu y déposes tes historiques Betclic ou Winamax. Il en déduit tes sessions, ton volume, ton net, tes fréquences de jeu — et il cherche tes leaks. Plus le planning, les fiches de review, le rejeu des mains et la règle de bankroll.</p>
+      <span class="go">Ouvrir le carnet →</span>
+    </a>
+    <a class="tile" href="guide.html">
+      <span class="n">La théorie</span>
+      <h2>Le guide</h2>
+      <p>Douze blocs, un par semaine : ranges d'open, math des bounties, push/fold, défense de BB, c-bet, turn, river, ICM, isolation PKO, leaks de population, multitabling. Avec des auto-tests à la fin des blocs.</p>
+      <span class="go">Ouvrir le guide →</span>
+    </a>
+  </div>
+
+  <div class="sec-label">Comment démarrer</div>
+  <div class="card steps">
+    <div class="st"><div><b>Ouvre le carnet et donne ton prénom</b><span>C'est tout ce qu'il demande. Aucun compte, aucun mot de passe, aucune adresse mail.</span></div></div>
+    <div class="st"><div><b>Glisse tous tes fichiers d'historique dans l'onglet Import</b><span>Tout ce que tu as, même vieux. Le volume passé ne se rattrape pas, et sans lui aucune statistique n'est lisible. Chez Winamax, pense aux fichiers <code>_summary</code> : ce sont eux qui portent le classement et le gain.</span></div></div>
+    <div class="st"><div><b>Renseigne ta bankroll</b><span>Onglet Bankroll. C'est ce qui fixe ton buy-in maximum et déclenche l'alerte quand tu joues au-dessus.</span></div></div>
+    <div class="st"><div><b>Après chaque session, écris trois fiches</b><span>Onglet Review. Le carnet te propose les mains aux plus gros mouvements de jetons ; tu les rejoues coup par coup et tu notes ce qu'il aurait fallu faire. C'est là que le progrès se fait, pas dans les graphiques.</span></div></div>
+  </div>
+
+  <div class="sec-label">Deux choses à savoir</div>
+  <div class="card">
+    <p style="font-size:14.5px;color:var(--ink-soft)"><b style="color:var(--ink)">Tout vit dans ton navigateur.</b> C'est la bonne nouvelle pour la confidentialité et la mauvaise pour la sauvegarde : effacer l'historique du navigateur, changer de téléphone ou naviguer en mode privé fait disparaître le carnet. Deux parades, dans l'onglet Bankroll — l'export JSON, à faire de temps en temps, et la sauvegarde en ligne, qui synchronise aussi téléphone et ordinateur.</p>
+    <div class="note"><b>Le carnet refuse d'afficher un chiffre tant que l'échantillon ne le porte pas.</b> Beaucoup de cases resteront vides longtemps, et des tirets s'afficheront là où tu attends un pourcentage. Ce n'est pas une panne. Un ROI calculé sur trente tournois ne veut rien dire, et l'afficher quand même serait le plus sûr moyen de te faire changer quelque chose qui allait bien.</div>
+  </div>
+
+  <div class="foot">Fait pour un petit groupe de joueurs. Un souci, un fichier non reconnu, une idée : dis-le à Guillaume.</div>
+</div>
+</body>
+</html>

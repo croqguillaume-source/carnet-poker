@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover"/>
+<title>Guide Poker — Les douze blocs</title>
+<meta name="description" content="Guide d'étude poker MTT / PKO en douze blocs : ranges, bounties, push-fold, défense de BB, c-bet, ICM."/>
+<meta name="theme-color" content="#0B1412"/>
+<link rel="icon" href="icon.svg" type="image/svg+xml"/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Public+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<style>
+:root{--paper:#0B1412;--deep:#18302B;--card:#122220;--ink:#E8E4D9;--soft:#B4C2BB;--olive:#1B4D40;--clay:#4FD1A5;--clay2:#7FE0C0;--gold:#C9922F;--alert:#E2574C;--line:#25403A;--muted:#8FA39D;--shadow:rgba(0,0,0,.35);--display:'Archivo Black',Impact,sans-serif;--body:'Public Sans',-apple-system,sans-serif;--mono:'JetBrains Mono',monospace;}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.6;-webkit-font-smoothing:antialiased}
+body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");opacity:.045;mix-blend-mode:overlay}
+.w{max-width:780px;margin:0 auto;padding:0 20px 80px;position:relative;z-index:1}
+header{background:linear-gradient(158deg,#13302A,#0B1412);border-bottom:1px solid var(--line);padding:22px 0 18px;position:relative;overflow:hidden}
+header::after{content:"";position:absolute;right:-40px;top:-60px;width:200px;height:200px;background:radial-gradient(circle,rgba(79,209,165,.12),transparent 68%);border-radius:50%}
+header .w{padding-bottom:0}
+.kicker{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+header h1{font-family:var(--display);font-size:clamp(20px,4vw,26px);line-height:1;text-transform:uppercase}
+header h1 em{font-style:normal;color:var(--clay)}
+.back{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-decoration:none;display:inline-flex;align-items:center;gap:6px;margin-top:12px;transition:.15s}
+.back:hover{color:var(--clay)}
+
+/* NAV */
+nav{position:sticky;top:0;z-index:50;background:rgba(11,20,18,.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--line)}
+nav .inner{max-width:780px;margin:0 auto;padding:0 12px;display:flex;gap:0;overflow-x:auto;scrollbar-width:none}
+nav .inner::-webkit-scrollbar{display:none}
+nav a{flex:0 0 auto;padding:13px 13px;font-family:var(--mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);text-decoration:none;white-space:nowrap;cursor:pointer;border-bottom:2px solid transparent;transition:.15s;scroll-snap-align:center}
+nav a:hover{color:var(--ink)}
+nav a.on{color:var(--clay);border-bottom-color:var(--clay)}
+nav a .n{display:inline-block;width:18px;height:18px;line-height:18px;text-align:center;border-radius:50%;background:var(--line);color:var(--muted);font-size:9px;margin-right:4px}
+nav a.done .n{background:var(--clay);color:#08120F}
+
+/* BLOCS */
+.bloc{display:none;padding:26px 0 12px}
+.bloc.on{display:block;animation:fadeIn .22s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1}}
+.sec{font-family:var(--mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--clay);display:flex;align-items:center;gap:9px;margin-bottom:10px}
+.sec::before{content:"";width:20px;height:1px;background:var(--clay)}
+h2{font-family:var(--display);font-size:clamp(18px,3vw,23px);line-height:1.2;letter-spacing:-.02em;margin-bottom:8px}
+h2 em{font-style:normal;color:var(--clay)}
+h3{font-family:var(--display);font-size:16px;margin:18px 0 8px}
+.lead{font-size:14.5px;color:var(--soft);max-width:62ch;margin-bottom:14px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:4px;box-shadow:0 2px 14px var(--shadow);padding:18px;margin-bottom:14px}
+.card.gold{border-left:3px solid var(--gold)}
+.card.alert{border-left:3px solid var(--alert)}
+.card.clay{border-left:3px solid var(--clay)}
+
+.rule{font-family:var(--mono);font-size:13px;font-weight:700;color:var(--gold);margin-bottom:6px}
+.rule em{font-style:normal;color:var(--ink);font-weight:400}
+p{margin-bottom:10px}
+ul{margin:0 0 12px 20px}
+li{margin-bottom:4px;font-size:14.5px;color:var(--soft)}
+li b{color:var(--ink);font-weight:600}
+strong{color:var(--ink)}
+.mono{font-family:var(--mono);font-size:13px}
+.tag{display:inline-block;font-family:var(--mono);font-size:10px;padding:2px 7px;border-radius:99px;border:1px solid var(--line);color:var(--muted);margin:0 4px 4px 0}
+.tag.hot{border-color:var(--alert);color:var(--alert)}
+.tag.warm{border-color:var(--gold);color:var(--gold)}
+.empty-range{border:1px dashed var(--line);border-radius:4px;padding:16px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;margin:10px 0}
+.btn{background:var(--clay);border:1px solid var(--clay);color:#08120F;border-radius:4px;padding:9px 14px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:.15s;white-space:nowrap}
+.btn:hover{background:var(--clay2)}
+.btn-o{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:4px;padding:9px 14px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;cursor:pointer;transition:.15s}
+.btn-o:hover{background:var(--line);color:var(--ink)}
+.checks{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.checks label{display:flex;align-items:center;gap:5px;font-family:var(--mono);font-size:11px;color:var(--muted);cursor:pointer}
+.checks label.done{color:var(--clay)}
+.checks input{accent-color:var(--clay)}
+.quiz{margin:12px 0}
+.quiz button{display:block;width:100%;text-align:left;background:var(--paper);border:1px solid var(--line);border-radius:4px;padding:10px 14px;font-size:14px;color:var(--ink);cursor:pointer;margin-bottom:6px;transition:.15s}
+.quiz button:hover{border-color:var(--clay);background:var(--deep)}
+.quiz button.ok{border-color:var(--clay);background:rgba(79,209,165,.12);color:var(--clay)}
+.quiz button.ko{border-color:var(--alert);background:rgba(226,87,76,.08);color:var(--alert)}
+.quiz .expl{font-size:13px;color:var(--soft);margin:6px 0 0;display:none}
+.foot{margin-top:40px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted)}
+table{width:100%;border-collapse:collapse;font-size:13px;margin:10px 0}
+th{font-family:var(--mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);text-align:left;padding:7px 8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid rgba(37,64,58,.5)}
+td.num{text-align:right;font-family:var(--mono)}
+@media(max-width:480px){nav a{padding:12px 9px;font-size:9px}}
+</style>
+</head>
+<body>
+<header>
+<div class="w">
+<div class="kicker">Douze blocs, un par semaine</div>
+<h1>Guide <em>poker</em></h1>
+<a class="back" href="carnet.html">← Retour au carnet</a>
+</div>
+</header>
+<nav><div class="inner" id="nav"></div></nav>
+<div class="w">
+<div id="content"></div>
+<div class="foot">Un bloc par semaine, dans l'ordre. Les cases cochées ici restent dans ce navigateur et sont indépendantes de celles du carnet — coche les deux si tu veux que le programme du carnet suive.</div>
+</div>
+<script>
+const BLOCS=[
+{id:1,titre:"Ranges d'open",soustitre:"par position et par stack",
+ sections:[
+  {type:'concept',titre:"Le principe",
+   html:`<p>Ouvrir, c'est décider de jouer une main avant que quiconque ait agi. La qualité de cette décision dépend de <b>trois variables</b> : ta position, la profondeur de ton tapis, et le profil du joueur en blindes.</p>
+<p>En MTT, le tapis effectif change à chaque niveau de blindes. Une main jouable à 60 bb ne l'est plus à 25 bb — pas parce qu'elle est devenue mauvaise, mais parce que le ratio risque/gain a changé.</p>`},
+  {type:'rule',titre:"Règle de base",
+   html:`<div class="rule">Plus ta position est tardive, plus ta range est large.</div>
+<p>EP (UTG, UTG+1) : tu ouvres tes 12-15 % les plus fortes. Beaucoup de joueurs restent derrière toi, et tu joueras le reste de la main hors position.</p>
+<p>CO : 22-28 % selon le profil des blindes. C'est la position où tu commences à ouvrir des mains spéculatives.</p>
+<p>BTN : 40-55 %. Tu auras la position sur tout le monde pour le reste de la main. C'est ta mine d'or.</p>
+<p>SB : 35-50 % en open-raise (jamais de limp), mais tu joueras hors position contre la BB. Beaucoup de joueurs sous-estiment ce désavantage.</p>`},
+  {type:'rule',titre:"Ajustement par stack",
+   html:`<div class="rule">60 bb → ranges complètes. <em>40 bb → resserre EP, élargis BTN.</em> 25 bb → push/fold (bloc 03).</div>
+<p>À 40 bb, les mains spéculatives (petites paires, connecteurs assortis) perdent de la valeur en EP parce que tu n'as plus la profondeur pour les rentabiliser. En revanche, au BTN, le vol de blindes + antes devient proportionnellement plus précieux.</p>
+<p>Le seuil exact dépend de ton pool — en low stakes, les blindes défendent trop, ce qui réduit la valeur du vol mais augmente celle de la position post-flop.</p>`},
+  {type:'leak',titre:"Leak de population en low stakes",
+   html:`<div class="card alert"><p>Le leak le plus coûteux en low stakes n'est pas d'ouvrir trop large, c'est d'<b>ouvrir trop serré au BTN</b> — surtout à 30-40 bb. Tu laisses les antes sur la table. Chaque orbit coûte ~2,5 bb en antes + blindes : si tu ne voles pas assez, tu te fais manger vivant avant même de jouer un pot.</p></div>`},
+  {type:'range',titre:"Les tableaux de ranges",
+   html:`<p><b>Cette section arrive bientôt.</b> Guillaume prépare les grilles main par main — quelles combinaisons ouvrir depuis chaque position et à chaque profondeur de tapis — et elles seront ajoutées ici.</p>
+<p>En attendant, les pourcentages ci-dessus suffisent à travailler : ce sont eux que mesure le carnet, et c'est sur eux que se déclenchent les règles de leaks. Une grille apprise par cœur sans comprendre pourquoi la range s'élargit en fin de parole s'applique mal dès que le spot s'écarte du cas standard.</p>
+<div class="empty-range">EP · 60 bb — en préparation</div>
+<div class="empty-range">CO · 60 bb — en préparation</div>
+<div class="empty-range">BTN · 60 bb — en préparation</div>
+<div class="empty-range">SB · 60 bb — en préparation</div>
+<div class="empty-range">EP · 40 bb — en préparation</div>
+<div class="empty-range">BTN · 40 bb — en préparation</div>`},
+  {type:'quiz',titre:"Auto-test",questions:[
+    {q:"Tu es au BTN à 35 bb, tous foldent avant toi. Quelle range est la plus correcte ?",
+     opts:["Top 20 % seulement","Top 45-50 %","Top 70 %, c'est le BTN"],
+     ok:1,expl:"À 35 bb au BTN, tu voles très large. 70 % serait correct heads-up, pas à une table pleine. 20 % est beaucoup trop serré — tu laisses les antes."},
+    {q:"EP à 60 bb, tu as 7♠6♠. Open ou fold ?",
+     opts:["Open 2.2 bb","Fold"],
+     ok:1,expl:"Les connecteurs assortis jouent mal hors position avec cinq joueurs derrière. C'est un fold standard en EP, même si la main est « jolie »."},
+    {q:"SB à 40 bb, la table folde jusqu'à toi. Tu as K♣5♦. Action ?",
+     opts:["Fold — trop faible","Open 2.2 bb","Limp pour voir un flop"],
+     ok:1,expl:"K5o est dans ta range d'open SB à 40 bb. Le limp est toujours faux en MTT : tu donnes un pot à prix réduit hors position."}
+  ]}
+]},
+
+{id:2,titre:"Math des bounties",soustitre:"prime-to-stack ratio",
+ sections:[
+  {type:'concept',titre:"Pourquoi le PKO change tout",
+   html:`<p>En MTT classique, chaque jeton vaut la même chose quel que soit le détenteur. En PKO, <b>éliminer un joueur te rapporte sa prime</b> — la moitié va dans ta poche, l'autre moitié augmente ta propre prime. Conséquence : les décisions marginales ne sont plus les mêmes.</p>
+<p>Le mécanisme clé est le <b>PSR</b> (Prime-to-Stack Ratio) : le rapport entre la prime que tu encaisses si tu élimines le joueur et le tapis que tu risques pour le faire.</p>`},
+  {type:'rule',titre:"Le PSR en pratique",
+   html:`<div class="rule">PSR = prime de l'adversaire ÷ (2 × buy-in initial)</div>
+<p>Quand le PSR dépasse <b>0,30</b>, tu élargis nettement tes ranges de call. Au-dessus de <b>0,50</b>, tu appelles avec des mains que tu folderais sans discussion en MTT classique.</p>
+<p>Attention : le PSR ne s'applique que quand tu <b>couvres</b> l'adversaire. Si c'est lui qui te couvre, il n'y a aucune prime en jeu pour toi — le calcul revient à un MTT normal.</p>`},
+  {type:'rule',titre:"Ajustement de la range de call",
+   html:`<div class="rule">PSR &lt; 0.15 → ajustement négligeable. <em>PSR 0.30 → +5-8 % de mains appelées.</em> PSR 0.50+ → call très large.</div>
+<p>En pratique, sur un 2 € PKO low stakes, les primes de départ valent 1 €. Après une ou deux éliminations, un joueur porte 2-3 € de prime. Le PSR passe au-dessus de 0.50 : un call all-in avec K8o ou Q9s devient correct, alors qu'il serait suicidaire en MTT classique.</p>`},
+  {type:'leak',titre:"Le piège des primes",
+   html:`<div class="card alert"><p>Le leak le plus fréquent en PKO low stakes : <b>surévaluer les petites primes</b>. Un PSR de 0.10 ne justifie rien de spécial. Si tu call all-in A3o pour une prime de 0,20 € et que tu perds ton tapis de 25 bb, tu as sacrifié ta valeur ICM pour un ticket de loterie. Le calcul des bounties est un multiplicateur, pas une carte blanche.</p></div>`},
+  {type:'quiz',titre:"Auto-test",questions:[
+    {q:"PKO 2 €. L'adversaire push 12 bb avec une prime de 3 €. Tu as A♠T♦ et tu le couvres. Le buy-in initial est 2 €. PSR ?",
+     opts:["0.50","0.75","1.50"],
+     ok:1,expl:"PSR = 3 € ÷ (2 × 2 €) = 0.75. C'est très élevé : AT est un call facile, tu pourrais même call avec des mains nettement plus faibles."},
+    {q:"Même spot, mais sa prime est de 0,30 €. Call ou fold avec A♠T♦ ?",
+     opts:["Call — ATo est toujours bon ici","Ça dépend de ma position et du reste de la table","Fold — pas assez de prime pour le risque"],
+     ok:1,expl:"PSR = 0.30 ÷ 4 = 0.075. La prime est négligeable. La décision se prend exactement comme en MTT classique : position, tailles de tapis, ICM."}
+  ]}
+]},
+
+{id:3,titre:"Push/fold",soustitre:"sous 15 bb avec ajustement bounty",
+ sections:[
+  {type:'concept',titre:"Quand le jeu post-flop disparaît",
+   html:`<p>En dessous de ~15 bb, open-raise puis fold au 3bet te coûte 20-25 % de ton tapis. Il n'y a plus de place pour le jeu post-flop : tu <b>push all-in ou tu folds</b>. C'est la zone où les charts de Nash dominent — et où la plupart des joueurs de low stakes font le plus d'erreurs.</p>`},
+  {type:'rule',titre:"Les deux questions",
+   html:`<div class="rule">1. Dois-je push ? → chart Nash par position et stack. <em>2. Dois-je call un push ? → range adverse + pot odds + ICM.</em></div>
+<p>En push : à 10 bb au BTN, tu push environ 50 % de tes mains. À 10 bb en EP, tu push 15-18 %. La différence est énorme.</p>
+<p>En call : la range de call est toujours plus serrée que la range de push, parce que le joueur qui push peut avoir n'importe quoi dans sa range, mais toi tu dois battre cette range en moyenne.</p>`},
+  {type:'rule',titre:"Ajustement PKO",
+   html:`<div class="rule">En PKO, le PSR élargit ta range de call, <em>pas ta range de push</em>.</div>
+<p>Quand tu pushes, tu ne peux pas encaisser de prime (sauf si tu couvres ET que tu gagnes). Quand tu appelles, tu peux. Le PSR s'ajoute aux pot odds : un call qui nécessite 40 % d'équité en MTT n'en nécessite plus que 32-35 % si le PSR vaut 0.30+.</p>`},
+  {type:'leak',titre:"Le leak classique",
+   html:`<div class="card alert"><p>Le push-fold le plus coûteux en low stakes : <b>fold trop souvent en SB face à un open du BTN</b> quand tu as 12-15 bb. Tu dois 3bet push ta range — environ 25-30 % de tes mains — parce que l'ouvreur fold très souvent. La plupart des joueurs de low stakes ne le font qu'avec les 8-10 % les plus fortes, ce qui revient à payer les blindes sans se battre.</p></div>`},
+  {type:'quiz',titre:"Auto-test",questions:[
+    {q:"Tu as 9 bb en CO. Tous foldent avant toi. Tu as A♥4♣. Action ?",
+     opts:["Fold — A4o est trop faible","Push all-in","Open 2.2 bb"],
+     ok:1,expl:"A4o est un push standard en CO à 9 bb. Open 2.2 bb te laisse 6.8 bb si tu dois fold face à un 3bet — autant avoir tout mis dès le départ."},
+    {q:"Tu as 11 bb en BB. Le BTN push all-in. Tu as K♠J♥. Call ?",
+     opts:["Oui — KJo est dans le top 15 %","Non — trop risqué avec un tapis jouable","Ça dépend du PSR en PKO"],
+     ok:0,expl:"KJo bat environ 55 % de la range de push d'un BTN standard. Avec le pot qui contient déjà les blindes + antes, c'est un call en MTT classique. En PKO, le PSR rend la décision encore plus facile."}
+  ]}
+]},
+
+{id:4,titre:"Défense de BB",soustitre:"quel prix, quelles textures",
+ sections:[
+  {type:'concept',titre:"La big blind est un cas à part",
+   html:`<p>Tu as déjà mis de l'argent dans le pot, donc tu as besoin de moins d'équité pour appeler. Un open de 2.2 bb te donne un prix de 1.2 bb pour un pot de 4.9 bb (avec les antes) — tu n'as besoin que de ~25 % d'équité. C'est la raison pour laquelle la BB défend très large.</p>`},
+  {type:'rule',titre:"La grille de défense",
+   html:`<div class="rule">Contre un open de 2-2.3 bb → défends 45-55 % de tes mains. <em>Contre 3 bb → 30-35 %.</em> Contre un minraise → 60 %+.</div>
+<p>Mais « défendre » ne veut pas dire « caller ». Ta défense inclut les <b>3bets</b>, qui représentent 12-16 % de ta range face à un open standard. Le reste est du call.</p>`},
+  {type:'leak',titre:"Les deux leaks en BB",
+   html:`<div class="card alert"><p><b>Leak 1 — fold excessif.</b> Folder 70 % de ta BB contre un open de 2.2 bb, c'est donner un profit garanti à l'ouvreur. Il n'a même pas besoin de bien jouer post-flop.</p>
+<p><b>Leak 2 — call sans plan post-flop.</b> Caller avec K7o en BB, c'est correct au prix. Mais si tu check-fold le flop à chaque c-bet, tu as gaspillé 1.2 bb 65 % du temps. La défense de BB n'a de sens que couplée à un plan post-flop — ce qui est traité dans les blocs 06-08.</p></div>`},
+  {type:'quiz',titre:"Auto-test",questions:[
+    {q:"Tu es en BB à 30 bb. Le CO open à 2.2 bb, tous foldent. Tu as J♠8♠. Action ?",
+     opts:["Fold — J8s n'est pas assez fort","Call — bon prix, bonne jouabilité","3bet à 7 bb"],
+     ok:1,expl:"J8s est dans le call de ta BB à ce prix. La main a de la jouabilité post-flop (paires, tirages, doubles backdoors). Le fold est le seul choix clairement faux ici."}
+  ]}
+]},
+
+{id:5,titre:"3bet léger",soustitre:"et construction des ranges de 4bet",
+ sections:[
+  {type:'concept',titre:"Pourquoi 3bet",
+   html:`<p>Le 3bet sert deux objectifs : <b>extraire de la valeur</b> avec tes meilleures mains, et <b>voler le pot préflop</b> avec des mains qui jouent mal en call mais qui ont du potentiel de blocage ou d'équité.</p>
+<p>La fréquence correcte dépend de la position de l'ouvreur et de la tienne. Tu 3bet plus souvent depuis le BTN et le SB que depuis les positions early.</p>`},
+  {type:'rule',titre:"Fréquences cibles",
+   html:`<div class="rule">Face à un open EP → 3bet 4-6 % (surtout value). <em>Face à un open CO/BTN → 3bet 8-12 % (mix value + bluff).</em></div>
+<p>En low stakes, la plupart des joueurs 3bet trop peu (3-5 % flat) et uniquement avec des mains premium. C'est prévisible et exploitable : l'adversaire peut fold face à ton 3bet en sachant que tu as toujours QQ+/AK.</p>`},
+  {type:'rule',titre:"Sizing",
+   html:`<div class="rule">En position → 2.5-3x l'open. <em>Hors position → 3-3.5x l'open.</em></div>
+<p>Le sizing plus gros hors position compense le désavantage positionnel en forçant l'adversaire à payer plus cher pour voir un flop avec position sur toi.</p>`},
+  {type:'leak',titre:"Leak : le 3bet trop prévisible",
+   html:`<div class="card alert"><p>Si tu ne 3bet qu'avec AA-QQ et AK, tes adversaires foldent tout sauf les mains qui te dominent. Ajoute des 3bets « légers » — A5s, A4s (blocage de l'as), KQs, JTs (jouabilité) — pour rendre ta range illisible.</p></div>`}
+]},
+
+{id:6,titre:"C-bet",soustitre:"fréquence et sizing selon la texture",
+ sections:[
+  {type:'concept',titre:"Le continuation bet",
+   html:`<p>Le c-bet est une mise au flop faite par l'agresseur préflop. Son efficacité dépend de la <b>texture du flop</b> — c'est-à-dire de la façon dont le tableau connecte avec la range de l'appelant vs la tienne.</p>`},
+  {type:'rule',titre:"Trois textures, trois stratégies",
+   html:`<div class="rule">Flop sec (K72r) → c-bet petit (25-33 %) à haute fréquence. <em>Flop connecté (987tt) → check la plupart du temps.</em></div>
+<p><b>Flop sec et haut</b> (A83r, K72r) : ta range d'ouvreur contient plus de mains fortes que celle du caller. C-bet petit, souvent — 70-80 % du temps.</p>
+<p><b>Flop moyennement connecté</b> (QT5, J97) : les deux ranges touchent. Sois sélectif — c-bet avec tes mains fortes et tes meilleurs tirages, check le reste.</p>
+<p><b>Flop très connecté</b> (876, T98, 765tt) : ce flop favorise la range du caller (connecteurs, petites paires). Check très souvent, même avec des overpairs.</p>`},
+  {type:'rule',titre:"Sizing",
+   html:`<div class="rule">25-33 % du pot → range large, flop sec. <em>50-75 % du pot → range étroite, mains fortes et semi-bluffs.</em></div>
+<p>Le petit sizing en position est la correction la plus rentable en low stakes. Beaucoup de joueurs c-bet 60-75 % sur tous les flops : ça marche contre les faibles, mais ça se fait exploiter dès que les adversaires réalisent qu'ils peuvent raise.</p>`},
+  {type:'leak',titre:"Le leak du c-bet automatique",
+   html:`<div class="card alert"><p>C-bet 100 % des flops, c'est brûler des jetons. Sur 876tt, ta range d'ouvreur a moins de sets et de doubles paires que le caller. Ta paire d'As vaut moins qu'il n'y paraît — et un check n'est pas un signe de faiblesse, c'est une décision.</p></div>`},
+  {type:'quiz',titre:"Auto-test",questions:[
+    {q:"Tu as open depuis le CO, la BB call. Flop K♠7♥2♣. Tu as A♦Q♦. C-bet ?",
+     opts:["Oui, 33 % du pot","Oui, 75 % du pot","Check"],
+     ok:0,expl:"Flop sec et haut, ta range écrase celle de la BB. C-bet petit à haute fréquence. AQ a des overcardes et tu peux barrel des turns qui t'améliorent."},
+    {q:"Même spot, mais le flop est 8♠7♠6♥. C-bet avec A♦Q♦ ?",
+     opts:["Oui, 50 % du pot — je suis l'agresseur","Check — ce flop ne me favorise pas"],
+     ok:1,expl:"876 connecte énormément avec la range du caller (paires, tirages, doubles paires). Ta main ne touche rien et n'a pas de tirage. Check."}
+  ]}
+]},
+
+{id:7,titre:"Turn",soustitre:"barreler ou checker",
+ sections:[
+  {type:'concept',titre:"Le tour le plus négligé",
+   html:`<p>La turn est l'endroit où la plupart des pots se décident, et c'est le street le moins travaillé. La question centrale : <b>est-ce que la carte tombée au turn change le rapport de force entre ta range et celle de l'adversaire ?</b></p>`},
+  {type:'rule',titre:"Quand barreler",
+   html:`<div class="rule">Barrel la turn si la carte <em>améliore ta range</em> ou si elle <em>fait peur à la range adverse</em>.</div>
+<p>Tu as c-bet un flop K72r, la turn est un A. C'est une carte qui favorise ta range (tu as plus de Ax que le caller). Barrel.</p>
+<p>La turn est un 4. Carte neutre. Si tu avais c-bet avec rien, c'est le moment de renoncer. Si tu as une main forte, continue à value.</p>`},
+  {type:'leak',titre:"Deux erreurs inversées",
+   html:`<div class="card alert"><p><b>Overfold turn</b> : tu c-bet le flop, l'adversaire call, et tu abandonnes la turn par défaut. Si tu fais ça systématiquement, tu donnes à l'adversaire un call gratuit au flop — il sait que ta mise ne coûte qu'un seul barrel.</p>
+<p><b>Barrel automatique</b> : l'inverse. Tu barrel toutes les turns par inertie. Sur une turn qui ne t'aide pas et n'effraie personne, c'est de l'argent offert.</p></div>`}
+]},
+
+{id:8,titre:"River",soustitre:"value fine et bluff-catchers",
+ sections:[
+  {type:'concept',titre:"La décision terminale",
+   html:`<p>À la river, plus de tirage, plus d'amélioration possible. Deux questions : <b>est-ce que ma main bat assez de mains adverses pour miser ?</b> Et inversement : <b>est-ce que ma main bat assez de bluffs adverses pour caller ?</b></p>`},
+  {type:'rule',titre:"Value bet et bluff-catch",
+   html:`<div class="rule">Value bet → ta main bat plus de 50 % de la range qui appelle. <em>Bluff-catch → tu dois battre assez de bluffs pour justifier le call selon les pot odds.</em></div>
+<p>Si le pot fait 10 000 et l'adversaire mise 5 000, tu as besoin de gagner 1 fois sur 3 pour que le call soit rentable. Traduis ça en pourcentage de bluffs dans sa range.</p>`},
+  {type:'leak',titre:"Piège low stakes",
+   html:`<div class="card alert"><p>Les joueurs de low stakes <b>bluffent moins qu'ils ne devraient à la river</b>. Conséquence : tu peux folder plus souvent face à une grosse mise river, surtout d'un joueur passif. Ce n'est pas de la lecture, c'est de la statistique de population.</p></div>`}
+]},
+
+{id:9,titre:"Pression ICM",soustitre:"bulle et table finale",
+ sections:[
+  {type:'concept',titre:"Quand les jetons ne valent plus la même chose",
+   html:`<p>L'ICM (Independent Chip Model) convertit les jetons en valeur monétaire. Près de la bulle et en table finale, chaque jeton gagné vaut <b>moins</b> qu'un jeton perdu. Conséquence : tu dois resserrer tes ranges dans les spots marginaux — sauf si tu es chipleader.</p>`},
+  {type:'rule',titre:"Deux règles",
+   html:`<div class="rule">1. En bulle, les tapis courts ne devraient presque jamais bust — <em>laisse les gros stacks s'entretuer</em>.</div>
+<div class="rule">2. Le chipleader peut mettre la pression sur les tapis moyens, <em>pas sur les tapis courts</em> (ils n'ont plus rien à perdre).</div>`},
+  {type:'leak',titre:"En PKO, l'ICM est atténué",
+   html:`<div class="card gold"><p>Les primes réduisent la pression ICM : une partie du prizepool est distribuée pendant le tournoi, pas seulement à la fin. En PKO, tu peux prendre des risques ICM marginaux si le PSR le justifie. C'est la raison pour laquelle les stratégies de bulle en PKO sont nettement plus agressives qu'en MTT classique.</p></div>`}
+]},
+
+{id:10,titre:"Isolation en PKO",soustitre:"cibler les tapis courts",
+ sections:[
+  {type:'concept',titre:"Isoler pour la prime",
+   html:`<p>En PKO, quand un tapis court push all-in, tu ne veux pas simplement gagner le pot — tu veux l'<b>éliminer</b>. Si un troisième joueur entre dans le pot, la prime est partagée avec celui qui le bust. Isoler, c'est relancer pour repousser les autres et garder la prime entière.</p>`},
+  {type:'rule',titre:"Sizing d'isolation",
+   html:`<div class="rule">Raise à 2.2-2.5x le push du short stack — assez pour décourager les overcalls, <em>pas assez pour te commettre avec une main marginale</em>.</div>
+<p>Si le short stack push 5 bb et qu'il a une grosse prime, raise à 12-13 bb. Les joueurs derrière toi doivent payer 12 bb pour voir un flop 3-way, ce qui sort la plupart des mains de leur range.</p>`},
+  {type:'leak',titre:"L'isolation qui coûte",
+   html:`<div class="card alert"><p>Isoler large est correct uniquement quand tu <b>couvres</b> le short stack. Si un troisième joueur te couvre et reshove, c'est <b>ta</b> prime qui est en jeu. Avant d'isoler, vérifie les tapis derrière toi.</p></div>`}
+]},
+
+{id:11,titre:"Profil des pools",soustitre:"leaks de population",
+ sections:[
+  {type:'concept',titre:"Exploiter sans lire",
+   html:`<p>En low stakes, tu ne connais pas tes adversaires — tu en affrontes des centaines. Mais tu connais le <b>profil statistique du pool</b> : les tendances moyennes de tous les joueurs de ton niveau. Exploiter le pool, c'est ajuster ta stratégie par rapport à GTO dans la direction opposée aux erreurs moyennes du pool.</p>`},
+  {type:'rule',titre:"Les cinq leaks de population en low stakes MTT",
+   html:`<div class="rule">1. Fold trop face aux 3bets → <em>3bet plus souvent en bluff</em>.</div>
+<div class="rule">2. Call trop préflop, pas assez de 3bet → <em>value bet plus large post-flop</em>.</div>
+<div class="rule">3. Fold trop au c-bet flop → <em>c-bet petit à haute fréquence</em>.</div>
+<div class="rule">4. Bluff pas assez à la river → <em>fold plus souvent face aux grosses mises river</em>.</div>
+<div class="rule">5. Sous-évalue la position → <em>joue plus de pots en position, moins hors position</em>.</div>
+<p>Ces cinq ajustements valent plus que n'importe quelle étude GTO avancée à ce niveau. Ils te rapportent de l'argent tant que le pool ne change pas — et en low stakes, il change très lentement.</p>`}
+]},
+
+{id:12,titre:"Multitabling",soustitre:"fatigue et fenêtre de jeu",
+ sections:[
+  {type:'concept',titre:"Le leak silencieux",
+   html:`<p>Le multitabling augmente le volume mais dégrade la qualité de chaque décision. Le temps moyen par décision est la mesure objective : en dessous de 3 secondes en MTT, tu joues mécaniquement. Au-dessus de 5 secondes, tu réfléchis. Le carnet mesure ça automatiquement sur Betclic.</p>`},
+  {type:'rule',titre:"Trouver ta limite",
+   html:`<div class="rule">Nombre de tables optimal = celui où ton temps de décision reste > 3,5 s <em>et</em> ton score de discipline ne chute pas.</div>
+<p>Commence à 4 tables. Monte d'une table par semaine. Quand ton temps de décision descend sous 3 s ou que tu constates des erreurs récurrentes en review, tu as dépassé ta limite. Reviens une table en arrière.</p>`},
+  {type:'rule',titre:"Fenêtre de jeu",
+   html:`<div class="rule">Fixe tes horaires de session avant de t'asseoir, <em>pas après avoir perdu</em>.</div>
+<p>La fenêtre de jeu se décide à froid : « je joue de 20 h à 23 h, je m'arrête quoi qu'il arrive ». Quand tu prolonges après un bad beat pour « te refaire », tu joues en tilt sans le savoir. Le carnet enregistre le tilt déclaré — mais un tilt non déclaré coûte la même chose.</p>`},
+  {type:'leak',titre:"Le piège de la quantité",
+   html:`<div class="card alert"><p>Doubler le nombre de tables ne double pas tes gains : ça les multiplie par 2 × (qualité à 2N tables / qualité à N tables). Si ta qualité chute de 30 % en passant de 4 à 8 tables, tes gains réels augmentent de 40 %, pas de 100 %. Et ta courbe de progression stagne, parce que tu ne réfléchis plus.</p></div>`}
+]}
+];
+
+/* ============ RENDU ============ */
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+let CUR=0, DONE={};
+/* Cle distincte de celle du guide a trois : les deux guides peuvent etre
+   publies sur le meme domaine, et localStorage est partage par origine. */
+const DONE_KEY='guide-solo-done';
+try{DONE=JSON.parse(localStorage.getItem(DONE_KEY)||'{}');}catch(e){}
+function saveDone(){localStorage.setItem(DONE_KEY,JSON.stringify(DONE));}
+
+function renderNav(){
+  $('nav').innerHTML=BLOCS.map((b,i)=>{
+    const d=DONE[b.id];
+    return `<a data-i="${i}" class="${i===CUR?'on':''} ${d?'done':''}" title="${esc(b.titre)}">
+      <span class="n">${String(b.id).padStart(2,'0')}</span>${esc(b.titre)}</a>`;
+  }).join('');
+  $('nav').querySelectorAll('a').forEach(a=>a.onclick=()=>{CUR=+a.dataset.i;render();});
+}
+
+function renderBloc(b){
+  let html=`<div class="sec">Bloc ${String(b.id).padStart(2,'0')} sur 12</div>
+    <h2>${esc(b.titre)} — <em>${esc(b.soustitre)}</em></h2>
+    <div class="checks"><label class="${DONE[b.id]?'done':''}">
+      <input type="checkbox" id="doneCheck" ${DONE[b.id]?'checked':''}> J'ai travaillé ce bloc</label></div>`;
+
+  b.sections.forEach(s=>{
+    if(s.type==='concept'||s.type==='rule'||s.type==='leak'||s.type==='range'){
+      html+=`<div class="card${s.type==='leak'?' alert':s.type==='range'?' gold':''}">
+        <h3>${esc(s.titre)}</h3>${s.html}</div>`;
+    }
+    else if(s.type==='quiz'){
+      html+=`<div class="card clay"><h3>${esc(s.titre)}</h3>`;
+      s.questions.forEach((q,qi)=>{
+        html+=`<p style="margin-top:14px"><b>Q${qi+1}.</b> ${esc(q.q)}</p><div class="quiz" data-ok="${q.ok}">`;
+        q.opts.forEach((o,oi)=>{html+=`<button data-oi="${oi}">${esc(o)}</button>`;});
+        html+=`<div class="expl">${esc(q.expl)}</div></div>`;
+      });
+      html+=`</div>`;
+    }
+  });
+
+  html+=`<div style="display:flex;gap:10px;margin-top:20px">`;
+  if(CUR>0)html+=`<button class="btn-o" id="prev">← Bloc précédent</button>`;
+  if(CUR<BLOCS.length-1)html+=`<button class="btn" id="next">Bloc suivant →</button>`;
+  html+=`</div>`;
+  return html;
+}
+
+function render(){
+  renderNav();
+  $('content').innerHTML=renderBloc(BLOCS[CUR]);
+  // checkbox
+  $('doneCheck').onchange=e=>{DONE[BLOCS[CUR].id]=e.target.checked;saveDone();renderNav();};
+  // quiz
+  $('content').querySelectorAll('.quiz').forEach(div=>{
+    const ok=+div.dataset.ok;
+    div.querySelectorAll('button').forEach(btn=>{
+      btn.onclick=()=>{
+        div.querySelectorAll('button').forEach(b=>{b.disabled=true;
+          b.className=+b.dataset.oi===ok?'ok':'ko';});
+        div.querySelector('.expl').style.display='block';
+      };
+    });
+  });
+  // nav
+  const p=$('prev'),n=$('next');
+  if(p)p.onclick=()=>{CUR--;render();window.scrollTo(0,0);};
+  if(n)n.onclick=()=>{CUR++;render();window.scrollTo(0,0);};
+  // scroll l'onglet actif dans la vue
+  const active=document.querySelector('nav a.on');
+  if(active)active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+}
+render();
+</script>
+</body>
+</html>

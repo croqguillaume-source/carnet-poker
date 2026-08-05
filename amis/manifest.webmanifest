@@ -1,0 +1,15 @@
+{
+  "name": "Carnet Poker",
+  "short_name": "Poker",
+  "description": "Carnet de suivi individuel — sessions, leaks, étude, bankroll.",
+  "lang": "fr",
+  "start_url": "carnet.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0B1412",
+  "theme_color": "#0B1412",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
