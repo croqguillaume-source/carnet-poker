@@ -3,19 +3,17 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-<title>Carnet Poker — Ton suivi de sessions</title>
+<title>Carnet Poker — Le labo des trois</title>
 
-<!-- PWA. Chemins RELATIFS : le site vit dans un sous-dossier, un chemin
-     commencant par une barre oblique pointerait a la racine du domaine. -->
-<link rel="manifest" href="manifest.webmanifest"/>
+<!-- PWA -->
+<link rel="manifest" href="/manifest.json"/>
 <meta name="theme-color" content="#0B1412"/>
 <meta name="apple-mobile-web-app-capable" content="yes"/>
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
 <meta name="apple-mobile-web-app-title" content="Poker"/>
-<link rel="apple-touch-icon" href="icon.svg"/>
-<link rel="icon" href="icon.svg" type="image/svg+xml"/>
+<link rel="apple-touch-icon" href="/icon.svg"/>
 <meta name="mobile-web-app-capable" content="yes"/>
-<meta name="description" content="Carnet poker individuel — sessions, leaks, étude, bankroll. Tes historiques Betclic et Winamax lus dans ton navigateur."/>
+<meta name="description" content="Carnet poker à trois — planning, étude, sessions, review des leaks, bankroll."/>
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Public+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
@@ -55,10 +53,6 @@
   .day-ring .ring-fg{fill:none;stroke:var(--gold);stroke-width:8;stroke-linecap:round;transition:stroke-dasharray .5s cubic-bezier(.4,0,.2,1);}
   .day-ring .ring-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:21px;color:var(--ink);}
   .day-ring .ring-num small{font-family:var(--mono);font-size:8px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-top:1px;}
-  .guide-link{display:inline-block;margin-top:8px;font-family:var(--mono);font-size:10px;
-    letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;
-    border-bottom:1px solid var(--line);padding-bottom:2px;transition:.15s;}
-  .guide-link:hover{color:var(--clay);border-bottom-color:var(--clay);}
   .who{display:flex;align-items:center;gap:9px;margin-top:14px;flex-wrap:wrap;}
   .who label{font-family:var(--mono);font-size:10px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);}
   .who select{background:rgba(232,228,217,.06);color:var(--ink);border:1px solid var(--line);border-radius:4px;padding:6px 10px;font-family:var(--body);font-size:13.5px;font-weight:600;width:auto;}
@@ -129,9 +123,6 @@
   .btn-outline:hover{background:var(--line);color:var(--ink);}
   .btn-mini{background:transparent;border:1px solid var(--line);border-radius:3px;padding:3px 9px;font-family:var(--mono);font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--muted);cursor:pointer;transition:.15s;}
   .btn-mini:hover{background:var(--clay);border-color:var(--clay);color:#08120F;}
-  .btn:disabled,.btn-outline:disabled,input:disabled{opacity:.4;cursor:not-allowed;}
-  .btn:disabled:hover{background:var(--clay);border-color:var(--clay);}
-  .btn-outline:disabled:hover{background:transparent;color:var(--muted);}
 
   /* NOTICES */
   .notice{border-left:3px solid var(--alert);background:rgba(226,87,76,.09);border-radius:0 4px 4px 0;padding:11px 14px;font-size:14px;margin-bottom:9px;}
@@ -220,25 +211,6 @@
   .verdict em{font-style:normal;color:var(--clay);}
   .verdict-note{font-family:var(--mono);font-size:11.5px;font-weight:400;color:var(--muted);margin-top:9px;letter-spacing:0;text-transform:none;}
 
-  /* HISTOGRAMME DE DISCIPLINE — une colonne par semaine */
-  .spark{display:flex;align-items:flex-end;gap:5px;height:88px;margin:14px 0 6px;}
-  .spark div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;min-width:0;}
-  .spark i{display:block;background:var(--line);border-radius:2px 2px 0 0;transition:.2s;}
-  .spark i.ok{background:var(--sage);} .spark i.mid{background:var(--gold);} .spark i.low{background:var(--clay-deep);}
-  .spark i.now{outline:1px solid var(--ink);outline-offset:1px;}
-  .spark-x{display:flex;gap:5px;font-family:var(--mono);font-size:9px;color:var(--muted);text-align:center;}
-  .spark-x span{flex:1;min-width:0;overflow:hidden;}
-
-  /* ONBOARDING — premiere ouverture et carnet encore vide */
-  .steps{counter-reset:s;}
-  .steps .st{display:flex;gap:13px;padding:11px 0;border-bottom:1px solid rgba(37,64,58,.6);}
-  .steps .st:last-child{border-bottom:none;}
-  .steps .st::before{counter-increment:s;content:counter(s);flex:0 0 24px;height:24px;border-radius:50%;
-    background:var(--olive);color:var(--clay);font-family:var(--mono);font-size:11px;font-weight:700;
-    display:flex;align-items:center;justify-content:center;}
-  .steps .st b{display:block;font-size:14px;margin-bottom:2px;}
-  .steps .st span{font-size:13px;color:var(--muted);}
-
   pre.sql{background:var(--night-deep);color:#9FD8C2;border:1px solid var(--line);border-radius:4px;padding:14px;font-family:var(--mono);font-size:11px;line-height:1.65;overflow-x:auto;white-space:pre;}
   details summary{color:var(--clay)!important;}
   .boot{padding:70px 16px;text-align:center;color:var(--muted);font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;}
@@ -250,9 +222,8 @@
   <div class="wrap">
     <div class="top-row">
       <div>
-        <div class="kicker">Sessions · leaks · bankroll</div>
+        <div class="kicker">Le labo des trois</div>
         <h1>Carnet <em>poker</em></h1>
-        <a class="guide-link" href="guide.html">Guide d'étude — 12 blocs ↗</a>
       </div>
       <div class="day-ring">
         <svg width="78" height="78" viewBox="0 0 78 78">
@@ -263,9 +234,18 @@
       </div>
     </div>
     <div class="who">
-      <label>Carnet de</label>
+      <label>Cet appareil</label>
       <span id="meName" style="font-weight:700;font-size:15px"></span>
       <button class="btn-mini" id="renameBtn">Renommer</button>
+      <label style="margin-left:14px">Consulter</label>
+      <select id="viewSel"></select>
+      <!-- Le format n'est pas un reglage d'un onglet : il change ce que TOUT
+           le carnet mesure — KPI, seuils de leaks, courbe, registre. Il vit
+           donc dans l'en-tete, visible en permanence, plutot qu'enfoui dans
+           une carte ou l'on oubliait sur quel format on lisait. -->
+      <label style="margin-left:14px">Format</label>
+      <select id="fmtSel" style="width:auto">
+        <option value="spin">Spin</option><option value="mtt">MTT / PKO</option></select>
       <span class="sync-dot" id="syncDot"><i></i><span id="syncTxt">Local</span></span>
     </div>
   </div>
@@ -273,48 +253,32 @@
 
 <nav class="tabs">
   <div class="inner" id="tabBar">
-    <a data-tab="dashboard" class="active"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Dashboard</a>
-    <a data-tab="calendrier"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 8h18M7 3v4m10-4v4M4 6h16v15H4z"/></svg>Calendrier</a>
-    <a data-tab="etude"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h7a2 2 0 012 2v14a2 2 0 00-2-2H4zM20 4h-7a2 2 0 00-2 2v14a2 2 0 012-2h7z"/></svg>Étude</a>
-    <a data-tab="sessions"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 5h16v14H4zM8 5v14M4 9h4M4 15h4"/></svg>Sessions</a>
+    <a data-tab="dashboard" class="active"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Tableau de bord</a>
+    <a data-tab="progresser"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19V9m5 10V5m5 14v-7m5 7V8"/></svg>Progresser</a>
     <a data-tab="review"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.5-4.5"/></svg>Review</a>
-    <a data-tab="mains"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h9v14H4zM15 4l5 1.5-3.5 13L12 17"/></svg>Base de mains</a>
-    <a data-tab="import"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v3h16v-3"/></svg>Import
-    </a>
-    <a data-tab="bankroll"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 7h18v12H3zM3 11h18M7 15h3"/></svg>Bankroll</a>
+    <a data-tab="import"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v3h16v-3"/></svg>Import</a>
+    <a data-tab="reglages"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M4.9 4.9l2.1 2.1m10 10l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>Réglages</a>
   </div>
 </nav>
 
 <div class="wrap">
 <div class="boot" id="boot">Ouverture du carnet…</div>
 <div id="whoami" style="display:none">
-  <div class="panel on" style="max-width:560px;margin:40px auto">
+  <div class="panel on" style="max-width:520px;margin:40px auto">
     <div class="sec-label">Première ouverture</div>
-    <h2>Bienvenue dans <em>ton carnet</em></h2>
-    <p class="lead">Ce carnet est le tien seul. Tout reste dans ce navigateur : rien n'est envoyé nulle part tant que tu n'actives pas la sauvegarde en ligne, et tes fichiers d'historique sont lus sur ta machine, jamais téléversés.</p>
-    <div class="card mb18">
-      <div class="form-row">
-        <div class="field" style="flex:2 1 220px"><label>Ton prénom ou ton pseudo</label>
-          <input id="whoName" placeholder="Ex : Thomas" maxlength="20"></div>
-        <button class="btn" id="whoGo">Ouvrir le carnet</button>
-      </div>
-      <p class="row-meta mt14">Modifiable à tout moment. Il ne sert qu'à l'affichage.</p>
-    </div>
-    <div class="card">
-      <div class="sec-label">Ce qui t'attend</div>
-      <div class="steps mt14">
-        <div class="st"><div><b>Tu déposes tes historiques de mains</b><span>Betclic ou Winamax, glissés dans l'onglet Import. Les sessions, le volume, le net et les fréquences s'en déduisent tout seuls — rien à ressaisir.</span></div></div>
-        <div class="st"><div><b>Le carnet cherche tes leaks</b><span>Neuf règles, chacune muette tant que l'échantillon est trop petit. Chaque leak est expliqué : pourquoi il coûte, à quoi il ressemble à la table, quoi tester.</span></div></div>
-        <div class="st"><div><b>Tu écris trois fiches par session</b><span>Le carnet te sort les mains aux plus gros mouvements de jetons, tu les rejoues et tu notes la ligne correcte. C'est là que le progrès se fait.</span></div></div>
-        <div class="st"><div><b>Tu suis le programme d'étude</b><span>Douze blocs dans le <a href="guide.html" style="color:var(--clay)">guide</a>, un par semaine, réordonnés en priorité par tes propres leaks.</span></div></div>
-      </div>
-    </div>
+    <h2>Qui utilise <em>cet appareil</em> ?</h2>
+    <p class="lead">Ce choix est fixé une fois pour toutes sur ce téléphone ou cet ordinateur. Tout ce que tu importes ira dans ton registre, sans choix à faire au moment de l'import — donc sans erreur possible. Tu pourras consulter les données des deux autres, en lecture seule.</p>
+    <div class="card"><div id="whoamiList"></div></div>
   </div>
 </div>
 <div id="app" style="display:none">
-<div id="firstRun"></div>
+<div id="roBanner"></div>
 
-<!-- =================== DASHBOARD =================== -->
+<!-- =================== TABLEAU DE BORD ===================
+     Absorbe l'ancien onglet Calendrier et l'ancien onglet Sessions : trois
+     pages qui repondaient a la meme question — ou j'en suis cette semaine.
+     L'ordre suit une narration : les resultats, puis la regularite, puis le
+     planning, puis le journal des journees jouees. -->
 <div class="panel on" data-panel="dashboard">
   <div class="sec-label">Vue d'ensemble</div>
   <h2>La semaine <em>en cours</em></h2>
@@ -326,20 +290,19 @@
 
   <div class="grid g2 mb18">
     <div class="card">
-      <div class="sec-label">Discipline, semaine après semaine</div>
-      <p class="row-meta mt14" style="margin-bottom:0">Une semaine à 80 ne vaut rien si les sept précédentes sont à 20. C'est la régularité qu'on lit ici, pas le pic.</p>
-      <div id="discHisto"></div>
+      <div class="sec-label">Discipline des trois</div>
+      <div id="discRows"></div>
     </div>
     <div class="card">
-      <div class="sec-label">Ta revue de la semaine</div>
-      <p class="row-meta mt14" style="margin-bottom:8px">Un créneau fixe, une heure, le même jour chaque semaine. L'ordre du jour est généré ci-dessous — le rendez-vous, lui, ne dépend que de toi.</p>
+      <div class="sec-label">Ordre du jour — review du dimanche</div>
+      <p class="row-meta mt14" style="margin-bottom:8px">Un créneau fixe, une heure, généré ci-dessous. C'est le seul mécanisme de tout le carnet qui ne dépend pas du code.</p>
       <div id="agenda"></div>
     </div>
   </div>
 
   <div class="card mb18">
-    <div class="sec-label">Tes trente derniers jours vs tout ton historique — <span id="cmpFmt"></span></div>
-    <p class="lead mt14">La même statistique, mesurée sur ta fenêtre récente et sur l'ensemble de ce que tu as importé. Un écart marqué signale un changement de jeu — voulu ou non. Chaque colonne reste muette tant que son échantillon est sous le minimum : trente jours suffisent rarement, et c'est normal.</p>
+    <div class="sec-label">Comparaison des trois — <span id="cmpFmt"></span></div>
+    <p class="lead mt14">Mêmes pools, mêmes formats, mêmes seuils d'échantillon. Un écart marqué sur une ligne est un sujet de discussion, pas un verdict : celui qui s'écarte a parfois raison.</p>
     <div id="compare"></div>
   </div>
 
@@ -363,12 +326,8 @@
       <p class="row-meta" style="flex:1 1 240px;padding-bottom:9px">De combien les joueurs de ce pool s'écartent-ils typiquement de l'équilibre ? 0,20 = ±20 % de ROI. <b>C'est une hypothèse, pas une mesure</b> : rien dans tes données ne permet de l'estimer, il faudrait les résultats de tout le pool. Elle ne sert qu'au ROI ajusté ci-dessus — fais-la varier pour voir à quel point ce chiffre en dépend.</p>
     </div>
   </div>
-</div>
 
-<!-- =================== CALENDRIER =================== -->
-<div class="panel" data-panel="calendrier">
-  <div class="sec-label">Planning</div>
-  <h2>Trois sessions, <em>trois créneaux d'étude</em></h2>
+  <div class="sec-label mt22">Planning</div>
   <p class="lead">Clique un jour pour le planifier, puis reviens le cocher une fois fait. Un jour prévu et non fait reste visible : c'est le but.</p>
 
   <div class="card mb18">
@@ -387,13 +346,65 @@
   </div>
 
   <div class="card" id="dayEditor"></div>
+
+  <div class="sec-label">Sessions</div>
+  <h2>Reconstituées <em>depuis tes imports</em></h2>
+  <p class="lead">Une session est un jour où tu as joué. Le carnet la déduit de l'historique : ni date, ni volume, ni résultat à ressaisir. Reste ce qu'aucun fichier ne contient — ton état pendant la session.</p>
+
+  <div class="card mb18">
+    <div class="sec-label">Journal de bord</div>
+    <p class="lead mt14">Le tilt et la fatigue ne sont pas dans l'historique et ne s'inventent pas après coup. Renseigne-les le soir même, sinon laisse vide : une valeur reconstituée de mémoire vaut moins que rien.</p>
+    <div class="form-row">
+      <div class="field" style="flex:0 0 160px"><label>Jour joué</label><select id="noDate"></select></div>
+      <div class="field" style="flex:1 1 150px"><label>Tilt ressenti</label><select id="noTilt">
+        <option value="">—</option><option value="0">Aucun</option><option value="1">Léger</option>
+        <option value="2">Marqué</option><option value="3">Aurait dû s'arrêter</option></select></div>
+      <div class="field" style="flex:2 1 240px"><label>Contexte</label><input id="noTxt" placeholder="Nombre de tables, fatigue, interruptions…"></div>
+      <button class="btn" id="noSave">Enregistrer</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">Historique — <span id="seFmtName"></span></div>
+    <p class="row-meta mt14">Clique une ligne pour ouvrir le détail de la journée : ton état noté ce soir-là, les tournois joués, ce que les statistiques du jour permettent — ou non — de conclure, et les fiches écrites.</p>
+    <div class="tbl-wrap"><table id="seTable"></table></div>
+    <div id="sessionBox"></div>
+  </div>
 </div>
 
-<!-- =================== ETUDE =================== -->
-<div class="panel" data-panel="etude">
+<!-- =================== PROGRESSER ===================
+     Le moteur de leaks vivait dans l'onglet Import, alors que c'est lui qui
+     designe les blocs a travailler dans l'onglet Etude. De l'analyse rangee
+     avec de la saisie de fichiers, et deux onglets pour une seule boucle.
+     Ils sont reunis : ce qui est mesure, puis ce qu'on en fait. -->
+<div class="panel" data-panel="progresser">
+  <div class="sec-label">Ce que tes mains disent</div>
+  <h2>Tes fréquences, <em>et ce qu'elles coûtent</em></h2>
+  <p class="lead">Rien ici n'est déclaratif : tout est mesuré sur les historiques que tu as déposés. Chaque chiffre reste masqué tant que son échantillon ne le porte pas, et le programme d'étude plus bas se réordonne d'après ce que ces règles déclenchent.</p>
+
+  <div class="card mb18">
+    <div class="sec-label">Statistiques mesurées</div>
+    <p class="lead mt14">Chaque statistique reste masquée tant que son échantillon est insuffisant. Une valeur affichée trop tôt est plus dangereuse qu'une valeur absente : c'est le même piège que la courbe de crédibilité, à l'échelle d'une fréquence.</p>
+    <div id="statGrid" class="grid g4"></div>
+  </div>
+
+  <div class="card mb18">
+    <div class="sec-label">Détail par position</div>
+    <p class="lead mt14">Une fréquence globale mélange six situations qui n'ont rien à voir : ouvrir sous le pistolet et défendre sa grosse blinde ne sont pas le même jeu. Une position suivie de « ≈ » a été déduite de la place du bouton, pas lue dans le fichier — la distinction est conservée et affichée, jamais fondue dans la moyenne.</p>
+    <div id="posBox"></div>
+  </div>
+
+  <div class="card mb18">
+    <div class="sec-label">Moteur de leaks</div>
+    <p class="lead mt14">Une règle ne dit rien tant que son échantillon minimum n'est pas atteint. Au-delà, elle ne répond plus par oui ou non : <b>dans la zone</b>, <b>à surveiller</b> — moins de 15 % au-delà du seuil — ou <b>dépassé</b>. Cette marge de 15 % est un choix arbitraire, pas une mesure. Les seuils eux-mêmes sont provisoires et modifiables : ils devront être recalibrés sur vos pools réels, pas sur des valeurs théoriques.</p>
+    <p class="row-meta">Sur chaque barre : le <b style="color:var(--ink)">trait clair</b> est ta valeur actuelle, le <b style="color:var(--muted)">trait gris</b> celle de l'import précédent. La zone verte est la cible, l'ambre la marge de surveillance, la rouge le dépassement — toutes trois déduites du seuil que tu fixes juste à côté, et de rien d'autre. L'échelle va de zéro à deux fois le seuil : le seuil est donc toujours au milieu de la barre.</p>
+    <div id="leakEngine"></div>
+  </div>
+
+
   <div class="sec-label">Programme</div>
   <h2>Douze blocs, <em>dans l'ordre</em></h2>
-  <p class="lead">Un bloc par semaine, le contenu complet dans <a href="guide.html" style="color:var(--clay)">le guide</a>. Coche ici quand tu l'as travaillé. L'ordre reste le même quoi qu'il arrive — ce que tes leaks changent, c'est la priorité, jamais le programme.</p>
+  <p class="lead">Un bloc par semaine. Il reste ouvert tant que les trois ne l'ont pas validé : sans base commune, les reviews à trois n'ont plus d'objet.</p>
   <div id="curricNote" class="mb12"></div>
   <div class="card mb18" id="curriculum"></div>
 
@@ -414,38 +425,40 @@
   </div>
 </div>
 
-<!-- =================== SESSIONS =================== -->
-<div class="panel" data-panel="sessions">
-  <div class="sec-label">Sessions</div>
-  <h2>Reconstituées <em>depuis tes imports</em></h2>
-  <p class="lead">Une session est un jour où tu as joué. Le carnet la déduit de l'historique : ni date, ni volume, ni résultat à ressaisir. Reste ce qu'aucun fichier ne contient — ton état pendant la session.</p>
-
-  <div class="card mb18">
-    <div class="sec-label">Journal de bord</div>
-    <p class="lead mt14">Le tilt et la fatigue ne sont pas dans l'historique et ne s'inventent pas après coup. Renseigne-les le soir même, sinon laisse vide : une valeur reconstituée de mémoire vaut moins que rien.</p>
-    <div class="form-row">
-      <div class="field" style="flex:0 0 160px"><label>Jour joué</label><select id="noDate"></select></div>
-      <div class="field" style="flex:1 1 150px"><label>Tilt ressenti</label><select id="noTilt">
-        <option value="">—</option><option value="0">Aucun</option><option value="1">Léger</option>
-        <option value="2">Marqué</option><option value="3">Aurait dû s'arrêter</option></select></div>
-      <div class="field" style="flex:2 1 240px"><label>Contexte</label><input id="noTxt" placeholder="Nombre de tables, fatigue, interruptions…"></div>
-      <button class="btn" id="noSave">Enregistrer</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="sec-label">Historique de tes journées</div>
-    <p class="row-meta mt14">Clique une ligne pour ouvrir le détail de la journée : ton état noté ce soir-là, les tournois joués, ce que les statistiques du jour permettent — ou non — de conclure, et les fiches écrites.</p>
-    <div class="tbl-wrap"><table id="seTable"></table></div>
-    <div id="sessionBox"></div>
-  </div>
-</div>
-
-<!-- =================== REVIEW =================== -->
+<!-- =================== REVIEW ===================
+     Absorbe l'ancienne Base de mains. La liste des tournois y sert de porte
+     d'entree : une ligne, puis toutes ses mains — ce que le plafond de
+     stockage interdisait avant qu'on conserve les historiques en entier. -->
 <div class="panel" data-panel="review">
   <div class="sec-label">Review</div>
   <h2>Trois mains par session, <em>revues sous 48 h</em></h2>
-  <p class="lead">Le tracker sort les statistiques, cette page sort les décisions. Chaque fiche est rattachée à un leak nommé, et le classement se construit tout seul en dessous. Quarante-huit heures parce qu'au-delà tu ne te souviens plus de ce que tu pensais au moment de jouer — et c'est précisément ça qu'on cherche à corriger.</p>
+  <p class="lead">Le tracker sort les statistiques, cette page sort les décisions. Chaque fiche est rattachée à un leak nommé, et le classement se construit tout seul en dessous.</p>
+
+  <div class="notice good mb18" style="margin-top:4px">
+    <b>Atelier de ranges — nouveau.</b> Une page à part, où tu saisis tes ranges préflop position par position.
+    Elle relit ensuite tes mains conservées, reclasse chaque spot et te montre où tu as joué autre chose que
+    ce que tu avais écrit à froid. <a href="review.html" style="color:var(--clay);font-weight:600">Ouvrir l'atelier →</a>
+  </div>
+
+  <div class="card mb18">
+    <div class="cal-nav"><div class="sec-label" style="margin:0">À revoir en priorité</div>
+      <select id="prioSort" style="width:auto">
+        <option value="prio">Priorité</option>
+        <option value="loss">Plus grosses pertes</option>
+        <option value="abs">Plus gros écarts</option>
+        <option value="win">Plus gros gains</option></select></div>
+    <p class="lead mt14">Le classement par défaut ne suit pas la taille du pot. Perdre un tapis avec les As contre les Rois ne s'analyse pas : il n'y avait rien à décider. Le carnet cherche l'inverse — les mains où tu as eu un vrai choix, et où ce choix a coûté ou rapporté. Sur les historiques Betclic, une décision importante prise en moins de trois secondes est remontée : c'est là que se trouvent les erreurs, pas dans les coups évidents.</p>
+    <p class="row-meta mb18">La pondération est un choix assumé, pas une mesure. Les autres tris restent disponibles au-dessus. Une position suivie de « ≈ » a été déduite de la place du bouton : Betclic n'étiquette que BTN, SB et BB à table pleine.</p>
+    <div class="tbl-wrap"><table id="prioTable"></table></div>
+    <div id="prioBox"></div>
+  </div>
+
+  <div class="card mb18">
+    <div class="sec-label">Tes tournois</div>
+    <p class="lead mt14">Clique une ligne pour dérouler toutes les mains du tournoi. Depuis que le carnet conserve les historiques en entier, ce n'est plus un échantillon : c'est tout ce que tu as joué.</p>
+    <div class="tbl-wrap"><table id="ldTable"></table></div>
+    <div id="tourBox"></div>
+  </div>
 
   <div class="card mb18">
     <div class="form-row">
@@ -462,23 +475,15 @@
     </div>
   </div>
 
-  <div class="card mb18">
-    <div class="cal-nav"><div class="sec-label" style="margin:0">Mains à revoir — les plus gros mouvements</div>
-      <select id="revSort" style="width:auto"><option value="loss">Plus grosses pertes</option><option value="abs">Plus gros écarts</option><option value="win">Plus gros gains</option></select></div>
-    <p class="lead mt14">Ces mains sont sélectionnées par le carnet sur le résultat en jetons, pas par toi. C'est ce qui permet de tomber sur un leak que tu ne cherchais pas — les fiches que tu écris de mémoire ne peuvent contenir que ce que tu sais déjà. Une position suivie de « ≈ » a été déduite de la place du bouton : Betclic n'étiquette que BTN, SB et BB à table pleine.</p>
-    <div class="tbl-wrap"><table id="revTable"></table></div>
-    <div id="replayBox"></div>
-  </div>
-
   <div class="grid g2 mb18">
     <div class="card">
-      <div class="sec-label">Tes leaks, toutes fiches confondues</div>
+      <div class="sec-label">Tes leaks — <span id="lkName"></span></div>
       <div id="leakRank" class="mt14"></div>
       <p class="row-meta mt14">Un leak qui remonte trois fois en un mois devient le thème d'étude de la semaine suivante, quel que soit le programme prévu.</p>
     </div>
     <div class="card">
-      <div class="sec-label">Ce mois-ci contre avant</div>
-      <div id="leakTrend" class="mt14"></div>
+      <div class="sec-label">Comparaison des trois</div>
+      <div id="leakCompare" class="mt14"></div>
     </div>
   </div>
 
@@ -488,58 +493,17 @@
   </div>
 </div>
 
-<!-- =================== BASE DE MAINS =================== -->
-<div class="panel" data-panel="mains">
-  <div class="sec-label">Recherche</div>
-  <h2>Toutes <em>tes mains</em></h2>
-  <p class="lead">Le tableau de review ne montre que les plus gros mouvements de jetons du format en cours. Ici, tout ce qui a été conservé, avec des filtres — pour retrouver une main précise, ou vérifier une intuition sur une position plutôt que sur une impression.</p>
-  <p class="row-meta mb18">Ce n'est pas l'intégralité de ce que tu as joué : seules les mains aux plus gros mouvements de jetons sont conservées, cinq par tournoi et cinquante tournois au total, pour tenir sous le plafond du stockage du navigateur. Le filtre par leak s'appuie sur le lien posé quand une fiche est créée depuis un rejeu ; une fiche saisie à la main n'est rattachée à aucune main, et n'est donc jamais devinée par recoupement de date.</p>
-
-  <div class="card mb18">
-    <div class="form-row">
-      <div class="field" style="flex:1 1 120px"><label>Format</label><select id="bmFmt">
-        <option value="">Tous</option><option value="spin">Spin</option><option value="mtt">MTT / PKO</option></select></div>
-      <div class="field" style="flex:1 1 110px"><label>Position</label><select id="bmPos">
-        <option value="">Toutes</option><option>EP</option><option>MP</option><option>CO</option>
-        <option>BTN</option><option>SB</option><option>BB</option></select></div>
-      <div class="field" style="flex:1 1 120px"><label>Résultat</label><select id="bmRes">
-        <option value="">Tous</option><option value="gain">Gains</option><option value="perte">Pertes</option></select></div>
-    </div>
-    <div class="form-row mt14">
-      <div class="field" style="flex:2 1 220px"><label>Leak de la fiche rattachée</label><select id="bmLeak"></select></div>
-      <div class="field" style="flex:0 0 150px"><label>Du</label><input type="date" id="bmDu"></div>
-      <div class="field" style="flex:0 0 150px"><label>Au</label><input type="date" id="bmAu"></div>
-      <div class="field" style="flex:1 1 150px"><label>Trier par</label><select id="bmSort">
-        <option value="abs">Plus gros écarts</option><option value="loss">Plus grosses pertes</option>
-        <option value="win">Plus gros gains</option><option value="date">Plus récentes</option></select></div>
-      <button class="btn-outline" id="bmReset">Réinitialiser</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="sec-label">Résultats — <span id="bmCount"></span></div>
-    <div class="tbl-wrap"><table id="bmTable"></table></div>
-    <div id="bmReplay"></div>
-  </div>
-</div>
-
 <!-- =================== IMPORT =================== -->
 <div class="panel" data-panel="import">
   <div class="sec-label">Import</div>
   <h2>Dépose tes historiques, <em>le carnet fait le reste</em></h2>
-  <p class="lead">Les fichiers sont lus dans ton navigateur, et n'en sortent jamais : aucun historique brut n'est téléversé. Si tu actives la sauvegarde en ligne, seuls les agrégats par tournoi partent — pas les mains. Les doublons sont détectés par identifiant de tournoi, tu peux donc redéposer le même dossier sans rien casser.</p>
-  <details class="mb18"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--clay-deep)">Où trouver ces fichiers sur Betclic et sur Winamax</summary>
-    <div class="row-meta mt14">Les deux clients écrivent des fichiers <code>.txt</code> dans un dossier d'historique local. L'emplacement se lit dans les options du client — cherche « historique des mains » ou « hand history » dans les réglages ; le chemin y est affiché, et souvent modifiable. Vérifie au passage que l'enregistrement est bien <b>activé</b> : sur certains comptes il est désactivé par défaut, et rien n'est écrit tant qu'on ne l'a pas coché.</div>
-    <div class="row-meta mt14"><b style="color:var(--ink)">Betclic.</b> Un fichier par tournoi, contenant à la fois les mains, le classement et le gain. Il porte aussi l'horodatage de chaque action — c'est la seule source qui permet de mesurer ton temps par décision.</div>
-    <div class="row-meta mt14"><b style="color:var(--ink)">Winamax.</b> Deux fichiers par tournoi : celui des mains, et un second dont le nom contient <code>_summary</code>, qui porte le classement et le gain. <b>Dépose les deux</b> — sans le résumé, le tournoi est enregistré mais reste exclu du net et du ROI, plutôt que compté comme perdu.</div>
-    <div class="row-meta mt14">Tu peux tout sélectionner et tout glisser d'un coup, y compris des fichiers déjà importés : les doublons sont ignorés. Si un fichier n'est pas reconnu, le diagnostic en bas de cette page en décrit la structure — exporte-le et envoie-le à Guillaume.</div>
-  </details>
+  <p class="lead">Les fichiers sont lus dans ton navigateur. Rien de brut ne part sur le serveur : seuls les agrégats par tournoi remontent dans le groupe. Les doublons sont détectés par identifiant de tournoi.</p>
 
   <div class="card mb18">
     <div id="drop" style="border:1px dashed var(--line);border-radius:4px;padding:26px;text-align:center;cursor:pointer;transition:.15s">
       <div style="font-family:var(--mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)">Glisse tes fichiers ici, ou clique</div>
       <div class="row-meta" style="margin-top:7px">.txt d'historique · .csv d'export tracker · plusieurs fichiers acceptés</div>
-      <div class="row-meta" style="margin-top:9px;color:var(--clay)">Lus sur ta machine · doublons ignorés · rien à ressaisir</div>
+      <div class="row-meta" style="margin-top:9px;color:var(--clay)">Destination : registre de <b id="dropWho"></b> — aucun choix à faire, aucune erreur possible</div>
     </div>
     <input type="file" id="impFile" multiple accept=".txt,.csv,.log" style="display:none">
     <div class="checks mt14"><label><input type="checkbox" id="impRecalc"> Recalculer les tournois déjà importés</label></div>
@@ -548,30 +512,10 @@
   </div>
 
   <div class="card mb18">
-    <div class="cal-nav"><div class="sec-label" style="margin:0">Ton registre</div>
-      <select id="fmtSel" style="width:auto"><option value="spin">Spin</option><option value="mtt">MTT / PKO</option></select></div>
+    <div class="sec-label">Volume et résultat — <span id="ldName"></span></div>
+    <p class="row-meta mt14">Le détail tournoi par tournoi, et les mains de chacun, sont dans l'onglet Review.</p>
     <div id="ledgerKpi" class="grid g4 mt14"></div>
     <div id="ledgerVerdict"></div>
-    <div class="tbl-wrap"><table id="ldTable"></table></div>
-  </div>
-
-  <div class="card mb18">
-    <div class="sec-label">Statistiques mesurées</div>
-    <p class="lead mt14">Chaque statistique reste masquée tant que son échantillon est insuffisant. Une valeur affichée trop tôt est plus dangereuse qu'une valeur absente : c'est le même piège que la courbe de crédibilité, à l'échelle d'une fréquence.</p>
-    <div id="statGrid" class="grid g4"></div>
-  </div>
-
-  <div class="card mb18">
-    <div class="sec-label">Détail par position</div>
-    <p class="lead mt14">Une fréquence globale mélange six situations qui n'ont rien à voir : ouvrir sous le pistolet et défendre sa grosse blinde ne sont pas le même jeu. Une position suivie de « ≈ » a été déduite de la place du bouton, pas lue dans le fichier — la distinction est conservée et affichée, jamais fondue dans la moyenne.</p>
-    <div id="posBox"></div>
-  </div>
-
-  <div class="card mb18">
-    <div class="sec-label">Moteur de leaks</div>
-    <p class="lead mt14">Une règle ne dit rien tant que son échantillon minimum n'est pas atteint. Au-delà, elle ne répond plus par oui ou non : <b>dans la zone</b>, <b>à surveiller</b> — moins de 15 % au-delà du seuil — ou <b>dépassé</b>. Cette marge de 15 % est un choix arbitraire, pas une mesure. <b>Les seuils eux-mêmes sont provisoires</b> : ce sont des valeurs théoriques, jamais calibrées sur les pools que tu joues réellement. Modifie-les si tu as mieux — le champ à droite de chaque règle est fait pour ça.</p>
-    <p class="row-meta">Sur chaque barre : le <b style="color:var(--ink)">trait clair</b> est ta valeur actuelle, le <b style="color:var(--muted)">trait gris</b> celle de l'import précédent. La zone verte est la cible, l'ambre la marge de surveillance, la rouge le dépassement — toutes trois déduites du seuil que tu fixes juste à côté, et de rien d'autre. L'échelle va de zéro à deux fois le seuil : le seuil est donc toujours au milieu de la barre.</p>
-    <div id="leakEngine"></div>
   </div>
 
   <div class="card">
@@ -582,13 +526,15 @@
   </div>
 </div>
 
-<!-- =================== BANKROLL =================== -->
-<div class="panel" data-panel="bankroll">
+<!-- =================== REGLAGES ===================
+     Bankroll, synchronisation et donnees : trois reglages qu'on ouvre
+     rarement et qui n'ont rien a faire dans le chemin quotidien. -->
+<div class="panel" data-panel="reglages">
   <div class="sec-label">Garde-fou</div>
   <h2>La règle est chiffrée, <em>et elle ne se négocie pas</em></h2>
-  <p class="lead">Buy-in maximum = bankroll ÷ caves de sécurité. Un dépassement s'affiche sur ton dashboard, en permanence, jusqu'à ce que la bankroll rattrape le niveau joué. Le compte ne s'efface jamais : il vieillit.</p>
+  <p class="lead">Buy-in maximum = bankroll ÷ caves de sécurité. Un dépassement s'affiche sur le dashboard des trois, en permanence, jusqu'à ce que la bankroll rattrape le niveau joué.</p>
 
-  <div class="grid mb18" id="brCards" style="grid-template-columns:repeat(auto-fit,minmax(185px,1fr))"></div>
+  <div class="grid g3 mb18" id="brCards"></div>
 
   <div class="card mb18">
     <div class="form-row">
@@ -604,37 +550,26 @@
   </div>
 
   <div class="card mb18">
-    <div class="sec-label">Historique de la règle</div>
+    <div class="sec-label">Historique de la règle — <span id="brLogName"></span></div>
     <p class="lead mt14">Chaque changement de bankroll ou de caves de sécurité est daté. Sans cette trace, un tournoi signalé « hors bankroll » resterait ambigu : écart réel au moment de jouer, ou règle durcie après coup ? Les tournois sont désormais jugés contre la règle en vigueur le jour où ils ont été joués, chaque fois qu'elle est connue.</p>
     <div id="brLog"></div>
   </div>
 
   <div class="card mb18">
     <div class="sec-label">Ce que ce carnet ne fait pas</div>
-    <p style="font-size:14.5px;color:var(--ink-soft);margin-top:10px">Ce n'est pas un tracker. Les statistiques de main fines — EV ajustée, équité par range, HUD en temps réel — viennent de PokerTracker 4, Hold'em Manager 3 ou Hand2Note. Le carnet fait ce qu'aucun tracker ne fait : il tient le planning, le programme d'étude, le protocole de review, la règle de bankroll, et il refuse d'afficher un chiffre tant que l'échantillon ne le porte pas. C'est ce dernier point qui compte le plus : la plupart des joueurs prennent des décisions sur des statistiques calculées à partir de trop peu de mains.</p>
+    <p style="font-size:14.5px;color:var(--ink-soft);margin-top:10px">Les statistiques de main — VPIP, PFR, fréquences de c-bet, EV ajustée — viennent de PokerTracker 4, Hold'em Manager 3 ou Hand2Note, tous autorisés sur Winamax. Le carnet gère ce qu'aucun tracker ne gère : le planning, le programme d'étude, le protocole de review, la règle de bankroll et la redevabilité à trois.</p>
   </div>
 
   <div class="card mb18">
-    <div class="sec-label">Sauvegarde en ligne</div>
-    <p class="lead mt14">Facultatif. Sans code, tout reste dans ce navigateur — et disparaît avec lui : historique effacé, nouveau téléphone, mode privé. Avec un code, ton carnet est répliqué en ligne et tu retrouves les mêmes données sur ton téléphone et sur ton ordinateur.</p>
-    <div id="syncOff"></div>
+    <div class="sec-label">Synchronisation</div>
+    <p class="lead mt14">Un code de groupe, partagé entre vous trois. Chacun voit le carnet complet : sessions, leaks et écarts de bankroll des deux autres. C'est le mécanisme, pas un effet de bord.</p>
     <div class="form-row">
-      <div class="field" style="flex:1 1 240px"><label>Ton code personnel</label><input id="grpCode" placeholder="ex : thomas-7f3k2p" autocomplete="off"></div>
+      <div class="field" style="flex:1 1 200px"><label>Code de groupe</label><input id="grpCode" placeholder="ex : les-trois-2026"></div>
       <button class="btn" id="grpSave">Connecter</button>
-      <button class="btn-outline" id="grpGen">Proposer un code</button>
-      <button class="btn-outline" id="grpPull">Tout récupérer</button>
+      <button class="btn-outline" id="grpPull">Récupérer maintenant</button>
     </div>
-    <div class="notice mt14" style="border-left-color:var(--gold);background:rgba(201,146,47,.08)">
-      <b>Ce code est ta seule clé — traite-le comme un mot de passe.</b> Il n'y a pas de compte et pas de connexion :
-      qui possède le code voit le carnet, et deux personnes qui choisissent le même code mélangent leurs données.
-      Prends celui que propose le bouton ci-dessus plutôt qu'un mot devinable, note-le quelque part, et ne le partage pas.
-      Le serveur est celui de Guillaume : il peut techniquement y lire ce que tu y écris, et un autre carnet de ce groupe
-      le pourrait aussi en devinant ton code — c'est pour ça qu'il doit rester long et aléatoire.
-      Si ça te gêne, laisse le champ vide et sers-toi de l'export JSON plus bas — le carnet fonctionne entièrement hors ligne.
-    </div>
-    <p class="row-meta mt14"><b style="color:var(--ink)">Plusieurs appareils, c'est prévu.</b> Le cas courant : tu importes tes historiques sur l'ordinateur, tu consultes sur le téléphone. Mets le même code sur les deux et tout circule dans les deux sens — tournois, fiches, séances, calendrier, notes, bankroll. Tu peux écrire des deux côtés, y compris une fiche notée sur le canapé juste après la session : rien n'écrase rien. Chaque enregistrement porte sa date de dernière modification, et la synchro les fusionne un par un plutôt que de remplacer le tout. Compte une minute pour qu'un changement traverse, ou clique « Tout récupérer » pour ne pas attendre.</p>
-    <p class="row-meta mt14">La seule limite : si tu modifies <b>la même fiche</b> sur les deux appareils sans qu'ils se soient parlé entre-temps, c'est la version la plus récente qui l'emporte, en entier. Deux fiches différentes, ou deux champs différents modifiés à des moments différents, ne se marchent jamais dessus. Et une suppression est bien une suppression : elle est mémorisée pendant six mois, donc elle ne revient pas par la porte de l'autre appareil.</p>
-    <details class="mt14"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--clay-deep)">Pour Guillaume : tables Supabase, à créer une seule fois</summary>
+    <p class="row-meta mt14">Sans code, tout reste sur cet appareil. Chacun n'écrit que sa propre ligne et ses propres tournois : deux imports simultanés depuis deux postes ne peuvent plus s'effacer l'un l'autre.</p>
+    <details class="mt14"><summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--clay-deep)">Tables Supabase à créer une seule fois</summary>
       <pre class="sql">create table poker_state (
   code text not null,
   pid  text not null,
@@ -678,43 +613,13 @@ create policy "groupe" on poker_tournament
 
 <script>
 /* ============ CONFIG ============ */
-/* PROJET SUPABASE DEDIE A CETTE VERSION — a remplir avant publication.
-   Il ne doit PAS s'agir du projet du carnet a trois. La cle `anon` ci-dessous
-   part en clair dans cette page, qui est publique ; or la policy RLS livree
-   avec le carnet est `using (true)`, donc elle n'autorise pas seulement a
-   ecrire ses propres lignes : elle autorise a LIRE toutes celles de la table,
-   quel que soit le code. Pointer cette page sur le projet des trois
-   reviendrait a publier leurs sessions, leurs fiches et leurs bankrolls.
-   Un projet distinct maintient l'exposition a l'interieur de ce groupe-ci. */
-const SUPABASE_URL='https://toyhycogwjuzfcbjfysf.supabase.co';
-const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRveWh5Y29nd2p1emZjYmpmeXNmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODU5NTY0NDYsImV4cCI6MjEwMTUzMjQ0Nn0.q4sJ44D1Evz4eLMpD3lBJaXUe3nvgaQb852xzEO-ofw';
-
-/* Projet du carnet a trois. Present ici uniquement pour etre refuse : une
-   copie de cette page dont on aurait recopie les identifiants du trio par
-   reflexe planterait le doigt sur le probleme au lieu de fonctionner en
-   silence. Ne jamais retirer ce garde-fou. */
-const PROJET_INTERDIT='csotvmnwpvezgakbhvbr';
-const SUPA_OK=(()=>{
-  if(!SUPABASE_URL||!SUPABASE_KEY)return false;
-  if(SUPABASE_URL.includes(PROJET_INTERDIT)){
-    console.error("Carnet solo : identifiants du carnet à trois détectés. "+
-      "Sauvegarde en ligne désactivée — voir amis/LISEZ-MOI.md.");
-    return false;
-  }
-  return true;
-})();
-/* Cles de stockage propres a la version solo. Elles DOIVENT differer de celles
-   du carnet a trois : les deux applications peuvent etre publiees sur le meme
-   domaine, or localStorage est partage par origine, pas par dossier. Deux
-   carnets sur les memes cles s'ecraseraient mutuellement sans prevenir. */
-const KEY='carnet-solo-v1';
-const MEKEY='carnet-solo-nom';
-const GRPKEY='carnet-solo-code';
-const FMTKEY='carnet-solo-fmt';
-/* Identifiant interne unique. Le modele de donnees garde un `pid` sur chaque
-   enregistrement — herite du carnet a trois — et c'est volontaire : les exports
-   restent lisibles par les deux versions, et rien dans les filtres n'a bouge. */
-const MOI='p1';
+const SUPABASE_URL='https://csotvmnwpvezgakbhvbr.supabase.co';
+const SUPABASE_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNzb3R2bW53cHZlemdha2JodmJyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODE2MDkxMDEsImV4cCI6MjA5NzE4NTEwMX0._Eh1APdr2a-4YO3P0vy-KwcN1yj_YnoOf1ChJQMgUDY';
+const TABLE='poker_group';
+const TTABLE='poker_tournament';
+const KEY='carnet-poker-v1';
+const MEKEY='carnet-poker-me';
+const GRPKEY='carnet-poker-group';
 
 const THEMES=[
  "Ranges d'open par position et par stack (60 / 40 / 25 bb)",
@@ -738,13 +643,12 @@ const LEAKS=[
 const MONTHS=['janvier','février','mars','avril','mai','juin','juillet','août','septembre','octobre','novembre','décembre'];
 const TARGET={sessions:3,studyMin:180,hands:9};
 
-/* Version solo : un seul joueur, donc ME, VIEW et OWNER() designent toujours la
-   meme personne. Les trois noms sont conserves parce que le code de rendu les
-   utilise partout ; les faire converger ici plutot que de les supprimer un par
-   un evite d'introduire des erreurs dans des fonctions qui, sinon, n'ont pas
-   besoin d'etre touchees. */
-function OWNER(){return MOI;}
-let DATA=null, ME=MOI, VIEW=MOI, GROUP='', sb=null, calRef=new Date(), selDay=null, IMPD=new Set();
+/* ME  = identite de l'appareil. Fixee une fois, jamais choisie au moment
+        d'un import : c'est ce qui rend l'erreur d'attribution impossible.
+   VIEW = joueur consulte. Les fonctions de rendu masquent ME par VIEW ;
+        OWNER() donne acces a l'identite reelle depuis leur interieur. */
+function OWNER(){return ME;}
+let DATA=null, ME='p1', VIEW='p1', GROUP='', sb=null, calRef=new Date(), selDay=null, IMPD=new Set();
 
 /* ============ UTILS ============ */
 const $=id=>document.getElementById(id);
@@ -762,10 +666,11 @@ const P=id=>DATA.players.find(p=>p.id===id)||DATA.players[0];
 
 function blank(){return{
   schemaVersion:SCHEMA,
-  players:[{id:MOI,name:'Moi',bankroll:500,rule:200}],
+  players:[{id:'p1',name:'Joueur 1',bankroll:500,rule:200},
+           {id:'p2',name:'Joueur 2',bankroll:500,rule:200},
+           {id:'p3',name:'Joueur 3',bankroll:500,rule:200}],
   sessions:[],study:[],hands:[],tournaments:[],days:{},notes:{},curriculum:{},
-  sd:2.5,thresholds:{},pseudos:{},tomb:[],batch:0,updatedAt:0,
-  ts:{},tomb2:{}};}
+  sd:2.5,thresholds:{},pseudos:{},tomb:[],batch:0,updatedAt:0};}
 
 /* ============ SCHEMA ET MIGRATIONS ============
    Regle du chantier : tout nouveau champ ajoute a un objet existant
@@ -777,7 +682,7 @@ function blank(){return{
    - champ optionnel d'un enregistrement       -> repli au point de lecture,
      commente sur place (ex : t.st.pos absent = tournoi importe avant 2d).
    Jamais de `??` disperse dans le rendu pour rattraper une structure. */
-const SCHEMA=3;
+const SCHEMA=2;
 
 /* Chaque entree fait passer de la version cle-1 a la version cle.
    Elles sont cumulatives : un carnet en v1 traverse 2, puis 3, etc. */
@@ -793,27 +698,6 @@ const MIGRATIONS={
       // `players` renomme en `seats` (nombre de sieges, pas le champ du tournoi)
       if(t.players&&!t.seats){t.seats=t.players;delete t.players;}
     });
-  },
-  /* v3 — dates de modification par enregistrement, pour la fusion entre
-     appareils. Tout ce qui existe deja est date de MAINTENANT : on ne sait pas
-     quand ces enregistrements ont ete ecrits, et les laisser a zero les ferait
-     perdre systematiquement face au moindre enregistrement distant date.
-     Consequence a connaitre : le premier appareil a ouvrir cette version gagne
-     les egalites sur les enregistrements que les deux possedent deja. Sans
-     effet en pratique — s'ils sont des deux cotes, c'est qu'ils sont
-     identiques. */
-  3(d){
-    const now=Date.now();
-    d.ts=d.ts||{}; d.tomb2=d.tomb2||{};
-    const marque=k=>{if(d.ts[k]===undefined)d.ts[k]=now;};
-    (d.study||[]).forEach(x=>marque('study|'+x.id));
-    (d.hands||[]).forEach(x=>marque('hands|'+x.id));
-    Object.values(d.days||{}).forEach(m=>Object.keys(m||{}).forEach(k=>marque('days|'+k)));
-    Object.values(d.notes||{}).forEach(m=>Object.keys(m||{}).forEach(k=>marque('notes|'+k)));
-    Object.keys(d.curriculum||{}).forEach(i=>marque('curric|'+i));
-    Object.entries(d.thresholds||{}).forEach(([f,o])=>
-      Object.keys(o||{}).forEach(r=>marque('thr|'+f+'|'+r)));
-    marque('player'); marque('pseudos');
   }
 };
 
@@ -834,28 +718,10 @@ function migrate(d){
    ou d'un blank() presente toujours les memes cles. */
 function shapeUp(d){
   if(!d.players||!d.players.length)d.players=blank().players;
-  /* Un JSON venu du carnet a trois porte trois joueurs et des enregistrements
-     rattaches a p2 / p3. On ne garde que le premier, renumerote sur MOI, et on
-     laisse tomber le reste plutot que de melanger deux registres — importer le
-     carnet de quelqu'un d'autre ne doit jamais gonfler silencieusement le sien. */
-  if(d.players.length>1||d.players[0].id!==MOI){
-    const p=d.players[0];p.id=MOI;d.players=[p];
-  }
-  const aMoi=x=>x&&x.pid===MOI;
-  d.study=(d.study||[]).filter(aMoi);
-  d.hands=(d.hands||[]).filter(aMoi);
-  d.tournaments=(d.tournaments||[]).filter(aMoi);
-  [['days'],['notes'],['pseudos']].forEach(([k])=>{
-    const src=d[k]||{};d[k]={};if(src[MOI]!==undefined)d[k][MOI]=src[MOI];});
-  Object.keys(d.curriculum||{}).forEach(i=>{
-    const v=d.curriculum[i]||{};d.curriculum[i]={[MOI]:!!v[MOI]};});
   d.sessions=d.sessions||[]; d.study=d.study||[]; d.hands=d.hands||[];
   d.tournaments=d.tournaments||[]; d.days=d.days||{}; d.notes=d.notes||{};
   d.curriculum=d.curriculum||{}; d.thresholds=d.thresholds||{};
   d.pseudos=d.pseudos||{}; d.tomb=d.tomb||[];
-  // Dates de modification et pierres tombales : indispensables a la fusion,
-  // et toujours presentes, meme sur un carnet vierge.
-  d.ts=d.ts||{}; d.tomb2=d.tomb2||{};
   d.sd=+d.sd||2.5; d.batch=+d.batch||0;
   // Hypothese de dispersion du pool (etape 8). Locale comme `sd`, non
   // synchronisee : c'est un reglage de lecture, pas une donnee de jeu.
@@ -891,69 +757,7 @@ function localSize(){try{return (localStorage.getItem(KEY)||'').length*2;}catch(
 function saveLocal(){DATA.updatedAt=Date.now();DATA.tomb=[...GONE];
   try{localStorage.setItem(KEY,JSON.stringify(DATA));}catch(e){console.error(e);setSync('err','Stockage local plein');}}
 
-/* ============ FUSION MULTI-APPAREILS ============
-   Les tournois n'ont jamais pose de probleme : une ligne chacun, ecriture
-   additive, deux appareils ne peuvent pas se marcher dessus. Les SAISIES, si —
-   fiches, seances, calendrier, notes, bankroll — tiennent toutes dans une seule
-   ligne d'etat. Tant qu'elle etait envoyee et appliquee en bloc, le dernier
-   appareil a ecrire effacait le travail de l'autre, en silence.
-
-   Le remede tient en trois pieces :
-
-   1. DATA.ts — une date de derniere modification par enregistrement, sous une
-      cle stable ('hands|<id>', 'days|<date>'...). C'est elle qui tranche.
-   2. DATA.tomb2 — les pierres tombales. Sans elles, un enregistrement supprime
-      ici ressusciterait a la premiere synchro depuis l'appareil qui l'a encore.
-      Une absence ne vaut PAS une suppression : il faut l'avoir dite.
-   3. La fusion elle-meme, enregistrement par enregistrement.
-
-   Ce qui reste en dernier-ecrivain-gagne, faute de mieux : la bankroll, la
-   regle et le prenom. Ce sont des valeurs uniques — il n'y a rien a y fusionner,
-   et changer sa bankroll sur deux appareils dans la meme minute n'a pas de
-   reponse juste. Tout le reste fusionne vraiment. */
-
-/* Cles suivies, et leur contenu serialise. Un seul endroit decrit ce qui compte
-   comme « un enregistrement », et sliceState / la detection de changement s'y
-   referent tous les deux. */
-function etatCles(){
-  const m=new Map();
-  DATA.study.forEach(x=>m.set('study|'+x.id,JSON.stringify(x)));
-  DATA.hands.forEach(x=>m.set('hands|'+x.id,JSON.stringify(x)));
-  const d=DATA.days[MOI]||{};
-  Object.keys(d).forEach(k=>m.set('days|'+k,JSON.stringify(d[k])));
-  const n=(DATA.notes||{})[MOI]||{};
-  Object.keys(n).forEach(k=>m.set('notes|'+k,JSON.stringify(n[k])));
-  Object.keys(DATA.curriculum||{}).forEach(k=>
-    m.set('curric|'+k,JSON.stringify(!!(DATA.curriculum[k]||{})[MOI])));
-  Object.entries(DATA.thresholds||{}).forEach(([f,o])=>
-    Object.keys(o||{}).forEach(r=>m.set('thr|'+f+'|'+r,JSON.stringify(o[r]))));
-  m.set('player',JSON.stringify(DATA.players[0]||null));
-  m.set('pseudos',JSON.stringify((DATA.pseudos||{})[MOI]||[]));
-  return m;
-}
-
-/* Instantane du dernier etat connu. Comparer a lui plutot que d'appeler un
-   touch() a chaque endroit qui ecrit : il y a une trentaine de points
-   d'ecriture dans ce fichier, et il suffirait d'en oublier un pour qu'une
-   saisie ne parte jamais. Ici, aucun chemin ne peut passer au travers. */
-const SNAP=new Map();
-function resnap(m){SNAP.clear();(m||etatCles()).forEach((v,k)=>SNAP.set(k,v));}
-function stampChanges(){
-  const cur=etatCles(), now=Date.now();
-  cur.forEach((v,k)=>{if(SNAP.get(k)!==v)DATA.ts[k]=now;});
-  SNAP.forEach((v,k)=>{if(!cur.has(k)){DATA.tomb2[k]=now;delete DATA.ts[k];}});
-  resnap(cur);
-}
-
-/* Les pierres tombales ne peuvent pas grandir indefiniment. Six mois : au-dela,
-   un appareil reste hors ligne plus longtemps que ca ressuscitera ce qu'il
-   croit encore vivant. C'est un compromis assume, pas une garantie. */
-const TOMB_JOURS=180;
-function purgeTombes(){
-  const lim=Date.now()-TOMB_JOURS*86400000;
-  Object.keys(DATA.tomb2).forEach(k=>{if((+DATA.tomb2[k]||0)<lim)delete DATA.tomb2[k];});
-}
-
+/* --- decoupage par joueur --- */
 function sliceState(pid){
   const cur={};
   Object.entries(DATA.curriculum||{}).forEach(([k,v])=>{if(v&&v[pid]!==undefined)cur[k]=!!v[pid];});
@@ -961,118 +765,24 @@ function sliceState(pid){
     study:DATA.study.filter(x=>x.pid===pid),
     hands:DATA.hands.filter(x=>x.pid===pid),
     days:DATA.days[pid]||{}, notes:(DATA.notes||{})[pid]||{}, curriculum:cur,
-    pseudos:(DATA.pseudos||{})[pid]||[],
-    // Les seuils voyageaient dans une ligne '_shared', heritee du carnet a
-    // trois ou ils etaient reellement communs. Ici ils sont personnels : ils
-    // rejoignent la ligne de leur proprietaire, et fusionnent comme le reste.
-    thresholds:DATA.thresholds||{},
-    ts:DATA.ts, tomb2:DATA.tomb2};
+    pseudos:(DATA.pseudos||{})[pid]||[]};
 }
-
-/* Un enregistrement est mort si sa pierre tombale est au moins aussi recente
-   que lui. Egalite comprise : supprimer puis ne rien faire ne doit pas laisser
-   la version distante gagner sur un ex aequo de milliseconde. */
-function estMort(k,ts){const t=+DATA.tomb2[k]||0;return t>0&&t>=ts;}
-
-/* Liste d'enregistrements identifies par `id`. */
-function fusionListe(nom,locale,distante,tsR){
-  const par=new Map();
-  locale.forEach(x=>par.set(String(x.id),{rec:x,ts:+DATA.ts[nom+'|'+x.id]||0}));
-  (distante||[]).forEach(x=>{
-    const id=String(x.id), ex=par.get(id), t=+tsR[nom+'|'+id]||0;
-    if(!ex||t>ex.ts)par.set(id,{rec:x,ts:t});
-  });
-  const out=[];
-  par.forEach(({rec,ts},id)=>{
-    const k=nom+'|'+id;
-    if(estMort(k,ts))return;
-    DATA.ts[k]=ts;out.push(rec);
-  });
-  return out;
-}
-
-/* Dictionnaire dont chaque cle est un enregistrement (calendrier, notes...). */
-function fusionMap(nom,locale,distante,tsR,cle){
-  const out={}, L=locale||{}, R=distante||{};
-  new Set([...Object.keys(L),...Object.keys(R)]).forEach(c=>{
-    const k=cle?cle(c):nom+'|'+c;
-    const tl=+DATA.ts[k]||0, tr=+tsR[k]||0;
-    const aL=L[c]!==undefined, aR=R[c]!==undefined;
-    let val,ts;
-    if(aR&&(!aL||tr>tl)){val=R[c];ts=tr;}
-    else if(aL){val=L[c];ts=tl;}
-    else return;
-    if(estMort(k,ts))return;
-    out[c]=val;DATA.ts[k]=ts;
-  });
-  return out;
-}
-
-/* Fusionne une ligne d'etat distante dans DATA. Rend true si quelque chose a
-   bouge — l'appelant sait alors qu'il doit redessiner. */
-function mergeState(s){
-  if(!s)return false;
-  const avant=JSON.stringify(sliceState(MOI));
-  const tsR=s.ts||{}, tbR=s.tomb2||{};
-  // Pierres tombales : on retient la plus recente des deux cotes, avant tout
-  // le reste — c'est ce qui permet a estMort() de trancher pendant la fusion.
-  Object.keys(tbR).forEach(k=>{if(!((+DATA.tomb2[k]||0)>=(+tbR[k]||0)))DATA.tomb2[k]=+tbR[k];});
-
-  DATA.study=fusionListe('study',DATA.study,s.study,tsR);
-  DATA.hands=fusionListe('hands',DATA.hands,s.hands,tsR);
-  DATA.days[MOI]=fusionMap('days',DATA.days[MOI],s.days,tsR);
-  DATA.notes=DATA.notes||{};
-  DATA.notes[MOI]=fusionMap('notes',DATA.notes[MOI],s.notes,tsR);
-
-  // Curriculum : douze booleens, une date chacun.
-  const curL={};Object.keys(DATA.curriculum||{}).forEach(i=>{
-    const v=(DATA.curriculum[i]||{})[MOI];if(v!==undefined)curL[i]=!!v;});
-  const curF=fusionMap('curric',curL,s.curriculum,tsR);
-  DATA.curriculum={};Object.keys(curF).forEach(i=>{DATA.curriculum[i]={[MOI]:!!curF[i]};});
-
-  // Seuils : un par regle et par format, donc fusionnables un a un.
-  const plat=o=>{const m={};Object.entries(o||{}).forEach(([f,r])=>
-    Object.entries(r||{}).forEach(([id,v])=>m[f+'|'+id]=v));return m;};
-  const thrF=fusionMap('thr',plat(DATA.thresholds),plat(s.thresholds),tsR,c=>'thr|'+c);
-  DATA.thresholds={};Object.entries(thrF).forEach(([c,v])=>{
-    const i=c.indexOf('|');const f=c.slice(0,i);
-    (DATA.thresholds[f]=DATA.thresholds[f]||{})[c.slice(i+1)]=v;});
-
-  // Pseudos : jamais retires a l'usage, l'union suffit et evite qu'un appareil
-  // qui n'a vu qu'un seul compte efface l'autre.
-  DATA.pseudos=DATA.pseudos||{};
-  DATA.pseudos[MOI]=[...new Set([...(DATA.pseudos[MOI]||[]),...(s.pseudos||[])])];
-
-  /* Joueur. Prenom, bankroll et regle sont des valeurs uniques : le plus
-     recent gagne en bloc, il n'y a rien a fusionner. `ruleLog` fait exception —
-     c'est un historique date, donc l'union par date le reconstitue sans perte,
-     meme si les deux appareils y ont ajoute des entrees chacun de leur cote. */
-  if(s.player){
-    const moi=DATA.players[0], tl=+DATA.ts.player||0, tr=+tsR.player||0;
-    const parDate={};
-    [...(s.player.ruleLog||[]),...(moi.ruleLog||[])].forEach(e=>{
-      if(!e||!e.date)return;
-      // a date egale, on garde la version du cote le plus recemment modifie
-      if(parDate[e.date]===undefined||tl>=tr)parDate[e.date]=e;});
-    if(tr>tl){DATA.players[0]=Object.assign(moi,s.player);DATA.ts.player=tr;}
-    DATA.players[0].ruleLog=Object.values(parDate)
-      .sort((a,b)=>String(a.date).localeCompare(String(b.date)));
-    DATA.players[0].id=MOI;
-  }
-
-  // Dates de modification : on retient la plus recente des deux cotes.
-  Object.keys(tsR).forEach(k=>{if(!((+DATA.ts[k]||0)>=(+tsR[k]||0)))DATA.ts[k]=+tsR[k];});
-  purgeTombes();
-  resnap();   // le fusionne devient la reference : sans ca, le prochain
-              // stampChanges() re-daterait a maintenant tout ce qui vient
-              // d'arriver, et cet appareil gagnerait toutes les comparaisons.
-  return JSON.stringify(sliceState(MOI))!==avant;
+function applyState(pid,s){
+  if(!s)return;
+  if(s.player){const i=DATA.players.findIndex(p=>p.id===pid);
+    if(i>=0)DATA.players[i]=Object.assign(DATA.players[i],s.player);}
+  DATA.study=DATA.study.filter(x=>x.pid!==pid).concat(s.study||[]);
+  DATA.hands=DATA.hands.filter(x=>x.pid!==pid).concat(s.hands||[]);
+  DATA.days[pid]=s.days||{};
+  DATA.notes=DATA.notes||{};DATA.notes[pid]=s.notes||{};
+  DATA.pseudos=DATA.pseudos||{};if(s.pseudos)DATA.pseudos[pid]=s.pseudos;
+  DATA.curriculum=DATA.curriculum||{};
+  Object.entries(s.curriculum||{}).forEach(([k,v])=>{
+    DATA.curriculum[k]=DATA.curriculum[k]||{};DATA.curriculum[k][pid]=v;});
 }
 
 let pushTimer=null, syncing=false;
-/* stampChanges() AVANT saveLocal() : les dates de modification font partie des
-   donnees, et un rechargement de page ne doit pas les perdre. */
-function save(){stampChanges();saveLocal();if(!sb||!GROUP)return;
+function save(){saveLocal();if(!sb||!GROUP)return;
   clearTimeout(pushTimer);pushTimer=setTimeout(()=>pushCloud().catch(e=>console.error(e)),900);}
 
 async function pushCloud(){
@@ -1101,21 +811,14 @@ async function pushCloud(){
         tids.slice(i,i+CHUNK).forEach(x=>GONE.delete(pid+'|'+x));
       }
     }
-    /* 3. Ma ligne d'etat. On RELIT la version distante et on la fusionne avant
-       d'ecrire : c'est le geste qui rend le multi-appareils sur. Sans lui, un
-       telephone reste ouvert depuis ce matin, qui n'a donc pas vu les fiches
-       ecrites sur le PC entre-temps, les effacerait a la premiere saisie —
-       cette ligne est envoyee en entier, pas champ par champ. */
-    const{data:cur,error:e0}=await sb.from(T_STATE).select('data')
-      .eq('code',GROUP).eq('pid',ME).maybeSingle();
-    if(e0)throw e0;
-    const fusionne=cur&&cur.data?mergeState(cur.data):false;
-    const{error:e1}=await sb.from(T_STATE).upsert(
+    // 3. ma ligne d'etat, et la ligne commune
+    let{error:e1}=await sb.from(T_STATE).upsert(
       {code:GROUP,pid:ME,data:sliceState(ME),updated_at:now},{onConflict:'code,pid'});
     if(e1)throw e1;
+    let{error:e2}=await sb.from(T_STATE).upsert(
+      {code:GROUP,pid:SHARED,data:{thresholds:DATA.thresholds||{}},updated_at:now},{onConflict:'code,pid'});
+    if(e2)throw e2;
     saveLocal();setSync('ok','Synchronisé');
-    // La fusion a pu faire descendre du distant : l'ecran serait perime.
-    if(fusionne)renderAll();
   }catch(e){console.error(e);setSync('err','Hors ligne');}
   finally{syncing=false;}
 }
@@ -1127,24 +830,14 @@ async function pullCloud(full){
     // 1. etats : peu de lignes, toujours legeres
     const{data:st,error}=await sb.from(T_STATE).select('pid,data').eq('code',GROUP);
     if(error)throw error;
-    /* La fusion etant sure, il n'y a plus de raison d'attendre une demande
-       explicite pour appliquer sa propre ligne : le carnet a trois sautait
-       cette etape sur les pulls automatiques parce qu'appliquer voulait dire
-       remplacer, et qu'une version distante perimee aurait efface une saisie
-       en cours. Ici on fusionne enregistrement par enregistrement — la saisie
-       locale, plus recente, gagne d'elle-meme. Le pull des 45 s fait donc
-       enfin descendre les fiches et les seances, pas seulement les tournois.
-       `full` ne sert plus qu'a distinguer un « Tout recuperer » manuel.
-       Une ligne '_shared' ne peut venir que d'une version anterieure a la
-       fusion : on la lit encore pour ne pas perdre ses seuils, on ne l'ecrit
-       plus jamais. */
     (st||[]).forEach(r=>{
-      if(!r.data)return;
-      if(r.pid===SHARED){if(mergeState({thresholds:r.data.thresholds}))changed=true;return;}
-      if(r.pid!==ME)return;                       // solo : aucune autre ligne n'est la mienne
-      if(mergeState(r.data))changed=true;
+      if(r.pid===SHARED){if(r.data&&r.data.thresholds){DATA.thresholds=r.data.thresholds;changed=true;}return;}
+      // Regle centrale : on n'ecrase MA ligne que sur demande explicite ou
+      // au premier chargement. Sinon une version distante perimee effacerait
+      // ce que je viens de saisir.
+      if(r.pid===ME&&!full)return;
+      applyState(r.pid,r.data);changed=true;
     });
-    void full;
     // 2. tournois : on ne compare que les identifiants, puis on ne
     //    telecharge que ce qui manque
     const ids=[];
@@ -1181,21 +874,6 @@ async function pullCloud(full){
 function setSync(state,txt){const d=$('syncDot');if(!d)return;
   d.className='sync-dot '+(state||'');$('syncTxt').textContent=txt;}
 
-/* Sans projet Supabase renseigne, la sauvegarde en ligne n'existe pas. On
-   desactive les commandes plutot que de les laisser echouer a l'usage : un
-   bouton qui ne fait rien se lit comme une panne, et pousse a reessayer. */
-function majSync(){
-  const box=$('syncOff');if(!box)return;
-  ['grpCode','grpSave','grpGen','grpPull'].forEach(id=>{
-    const el=$(id);if(el)el.disabled=!SUPA_OK;});
-  box.innerHTML=SUPA_OK?'':
-    `<div class="notice" style="border-left-color:var(--gold);background:rgba(201,146,47,.08)">
-      <b>Sauvegarde en ligne non configurée sur cette copie.</b> Ce n'est pas une panne :
-      le carnet fonctionne entièrement sans elle. Tes données restent dans ce navigateur,
-      et ta sauvegarde passe par le bouton <b>Exporter en JSON</b> ci-dessous — prends le
-      réflexe de le faire de temps en temps, un historique de navigateur effacé emporte tout.</div>`;
-}
-
 /* ============ DISCIPLINE ============ */
 function dayRec(pid,date){DATA.days[pid]=DATA.days[pid]||{};return DATA.days[pid][date]||null;}
 function setDay(pid,date,rec){DATA.days[pid]=DATA.days[pid]||{};
@@ -1222,6 +900,7 @@ function discipline(pid,wk){
 
 /* ============ DASHBOARD ============ */
 function renderDash(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
   const wk=weekKey(new Date()),me=P(ME),d=discipline(ME,wk);
   const c=2*Math.PI*33;
   $('ringFg').setAttribute('stroke-dasharray',`${(d.score/100*c).toFixed(1)} ${c.toFixed(1)}`);
@@ -1260,126 +939,80 @@ function renderDash(){
       const vieille=att.slice().sort((a,b)=>String(a.date).localeCompare(String(b.date)))[0];
       return `<div class="kpi ${att.length?'gold':'olive'}"><div class="kpi-label">En attente de review</div>
         <div class="kpi-value">${att.length}<span class="unit">/ ${tot} fiche${tot>1?'s':''}</span></div>
-        <div class="kpi-sub">${att.length?`la plus ancienne remonte au ${esc(vieille.date)}`:(tot?'toutes tes fiches sont passées en revue':'aucune fiche écrite')}</div></div>`;
+        <div class="kpi-sub">${att.length?`la plus ancienne remonte au ${esc(vieille.date)}`:(tot?'toutes passées en revue à trois':'aucune fiche écrite')}</div></div>`;
     })()}`;
 
-  renderHisto();
+  $('discRows').innerHTML=DATA.players.map(p=>{const x=discipline(p.id,wk);
+    return `<div class="lbar"><span class="lbar-name">${esc(p.name)}</span>
+      <span class="lbar-track"><i style="width:${x.score}%;background:${x.score>=70?'var(--sage)':x.score>=40?'var(--gold)':'var(--clay)'}"></i></span>
+      <span class="lbar-n">${x.score}</span></div>
+      <div class="row-meta" style="margin:-3px 0 9px 0">${x.done}/3 sessions ${x.verified?'(vérifiées par l\'import)':'(déclarées)'} · ${x.mins}/180 min d'étude · ${x.hv}/9 mains revues</div>`;}).join('');
 
   let al='';
-  const max=me.bankroll/(me.rule||200);
-  const hb=horsBankroll(ME);
-  if(hb.n){
-    // « Depuis quand et combien », pas un booleen : un ecart de l'an dernier
-    // et un ecart d'hier n'appellent pas la meme lecture.
-    const encours=hb.recents>0;
-    al+=`<div class="notice${encours?'':' good'}" ${encours?'':'style="border-left-color:var(--gold);background:rgba(201,146,47,.08)"'}>
-      <b>${hb.n} tournoi${hb.n>1?'s':''} joué${hb.n>1?'s':''} hors bankroll.</b>
-      ${encours
-        ? `Dont ${hb.recents} sur les ${BR_FENETRE} derniers jours. Le dernier remonte à ${hb.jours} jour${hb.jours>1?'s':''} : ${esc(String(hb.dernier.date).slice(0,10))}, buy-in ${(+hb.dernier.buyin).toFixed(2)} € pour un plafond de ${max.toFixed(2)} €.`
-        : `Aucun depuis ${BR_FENETRE} jours — le dernier remonte à ${hb.jours} jours. Le compte reste affiché, il ne s'efface pas.`}
-      ${hb.sansTrace?`<br><span class="row-meta">${hb.sansTrace} de ces tournois ${hb.sansTrace>1?'sont jugés':'est jugé'} avec la règle actuelle, faute d'historique à leur date.</span>`:''}</div>`;}
-  const N=(DATA.notes||{})[ME]||{};
-  const tl=Object.values(N).filter(x=>+x.tilt>=2);
-  if(tl.length>=3)al+=`<div class="notice"><b>Tilt récurrent.</b> ${tl.length} sessions notées « marqué » ou pire. Avant de retoucher quoi que ce soit à ta stratégie, va lire le bloc 12 : fenêtre de jeu et nombre de tables. C'est le leak qui annule tous les autres progrès.</div>`;
+  DATA.players.forEach(p=>{
+    const max=p.bankroll/(p.rule||200);
+    const hb=horsBankroll(p.id);
+    if(hb.n){
+      // « Depuis quand et combien », pas un booleen : un ecart de l'an dernier
+      // et un ecart d'hier n'appellent pas la meme conversation.
+      const encours=hb.recents>0;
+      al+=`<div class="notice${encours?'':' good'}" ${encours?'':'style="border-left-color:var(--gold);background:rgba(201,146,47,.08)"'}>
+        <b>${esc(p.name)} — ${hb.n} tournoi${hb.n>1?'s':''} hors bankroll.</b>
+        ${encours
+          ? `Dont ${hb.recents} sur les ${BR_FENETRE} derniers jours. Le dernier remonte à ${hb.jours} jour${hb.jours>1?'s':''} : ${esc(String(hb.dernier.date).slice(0,10))}, buy-in ${(+hb.dernier.buyin).toFixed(2)} € pour un plafond de ${max.toFixed(2)} €.`
+          : `Aucun depuis ${BR_FENETRE} jours — le dernier remonte à ${hb.jours} jours. Le compte reste affiché, il ne s'efface pas.`}
+        ${hb.sansTrace?`<br><span class="row-meta">${hb.sansTrace} de ces tournois ${hb.sansTrace>1?'sont jugés':'est jugé'} avec la règle actuelle, faute d'historique à leur date.</span>`:''}</div>`;}
+    const N=(DATA.notes||{})[p.id]||{};
+    const t=Object.values(N).filter(x=>+x.tilt>=2);
+    if(t.length>=3)al+=`<div class="notice"><b>${esc(p.name)} — tilt récurrent.</b> ${t.length} sessions notées « marqué » ou pire. Le prochain bloc d'étude porte sur la fenêtre de jeu et le nombre de tables.</div>`;
+  });
   if(d.score>=80)al+=`<div class="notice good"><b>Semaine tenue.</b> ${d.score}/100. C'est ce chiffre-là qui prédit le résultat dans deux ans, pas celui de la semaine.</div>`;
   $('alerts').innerHTML=al;
 
   $('sdIn').value=DATA.sd;
   $('tauIn').value=DATA.tau;
   drawChart();
-  renderTendance();
-  renderFirstRun();
+  renderCompare();
 }
 
-/* Douze semaines de discipline, la plus recente a droite. Le score de la
-   semaine en cours ne se compare pas aux autres — elle n'est pas finie — d'ou
-   le contour plutot qu'une couleur qui la ferait passer pour un resultat. */
-const HISTO_SEM=12;
-function renderHisto(){
-  const box=$('discHisto');if(!box)return;
-  const sem=[];
-  for(let i=HISTO_SEM-1;i>=0;i--){
-    const d=new Date();d.setDate(d.getDate()-7*i);
-    sem.push({wk:weekKey(d),lbl:'S'+weekKey(d).slice(-2),now:i===0});
-  }
-  const vals=sem.map(s=>Object.assign(s,discipline(ME,s.wk)));
-  const actives=vals.filter(v=>!v.now&&(v.score>0));
-  const moy=actives.length?Math.round(actives.reduce((a,v)=>a+v.score,0)/actives.length):null;
-  box.innerHTML=`<div class="spark">${vals.map(v=>{
-      const h=Math.max(2,v.score);
-      const c=v.score>=70?'ok':v.score>=40?'mid':'low';
-      return `<div title="${v.lbl} — ${v.score}/100 : ${v.done} session${v.done>1?'s':''}, ${v.mins} min, ${v.hv} main${v.hv>1?'s':''}"><i class="${c}${v.now?' now':''}" style="height:${h}%"></i></div>`;
-    }).join('')}</div>
-    <div class="spark-x">${vals.map(v=>`<span>${v.lbl}</span>`).join('')}</div>
-    <p class="row-meta mt14">${moy===null
-      ? "Aucune semaine complète renseignée pour l'instant. Les colonnes se remplissent au fil des imports et des séances d'étude."
-      : `Moyenne sur les ${actives.length} semaine${actives.length>1?'s':''} entamée${actives.length>1?'s':''} hors semaine en cours : <b style="color:var(--ink)">${moy}/100</b>. La dernière colonne est encadrée : elle n'est pas terminée, elle ne se compare donc pas aux autres.`}</p>`;
-}
-
-/* Ce que le carnet ne peut pas dire tant qu'il est vide. Affiche les quatre
-   gestes de depart, et disparait des le premier tournoi importe. */
-function renderFirstRun(){
-  const box=$('firstRun');if(!box)return;
-  if(DATA.tournaments.length){box.innerHTML='';return;}
-  box.innerHTML=`<div class="card" style="margin-top:22px;border-left:3px solid var(--clay)">
-    <div class="sec-label">Par où commencer</div>
-    <p class="lead mt14">Le carnet est vide : tous les chiffres ci-dessous valent zéro, et c'est normal. Quatre gestes, dans cet ordre.</p>
-    <div class="steps">
-      <div class="st"><div><b>Dépose tes historiques dans l'onglet Import</b><span>Tout ce que tu as, même vieux de plusieurs mois. Le volume passé ne se rattrape pas, et sans lui aucune statistique n'est lisible.</span></div></div>
-      <div class="st"><div><b>Renseigne ta bankroll</b><span>Onglet Bankroll. C'est ce qui fixe ton buy-in maximum, et ce qui déclenche l'alerte quand tu joues au-dessus.</span></div></div>
-      <div class="st"><div><b>Écris trois fiches après ta prochaine session</b><span>Onglet Review. Le carnet te propose les mains aux plus gros mouvements de jetons : tu les rejoues coup par coup et tu notes la ligne correcte.</span></div></div>
-      <div class="st"><div><b>Active la sauvegarde si tu joues sur deux appareils</b><span>Onglet Bankroll, en bas. Facultatif — sans elle, tout reste dans ce navigateur uniquement.</span></div></div>
-    </div>
-  </div>`;
-}
-
-/* Fenetre recente contre historique complet. C'est la comparaison qui reste
-   possible quand on joue seul : elle repond a « est-ce que mon jeu a bouge »,
-   la seule question qu'un tracker ne pose jamais de lui-meme.
-   Les DEUX colonnes sont soumises au meme seuil d'echantillon que partout
-   ailleurs. Trente jours le franchissent rarement, et la colonne reste alors
-   vide plutot que d'afficher une frequence calculee sur cent mains. */
-const TEND_JOURS=30;
-function renderTendance(){
+/* Comparaison des trois sur le meme format : ce qu'aucun tracker ne fait,
+   et la seule raison objective d'ouvrir ce carnet plutot que PT4. */
+function renderCompare(){
   const box=$('compare');if(!box)return;
-  const rows=Object.entries(GATES).concat([['speed',['Temps par décision','dt_n',150]]]);
-  const tout=statsOf(ME,FMT), recent=statsOfWindow(ME,FMT,TEND_JOURS);
-  if(!tout.hands){box.innerHTML='<p class="empty">Aucun historique importé pour ce format. Dépose un fichier dans l\'onglet Import.</p>';return;}
-  const val=(s,k,den,min)=>{const n=+s[den]||0;
-    if(n<min)return{v:null,n};
-    return{v:k==='speed'?s.dt/s.dt_n:100*(+s[k]||0)/n,n};};
-  const fmtV=(x,k)=>x.v===null
-    ? `<span class="row-meta">— (${x.n})</span>`
-    : x.v.toFixed(k==='speed'?1:0)+(k==='speed'?' s':' %');
-  box.innerHTML=`<div class="tbl-wrap"><table>
-    <tr><th>Indicateur</th><th class="num">${TEND_JOURS} derniers jours</th><th class="num">Tout l'historique</th><th class="num">Écart</th></tr>`+
+  const rows=Object.entries(GATES).concat([['speed',['Temps/décision','dt_n',150]]]);
+  const data=DATA.players.map(p=>({p,s:statsOf(p.id,FMT)}));
+  const any=data.some(d=>d.s.hands>0);
+  if(!any){box.innerHTML='<p class="empty">Aucun historique importé. La comparaison apparaît dès que l\'un de vous importe un fichier.</p>';return;}
+  box.innerHTML=`<div class="tbl-wrap"><table><tr><th>Indicateur</th>${data.map(d=>`<th class="num">${esc(d.p.name)}</th>`).join('')}</tr>`+
     rows.map(([k,[lbl,den,min]])=>{
-      const a=val(recent,k,den,min), b=val(tout,k,den,min);
-      const d=(a.v!==null&&b.v!==null)?a.v-b.v:null;
-      const bruit=k==='speed'?0.2:1;   // en deca, on n'annonce aucun mouvement
-      return `<tr><td>${esc(lbl)}</td><td class="num">${fmtV(a,k)}</td><td class="num">${fmtV(b,k)}</td>
-        <td class="num">${d===null?'<span class="row-meta">—</span>'
-          :Math.abs(d)<bruit?'<span class="row-meta">stable</span>'
-          :`<b>${d>0?'+':'−'}${Math.abs(d).toFixed(k==='speed'?1:0)}</b>`}</td></tr>`;}).join('')+
-    `<tr><td>Tournois importés</td>
-      <td class="num">${toursOf(ME,FMT).filter(t=>{const l=new Date();l.setDate(l.getDate()-TEND_JOURS);return String(t.date).slice(0,10)>=iso(l);}).length}</td>
-      <td class="num">${toursOf(ME,FMT).length}</td><td class="num">—</td></tr></table></div>
-    <p class="row-meta mt14">Un écart est un fait à expliquer, pas un verdict. Une fréquence qui bouge après un bloc d'étude est le signe que le travail a pris ; la même qui bouge sans raison signale plus souvent un changement de format, de niveau de buy-in ou de fatigue qu'un changement de niveau.</p>`;
+      const vals=data.map(d=>{const n=+d.s[den]||0;
+        if(n<min)return{txt:`— <span style="color:var(--muted)">(${n})</span>`,v:null};
+        const v=k==='speed'?d.s.dt/d.s.dt_n:100*(+d.s[k]||0)/n;
+        return{txt:v.toFixed(k==='speed'?1:0)+(k==='speed'?' s':' %'),v};});
+      const ok=vals.filter(x=>x.v!==null).map(x=>x.v);
+      const spread=ok.length>1?Math.max(...ok)-Math.min(...ok):null;
+      return `<tr><td>${esc(lbl)}${spread!==null&&spread>0?` <span class="row-meta">écart ${spread.toFixed(k==='speed'?1:0)}</span>`:''}</td>`+
+        vals.map(x=>`<td class="num">${x.txt}</td>`).join('')+'</tr>';}).join('')+
+    `<tr><td>Tournois importés</td>${data.map(d=>`<td class="num">${toursOf(d.p.id,FMT).length}</td>`).join('')}</tr></table></div>`;
 }
 
-/* ============ CLOTURE D'UNE FICHE ============
-   Une fiche traitee porte reviewed:{date, notes}. Champ OPTIONNEL : une fiche
-   ecrite avant cette etape ne l'a pas, et se lit partout comme « non traitee ».
-   Aucun `undefined` ne remonte dans un calcul.
+/* ============ REVIEW DE GROUPE ============
+   Une fiche passee en revue a trois porte reviewed:{date, by:[pid], notes}.
+   Champ OPTIONNEL : une fiche ecrite avant cette etape ne l'a pas, et se lit
+   partout comme « non revue ». Aucun `undefined` ne remonte dans un calcul.
 
-   Ecrire la fiche et la traiter sont deux gestes SEPARES, et volontairement.
-   La fiche se note a chaud, dans les minutes qui suivent la session, quand on
-   se souvient encore de ce qu'on pensait au moment de jouer. La conclusion
-   s'ecrit a froid, apres avoir verifie le spot dans un solveur, dans le guide,
-   ou aupres de quelqu'un. Fondre les deux en un seul formulaire reviendrait a
-   demander la reponse au moment ou l'on pose la question — et l'ecart entre
-   les deux, visible sur le dashboard, est justement ce qui mesure si le travail
-   de fond se fait ou si les fiches s'empilent. */
+   OU VIT CETTE DONNEE, ET POURQUOI. Elle est ecrite sur la fiche elle-meme,
+   donc dans DATA.hands, donc transportee par la ligne poker_state du
+   PROPRIETAIRE de la fiche. Consequence assumee : seul l'auteur d'une fiche
+   peut la marquer revue. La raison est structurelle, pas esthetique —
+   applyState() remplace en bloc les fiches d'un joueur par celles de sa ligne
+   distante, et une annotation ecrite par quelqu'un d'autre serait effacee au
+   premier pull. La ligne _shared a ete ecartee pour la meme raison : elle est
+   appliquee en bloc elle aussi, et deux syntheses simultanees en perdraient
+   une sans que personne ne s'en apercoive.
+   `by` enregistre qui etait present a la revue : c'est la dimension
+   collective, et elle est visible des trois puisque chacun recoit la ligne
+   des deux autres. */
 function isReviewed(h){return !!(h&&h.reviewed&&h.reviewed.date);}
 function pendingReviews(pid){return DATA.hands.filter(h=>h.pid===pid&&!isReviewed(h));}
 let REVFORM=null;
@@ -1389,24 +1022,26 @@ function renderRevForm(){
   const h=REVFORM?DATA.hands.find(x=>x.id===REVFORM&&x.pid===ME):null;
   if(!h){REVFORM=null;box.innerHTML='';return;}
   box.innerHTML=`<div class="card mt14" style="background:var(--paper)">
-    <div class="sec-label">Conclure la fiche — ${esc(h.leak)}</div>
+    <div class="sec-label">Revue de groupe — ${esc(h.leak)}</div>
     <p class="row-meta">${esc(h.date)} · ${esc(h.stage)} · ${esc(h.pos)} · ${h.stack} bb</p>
     <p class="row-meta" style="margin-top:6px">${esc(h.spot)}<br><span style="color:var(--clay-deep)">→ ${esc(h.fix)}</span></p>
+    <div class="checks mt14">${DATA.players.map(p=>`<label><input type="checkbox" data-by="${p.id}"${p.id===ME?' checked':''}>${esc(p.name)}</label>`).join('')}</div>
     <div class="form-row mt14">
       <div class="field" style="flex:0 0 150px"><label>Date de la revue</label>
         <input type="date" id="rgDate" value="${iso(new Date())}"></div>
-      <div class="field" style="flex:3 1 320px"><label>Ce que tu en retiens après vérification, en une phrase</label>
-        <input id="rgNote" placeholder="Ex : check-back confirmé, ma range est capée sur ce flop — vu bloc 06"></div>
+      <div class="field" style="flex:3 1 320px"><label>Ce que le groupe en conclut, en une phrase</label>
+        <input id="rgNote" placeholder="Ex : les trois d'accord pour check-back, ma range est capée sur ce flop"></div>
       <button class="btn" id="rgSave">Enregistrer</button>
       <button class="btn-outline" id="rgCancel">Annuler</button>
-    </div>
-    <p class="row-meta mt14">Cette phrase-là n'est pas la même que « la ligne correcte » écrite à chaud : celle-ci s'écrit après vérification, et c'est elle qui compte.</p></div>`;
+    </div></div>`;
   $('rgCancel').onclick=()=>{REVFORM=null;renderRevForm();};
   $('rgSave').onclick=()=>{
     const notes=$('rgNote').value.trim();
+    const by=[...box.querySelectorAll('[data-by]')].filter(c=>c.checked).map(c=>c.dataset.by);
     // Meme exigence que partout : une revue sans conclusion ecrite ne compte pas.
-    if(!notes){alert("Écris ta conclusion. Une main « revue » sans phrase de synthèse ne se distingue en rien d'une main non revue.");return;}
-    h.reviewed={date:$('rgDate').value||iso(new Date()),notes};
+    if(!notes){alert("Écris la conclusion du groupe. Une main « revue » sans phrase de synthèse ne se distingue en rien d'une main non revue.");return;}
+    if(!by.length){alert("Coche au moins un participant : une revue de groupe sans personne n'en est pas une.");return;}
+    h.reviewed={date:$('rgDate').value||iso(new Date()),by,notes};
     REVFORM=null;save();renderAgenda();renderDash();renderReview();};
 }
 
@@ -1415,25 +1050,30 @@ function renderRevForm(){
 function renderAgenda(){
   const box=$('agenda');if(!box)return;
   const wk=weekKey(new Date());
-  const s=statsOf(ME,FMT);
-  // Le plus grave d'abord : un depassement franc passe avant un simple
-  // debut de derive, sinon l'ordre du jour lit comme une liste plate.
-  const fired=rulesFor(FMT).map(r=>({r,st:ruleState(s,r)})).filter(x=>x.st.fired)
-    .sort((a,b)=>(a.st.sev==='depasse'?0:1)-(b.st.sev==='depasse'?0:1));
-  const worst=allReplays(ME,FMT).sort((a,b)=>a.d-b.d)[0];
-  const d=discipline(ME,wk);
-  box.innerHTML=`<div class="row-line">
+  const items=DATA.players.map(p=>{
+    const s=statsOf(p.id,FMT);
+    // Le plus grave d'abord : un depassement franc passe avant un simple
+    // debut de derive, sinon l'ordre du jour lit comme une liste plate.
+    const fired=rulesFor(FMT).map(r=>({r,st:ruleState(s,r)})).filter(x=>x.st.fired)
+      .sort((a,b)=>(a.st.sev==='depasse'?0:1)-(b.st.sev==='depasse'?0:1));
+    const reps=allReplays(p.id,FMT).sort((a,b)=>a.d-b.d);
+    const worst=reps[0];
+    const d=discipline(p.id,wk);
+    return{p,fired,worst,d};});
+  box.innerHTML=items.map(x=>`<div class="row-line">
       <div class="row-main">
-        <div class="row-title">Cette semaine <span class="row-meta">— discipline ${d.score}/100</span></div>
-        <div class="row-meta">${fired.length
-          ? 'À traiter : '+fired.map(({r,st})=>`<span style="color:${SEV[st.sev].c}">${esc(r.lbl)}</span> (bloc ${String(r.bloc).padStart(2,'0')})`).join(' · ')
+        <div class="row-title">${esc(x.p.name)} <span class="row-meta">— discipline ${x.d.score}/100</span></div>
+        <div class="row-meta">${x.fired.length
+          ? 'À traiter : '+x.fired.map(({r,st})=>`<span style="color:${SEV[st.sev].c}">${esc(r.lbl)}</span> (bloc ${String(r.bloc).padStart(2,'0')})`).join(' · ')
           : 'Aucun leak au-dessus du seuil, ou échantillon encore insuffisant.'}</div>
-        <div class="row-meta">${worst
-          ? `Main à revoir en premier : ${esc(worst.tdate)} ${esc(worst.ts)}, ${esc(worst.pos||'')} ${Math.round(worst.stack/worst.bb)}bb, ${worst.d} bb`
+        <div class="row-meta">${x.worst
+          ? `Main à présenter : ${esc(x.worst.tdate)} ${esc(x.worst.ts)}, ${esc(x.worst.pos||'')} ${Math.round(x.worst.stack/x.worst.bb)}bb, ${x.worst.d} bb`
           : 'Aucune main importée.'}</div>
-      </div></div>`
-    +`<div class="sec-label mt22">Tes fiches à conclure</div>
-      <p class="row-meta">Elles ont été écrites à chaud. Vérifie le spot — dans le guide, dans un solveur, ou en le posant à quelqu'un — puis note ce que tu en retiens vraiment. C'est ce geste-là qui transforme une fiche en correction.</p>`
+        <div class="row-meta">${(()=>{const a=pendingReviews(x.p.id).length;
+          return a?`${a} fiche${a>1?'s':''} en attente de revue de groupe`:'Toutes ses fiches ont été passées en revue.';})()}</div>
+      </div></div>`).join('')
+    +`<div class="sec-label mt22">Tes fiches à passer en revue</div>
+      <p class="row-meta">Tu ne peux marquer que tes propres fiches : une annotation portée sur la fiche d'un autre serait effacée à la première synchronisation, puisque chacun n'écrit que sa ligne. Coche qui était présent, écris la conclusion du groupe — les deux autres la verront.</p>`
     +(() =>{
       const att=pendingReviews(ME).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
       if(!att.length)return '<p class="row-meta mt14">Aucune fiche en attente. Écris-en trois à la prochaine session.</p>';
@@ -1442,7 +1082,7 @@ function renderAgenda(){
           <div class="row-title">${esc(h.leak)} <span class="row-meta">— ${esc(h.date)}, ${esc(h.stage)}, ${esc(h.pos)}, ${h.stack} bb</span></div>
           <div class="row-meta">${esc(h.spot)}</div>
         </div>
-        <button class="btn-mini" data-rev="${h.id}">Conclure</button></div>`).join('')
+        <button class="btn-mini" data-rev="${h.id}">Marquer revue</button></div>`).join('')
         +(att.length>6?`<p class="row-meta mt14">${att.length-6} autre${att.length-6>1?'s':''} fiche${att.length-6>1?'s':''} en attente, non listée${att.length-6>1?'s':''} ici.</p>`:'');
     })()
     +`<div id="revGroupForm"></div>`;
@@ -1492,6 +1132,7 @@ function roiAjuste(m,sd,N,tau){
 }
 
 function drawChart(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
   const svg=$('chart'),W=900,H=330,ml=56,mr=18,mt=30,mb=30;
   const T=DATA.tournaments.filter(t=>t.pid===ME&&t.fmt===FMT&&t.res!==false)
     .sort((a,b)=>String(a.date).localeCompare(String(b.date)));
@@ -1553,6 +1194,7 @@ function drawChart(){
 
 /* ============ CALENDRIER ============ */
 function renderCal(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
   IMPD=playDays(ME,null);
   const y=calRef.getFullYear(),m=calRef.getMonth();
   $('calLabel').textContent=MONTHS[m]+' '+y;
@@ -1581,6 +1223,7 @@ function renderCal(){
 }
 function renderEditor(){
   const box=$('dayEditor');
+  if(VIEW!==ME){box.innerHTML=`<p class="empty">Calendrier de ${esc(P(VIEW).name)}, en lecture seule.</p>`;return;}
   if(!selDay){box.innerHTML=`<p class="empty">Sélectionne un jour dans le calendrier pour le planifier.</p>`;return;}
   const r=dayRec(ME,selDay)||{s:null,min:0,theme:''};
   box.innerHTML=`<div class="sec-label">${esc(selDay)} — ${esc(P(ME).name)}</div>
@@ -1609,24 +1252,26 @@ function statsOfWindow(pid,fmt,jours){
   toursOf(pid,fmt).forEach(t=>{if(String(t.date).slice(0,10)>=min)addSt(acc,t.st);});
   return acc;
 }
-/* Blocs designes par tes propres leaks sur la fenetre. Pour chaque format —
-   les seuils etant propres au format, les melanger n'aurait pas de sens — on
-   releve les regles declenchees et on remonte au bloc d'etude qu'elles
-   referencent via RULES[].bloc.
+/* Blocs designes par les leaks des trois sur la fenetre. Pour chaque joueur et
+   chaque format — les seuils etant propres au format, les melanger n'aurait
+   pas de sens — on releve les regles declenchees et on remonte au bloc d'etude
+   qu'elles referencent via RULES[].bloc.
    L'ordre fixe des douze blocs n'est PAS touche : le programme reste
    consultable tel quel. On ajoute une recommandation, on ne reordonne rien. */
 function blocsRecommandes(){
   const score={};
-  Object.keys(FMTS).forEach(fmt=>{
-    const s=statsOfWindow(ME,fmt,CURRIC_JOURS);
-    rulesFor(fmt).forEach(r=>{
-      const R=ruleState(s,r,fmt);
-      if(!R.fired)return;
-      const i=r.bloc-1;                 // bloc est 1-indexe, THEMES 0-indexe
-      if(!(i>=0&&i<THEMES.length))return;   // repli : reference hors bornes ignoree
-      const e=score[i]||(score[i]={n:0,fmts:new Set(),regles:new Set(),grave:false});
-      e.n++;e.fmts.add(FMTS[fmt]);e.regles.add(r.lbl);
-      if(R.sev==='depasse')e.grave=true;
+  DATA.players.forEach(p=>{
+    Object.keys(FMTS).forEach(fmt=>{
+      const s=statsOfWindow(p.id,fmt,CURRIC_JOURS);
+      rulesFor(fmt).forEach(r=>{
+        const R=ruleState(s,r,fmt);
+        if(!R.fired)return;
+        const i=r.bloc-1;                 // bloc est 1-indexe, THEMES 0-indexe
+        if(!(i>=0&&i<THEMES.length))return;   // repli : reference hors bornes ignoree
+        const e=score[i]||(score[i]={n:0,qui:new Set(),regles:new Set(),grave:false});
+        e.n++;e.qui.add(p.id);e.regles.add(r.lbl);
+        if(R.sev==='depasse')e.grave=true;
+      });
     });
   });
   return score;
@@ -1634,7 +1279,7 @@ function blocsRecommandes(){
 function ordreRecommande(score){
   return Object.keys(score).map(Number).sort((a,b)=>{
     const A=score[a],B=score[b];
-    return (B.grave-A.grave)||(B.n-A.n)||(a-b);});
+    return (B.grave-A.grave)||(B.n-A.n)||(B.qui.size-A.qui.size)||(a-b);});
 }
 
 function renderStudy(){
@@ -1643,33 +1288,35 @@ function renderStudy(){
   const note=$('curricNote');
   if(note)note.innerHTML=ordre.length
     ? `<div class="notice" style="border-left-color:var(--gold);background:rgba(201,146,47,.08)">
-        <b>Sur les ${CURRIC_JOURS} derniers jours, tes leaks désignent ${ordre.length} bloc${ordre.length>1?'s':''}.</b>
+        <b>Sur les ${CURRIC_JOURS} derniers jours, vos leaks désignent ${ordre.length} bloc${ordre.length>1?'s':''}.</b>
         Par ordre de priorité : ${ordre.map(i=>`bloc ${String(i+1).padStart(2,'0')}`).join(' · ')}.
         L'ordre du programme reste celui d'en dessous — ceci est une suggestion, pas un réordonnancement.
         Un bloc n'apparaît que si une règle s'est déclenchée au-dessus de son échantillon minimum sur la fenêtre.</div>`
     : `<div class="notice good"><b>Aucun bloc mis en avant.</b> Sur les ${CURRIC_JOURS} derniers jours, soit aucune règle ne s'est déclenchée, soit l'échantillon de la fenêtre reste sous le minimum requis. Suis l'ordre du programme.</div>`;
 
   $('curriculum').innerHTML=THEMES.map((t,i)=>{
-    const done=(DATA.curriculum[i]||{})[ME];
+    const done=DATA.curriculum[i]||{};
     const e=rec[i];
+    const tousValide=DATA.players.every(p=>done[p.id]);
     const badge=e?(i===top
       ? '<span class="tag hot">Recommandé cette semaine</span>'
       : `<span class="tag warm">Signalé par ${e.n} leak${e.n>1?'s':''}</span>`):'';
-    const detail=e?`<div class="row-meta">${[...e.regles].map(esc).join(' · ')} — en ${[...e.fmts].map(esc).join(' et ')}${done?' · bloc pourtant coché comme travaillé':''}</div>`:'';
+    const detail=e?`<div class="row-meta">${[...e.regles].map(esc).join(' · ')} — ${[...e.qui].map(id=>esc(P(id).name)).join(', ')}${tousValide?' · bloc pourtant validé par les trois':''}</div>`:'';
     return `<div class="row-line"><span class="row-num">${String(i+1).padStart(2,'0')}</span>
       <div class="row-main"><div class="row-title">${esc(t)} ${badge}</div>${detail}</div>
-      <div class="checks"><label class="${done?'done':''}">
-        <input type="checkbox" data-c="${i}" ${done?'checked':''}>Travaillé</label></div></div>`;}).join('');
+      <div class="checks">${DATA.players.map(p=>`<label class="${done[p.id]?'done':''}">
+        <input type="checkbox" data-c="${i}" data-p="${p.id}" ${done[p.id]?'checked':''} ${p.id===ME?'':'disabled'}>${esc(p.name.slice(0,7))}</label>`).join('')}</div></div>`;}).join('');
   $('curriculum').querySelectorAll('input').forEach(cb=>cb.onchange=()=>{
+    if(cb.dataset.p!==ME)return;
     const i=cb.dataset.c;DATA.curriculum[i]=DATA.curriculum[i]||{};
-    DATA.curriculum[i][ME]=cb.checked;save();renderStudy();});
+    DATA.curriculum[i][cb.dataset.p]=cb.checked;save();renderStudy();});
 
   const rows=DATA.study.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,40);
-  $('stTable').innerHTML=`<tr><th>Date</th><th>Thème</th><th class="num">Min</th><th>À retenir</th><th></th></tr>`+
-    (rows.length?rows.map(r=>`<tr><td class="num">${esc(r.date)}</td>
+  $('stTable').innerHTML=`<tr><th>Date</th><th>Joueur</th><th>Thème</th><th class="num">Min</th><th>À retenir</th><th></th></tr>`+
+    (rows.length?rows.map(r=>`<tr><td class="num">${esc(r.date)}</td><td>${esc(P(r.pid).name)}</td>
       <td>${esc(r.theme)}</td><td class="num">${r.min}</td><td>${esc(r.note)}</td>
-      <td><button class="btn-mini" data-del-st="${r.id}">×</button></td></tr>`).join('')
-     :`<tr><td colspan="5" class="empty">Aucune séance. Ajoute la première ci-dessus.</td></tr>`);
+      <td>${r.pid===OWNER()?`<button class="btn-mini" data-del-st="${r.id}">×</button>`:''}</td></tr>`).join('')
+     :`<tr><td colspan="6" class="empty">Aucune séance. Ajoute la première ci-dessus.</td></tr>`);
   $('stTable').querySelectorAll('[data-del-st]').forEach(b=>b.onclick=()=>{
     DATA.study=DATA.study.filter(x=>x.id!==b.dataset.delSt);save();renderStudy();});
 }
@@ -1686,7 +1333,9 @@ function sessionsOf(pid){
 }
 let OPENSESSION=null;
 function renderSessions(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
   const S=sessionsOf(ME);
+  $('seFmtName').textContent=P(ME).name;
   const sel=$('noDate');
   if(sel)sel.innerHTML=S.length?S.map(s=>`<option value="${s.date}">${s.date}</option>`).join('')
     :'<option value="">aucun jour joué</option>';
@@ -1716,7 +1365,7 @@ function renderSessions(){
 function renderSessionBox(){
   const box=$('sessionBox');if(!box)return;
   if(!OPENSESSION){box.innerHTML='';return;}
-  const pid=ME, date=OPENSESSION;
+  const pid=VIEW, date=OPENSESSION;
   const T=toursOf(pid,null).filter(t=>String(t.date).slice(0,10)===date);
   if(!T.length){OPENSESSION=null;box.innerHTML='';return;}
 
@@ -1767,7 +1416,7 @@ function renderSessionBox(){
     .sort((a,b)=>String(a.stage).localeCompare(String(b.stage)));
 
   box.innerHTML=`<div class="card mt14" style="background:var(--paper)">
-    <div class="cal-nav"><div class="sec-label" style="margin:0">Ta journée du ${esc(date)}</div>
+    <div class="cal-nav"><div class="sec-label" style="margin:0">${esc(date)} — ${esc(P(pid).name)}</div>
       <button class="btn-mini" id="sbClose">Fermer</button></div>
 
     <div class="sec-label mt22">Ton état ce soir-là</div>
@@ -1787,10 +1436,11 @@ function renderSessionBox(){
         <div class="row-meta">${esc(h.spot)}</div>
         <div class="row-meta" style="color:var(--clay-deep)">→ ${esc(h.fix)}</div>
         <div style="margin-top:5px">${isReviewed(h)
-          ? `<span class="tag cool">conclue le ${esc(h.reviewed.date)}</span><span class="row-meta">${esc(h.reviewed.notes||'')}</span>`
-          : '<span class="tag warm">en attente de conclusion</span>'}</div></div></div>`).join('')
+          ? `<span class="tag cool">revue à trois le ${esc(h.reviewed.date)}</span><span class="row-meta">${esc(h.reviewed.notes||'')}</span>`
+          : '<span class="tag warm">en attente de revue de groupe</span>'}</div></div></div>`).join('')
       :`<p class="row-meta">Aucune fiche écrite pour ce jour.</p>`}
-    <div class="form-row mt14"><button class="btn" id="sbFiche">Ajouter une fiche pour ce jour</button></div>
+    ${pid===ME?`<div class="form-row mt14"><button class="btn" id="sbFiche">Ajouter une fiche pour ce jour</button></div>`
+      :`<p class="row-meta mt14">Journée de ${esc(P(pid).name)}, en lecture seule.</p>`}
   </div>`;
 
   $('sbClose').onclick=()=>{OPENSESSION=null;renderSessions();};
@@ -1830,26 +1480,108 @@ function fichesParMain(){
     (idx[k]=idx[k]||[]).push(h);});
   return idx;
 }
-function renderReplays(){
-  let R=allReplays(ME,FMT);
-  R.sort((a,b)=>REVSORT==='loss'?a.d-b.d:REVSORT==='win'?b.d-a.d:Math.abs(b.d)-Math.abs(a.d));
-  $('revTable').innerHTML=`<tr><th>Jour</th><th>Heure</th><th>Position</th><th class="num">Tapis</th>
-    <th>Main</th><th>Tableau</th><th class="num">Résultat</th><th></th></tr>`+
-    (R.length?R.slice(0,25).map((r,i)=>`<tr><td class="num">${esc(r.tdate)}</td><td class="num">${esc(r.ts)}</td>
-      <td>${esc(r.pos||'—')}${r.posInf?'<span class="row-meta"> ≈</span>':''}</td><td class="num">${(r.stack/r.bb).toFixed(0)} bb</td>
+/* ---- Mains completes ----
+   La base IndexedDB porte l'integralite des historiques. `rep` (cinq mains par
+   tournoi) reste le repli pour les tournois importes avant qu'elle existe.
+   Le cache evite de relire la base a chaque tri ou changement d'onglet. */
+let CACHE_MAINS=null;
+function normMain(m){
+  // Les deux sources decrivent la meme chose sous des noms differents. On
+  // reconcilie ici pour que le rendu et le rejeu n'aient qu'une seule forme.
+  return{pid:m.pid,tid:m.tid,i:m.hid,tdate:m.date,ts:m.ts,game:m.game,fmt:m.fmt,
+    bb:m.bb,stack:m.stack,pos:m.pos,posInf:m.posInf,hole:m.hole,board:m.board,
+    d:m.d,sd:m.sd,seats:m.seats,a:m.a,lvl:m.lvl,prime:m.prime,complete:true};
+}
+function chargeMains(){
+  if(CACHE_MAINS)return Promise.resolve(CACHE_MAINS);
+  return txMains('readonly',st=>{const r=st.getAll();const b={};r.onsuccess=()=>b.v=r.result;return b;})
+    .then(b=>{CACHE_MAINS=(b&&b.v)?b.v.map(normMain):[];return CACHE_MAINS;})
+    .catch(()=>{CACHE_MAINS=[];return CACHE_MAINS;});
+}
+/* Toutes les mains du joueur pour un format : la base si elle en a, les rejeux
+   sinon. Melanger les deux ferait des doublons — la base contient deja les
+   mains que `rep` conserve. */
+function mainsDe(pid,fmt,tid){
+  const base=(CACHE_MAINS||[]).filter(m=>m.pid===pid&&(!fmt||m.fmt===fmt)&&(!tid||m.tid===tid));
+  if(base.length)return base;
+  return allReplays(pid,fmt).filter(r=>!tid||String(r.tid)===String(tid));
+}
+
+/* ---- Priorite de relecture ----
+   Trois idees, et aucune n'est une mesure — les coefficients sont arbitraires,
+   assumes, et le tri par montant reste offert juste a cote :
+   1. l'ampleur du mouvement de jetons donne l'enjeu ;
+   2. une main ou l'on n'a rien eu a decider — tapis preflop paye, fold
+      immediat — n'apprend rien, quelle que soit la somme perdue. C'est tout
+      l'inconvenient du classement par montant : il remonte les coolers ;
+   3. une decision importante prise en moins de trois secondes est suspecte.
+      Betclic horodate les actions, Winamax non : le signal est donc muet sur
+      la moitie de l'historique, et l'ecran le dit plutot que de faire comme si. */
+const PRIO_VITE=3;      // secondes : en deca, la decision n'a pas ete pesee
+function scorePrio(r){
+  const enjeu=Math.abs(+r.d||0);
+  if(!enjeu)return 0;
+  const pf=(r.a||[]).filter(a=>a.s==='PF'&&!/^Posts/i.test(a.v));
+  const moi=(r.a||[]).filter(a=>a.p==='moi'&&!/^Posts/i.test(a.v));
+  const streets=new Set(moi.map(a=>a.s));
+  let poids=1;
+  // Vrai choix : quelqu'un a relance avant moi et j'ai continue.
+  const iMoi=pf.findIndex(a=>a.p==='moi');
+  if(iMoi>0&&pf.slice(0,iMoi).some(a=>a.v==='Raises to')&&pf[iMoi].v!=='Folds')poids*=1.4;
+  // Main jouee sur plusieurs tours : les decisions s'y empilent.
+  if(streets.size>=3)poids*=1.35; else if(streets.size===2)poids*=1.15;
+  // Tapis preflop sans suite : gros montant, aucune decision a revoir.
+  if(streets.size<=1&&moi.some(a=>a.ai))poids*=0.55;
+  // Decision rapide sur un coup important (Betclic seulement).
+  let vite=false;
+  const sec=t=>{const p=String(t||'').split(':').map(Number);
+    return p.length===3?p[0]*3600+p[1]*60+p[2]:null;};
+  (r.a||[]).forEach((a,i)=>{
+    if(a.p!=='moi'||!i||!a.t)return;
+    const d=sec(a.t)-sec((r.a[i-1]||{}).t);
+    if(d!==null&&d>=0&&d<PRIO_VITE)vite=true;});
+  if(vite)poids*=1.5;
+  return{s:enjeu*poids,vite,streets:streets.size};
+}
+let PRIOSORT='prio';
+const PRIO_MAX=25;
+function renderPrio(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
+  const tbl=$('prioTable');if(!tbl)return;
+  let R=mainsDe(ME,FMT).map(r=>Object.assign({},r,{_p:scorePrio(r)}));
+  R.sort((a,b)=>PRIOSORT==='loss'?a.d-b.d
+    :PRIOSORT==='win'?b.d-a.d
+    :PRIOSORT==='abs'?Math.abs(b.d)-Math.abs(a.d)
+    :(b._p.s||0)-(a._p.s||0));
+  const vus=R.slice(0,PRIO_MAX);
+  const horodate=R.some(r=>(r.a||[]).some(a=>a.t));
+  tbl.innerHTML=`<tr><th>Jour</th><th>Heure</th><th>Position</th><th class="num">Tapis</th>
+    <th>Main</th><th>Tableau</th><th class="num">Résultat</th><th>Pourquoi</th><th></th></tr>`+
+    (vus.length?vus.map((r,i)=>{
+      const marques=[];
+      if(r._p.vite)marques.push('<span class="tag hot">décidé en moins de 3 s</span>');
+      if(r._p.streets>=3)marques.push('<span class="tag warm">jouée jusqu\'à la river</span>');
+      else if(r._p.streets===2)marques.push('<span class="tag">deux tours d\'enchères</span>');
+      return `<tr><td class="num">${esc(r.tdate)}</td><td class="num">${esc(r.ts)}</td>
+      <td>${esc(r.pos||'—')}${r.posInf?'<span class="row-meta"> ≈</span>':''}</td>
+      <td class="num">${(r.stack/r.bb).toFixed(0)} bb</td>
       <td style="font-family:var(--mono);font-size:12px">${esc(r.hole||'—')}</td>
       <td style="font-family:var(--mono);font-size:12px">${esc(r.board||'pas de flop')}</td>
       <td class="num ${r.d>=0?'pos':'neg'}">${r.d>=0?'+':''}${r.d} bb</td>
-      <td><button class="btn-mini" data-rep="${i}">Rejouer</button></td></tr>`).join('')
-     :`<tr><td colspan="8" class="empty">Aucune main enregistrée pour ce format. Importe un historique dans l'onglet Import.</td></tr>`);
-  $('revTable').querySelectorAll('[data-rep]').forEach(b=>b.onclick=()=>{
-    OPENREP=R[+b.dataset.rep];renderReplayBox();});
-  if(OPENREP&&!R.some(x=>x.i===OPENREP.i))OPENREP=null;
-  renderReplayBox();
+      <td>${marques.join('')||'<span class="row-meta">—</span>'}</td>
+      <td><button class="btn-mini" data-rep="${i}">Rejouer</button></td></tr>`;}).join('')
+     :`<tr><td colspan="9" class="empty">Aucune main pour ce format. Dépose un historique dans l'onglet Import.</td></tr>`);
+  tbl.querySelectorAll('[data-rep]').forEach(b=>b.onclick=()=>{
+    OPENREP=vus[+b.dataset.rep];renderReplayBox(OPENREP,'prioBox',()=>{OPENREP=null;renderPrio();});});
+  if(OPENREP&&!vus.some(x=>x.i===OPENREP.i))OPENREP=null;
+  renderReplayBox(OPENREP,'prioBox',()=>{OPENREP=null;renderPrio();});
+  const n=$('prioNote');
+  if(n)n.innerHTML=horodate?'':
+    `<p class="row-meta mt14">Aucune de ces mains n'est horodatée action par action — ce sont des historiques Winamax. Le signal « décidé trop vite » reste donc muet ici : il n'existe que sur Betclic.</p>`;
 }
 /* Affichage detaille d'une main rejouee. Deux appelants : le tableau de review
-   (#replayBox, format en cours seulement) et la base de mains (#bmReplay, tous
-   formats). Les identifiants internes sont derives de boxId pour que deux
+   (#replayBox, main du joueur consulte) et la base de mains (#bmReplay, mains
+   des trois). Les identifiants internes sont derives de boxId pour que deux
    panneaux puissent coexister dans la page. */
 function renderReplayBox(rep,boxId,fermer){
   const id=boxId||'replayBox';
@@ -1865,16 +1597,20 @@ function renderReplayBox(rep,boxId,fermer){
     body+=`<div style="font-size:13px;padding:2px 0;color:${mine?'var(--ink)':'var(--muted)'}">
       <span style="font-weight:${mine?600:400}">${esc(a.p)}</span> — ${esc(a.v)}${a.m?' '+a.m:''}${a.ai?' <span class="tag hot" style="margin:0">tapis</span>':''}</div>`;
   });
+  // La fiche appartient a l'appareil : on ne propose d'en creer une que sur
+  // ses propres mains, sinon on ecrirait une fiche a soi sur la main d'un autre.
+  const sien=(r.pid===undefined)||r.pid===ME;
   const liees=fichesParMain()[(r.pid||ME)+'|'+r.tid+'|'+r.i]||[];
   box.innerHTML=`<div class="card mt14" style="background:var(--paper)">
-    <div class="cal-nav"><div class="sec-label" style="margin:0">${esc(r.tdate)} · ${esc(r.ts)} · ${esc(r.game)}</div>
+    <div class="cal-nav"><div class="sec-label" style="margin:0">${esc(r.tdate)} · ${esc(r.ts)} · ${esc(r.game)}${r.pid&&r.pid!==ME?' · '+esc(P(r.pid).name):''}</div>
       <button class="btn-mini" id="${id}Close">Fermer</button></div>
     <div class="row-meta mt14">À table : ${r.seats.map(s=>`${esc(s.n)} ${(s.s/r.bb).toFixed(0)}bb${s.p?' ('+esc(s.p)+')':''}`).join(' · ')}</div>
     <div class="row-meta">Ma main <b style="font-family:var(--mono)">${esc(r.hole||'—')}</b> · tableau <b style="font-family:var(--mono)">${esc(r.board||'pas de flop')}</b> · blindes ${r.bb/2}/${r.bb} · ${r.sd?'abattage':'pas d\'abattage'}</div>
     ${body}
     <div class="row-meta mt14" style="color:${r.d>=0?'var(--clay)':'var(--alert)'};font-weight:600">Résultat : ${r.d>=0?'+':''}${r.d} bb</div>
     ${liees.length?`<div class="row-meta mt14">Fiche${liees.length>1?'s':''} rattachée${liees.length>1?'s':''} : ${liees.map(h=>`<span class="tag warm">${esc(h.leak)}</span>`).join('')}</div>`:''}
-    <div class="form-row mt14"><button class="btn" id="${id}Fiche">Créer la fiche de review</button></div></div>`;
+    ${sien?`<div class="form-row mt14"><button class="btn" id="${id}Fiche">Créer la fiche de review</button></div>`
+      :`<p class="row-meta mt14">Main de ${esc(P(r.pid).name)} : consultable, mais une fiche se rédige par son auteur.</p>`}</div>`;
   $(id+'Close').onclick=fermer||(()=>{OPENREP=null;renderReplayBox();});
   const fb=$(id+'Fiche');
   if(fb)fb.onclick=()=>{
@@ -1892,7 +1628,9 @@ function renderReplayBox(rep,boxId,fermer){
 }
 
 function renderReview(){
-  renderReplays();
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
+  renderPrio();
+  $('lkName').textContent=P(ME).name;
   const mine=DATA.hands.filter(h=>h.pid===ME),c={};
   mine.forEach(h=>c[h.leak]=(c[h.leak]||0)+1);
   const ranked=Object.entries(c).sort((a,b)=>b[1]-a[1]);
@@ -1902,37 +1640,27 @@ function renderReview(){
      <span class="lbar-n">${k}</span></div>`).join('')
     :`<p class="empty">Aucune fiche. Tague trois mains à la prochaine session et remplis-les sous 48 h.</p>`;
 
-  /* Meme classement, coupe en deux dans le temps. Un leak qui recule est le
-     seul retour dont on dispose sur l'efficacite du travail d'etude : le
-     resultat en euros, lui, met des milliers de tournois a repondre. */
-  const lim=new Date();lim.setDate(lim.getDate()-TEND_JOURS);const min=iso(lim);
-  const cnt=list=>{const o={};list.forEach(x=>o[x.leak]=(o[x.leak]||0)+1);return o;};
-  const recent=cnt(mine.filter(h=>h.date>=min)), avant=cnt(mine.filter(h=>h.date<min));
-  const noms=[...new Set([...Object.keys(recent),...Object.keys(avant)])];
-  $('leakTrend').innerHTML=noms.length
-    ? `<div class="tbl-wrap"><table><tr><th>Leak</th><th class="num">${TEND_JOURS} j</th><th class="num">Avant</th></tr>`
-      +noms.map(l=>[l,recent[l]||0,avant[l]||0])
-        .sort((a,b)=>(b[1]-a[1])||(b[2]-a[2]))
-        .map(([l,a,b])=>`<tr><td>${esc(l)}</td>
-          <td class="num"><b style="color:${a>b?'var(--alert)':a<b?'var(--clay)':'var(--ink)'}">${a}</b></td>
-          <td class="num"><span class="row-meta">${b}</span></td></tr>`).join('')
-      +`</table></div>
-      <p class="row-meta mt14">Attention au piège : ces deux colonnes ne comptent pas tes erreurs, elles comptent tes <b>fiches</b>. Un leak qui tombe à zéro parce que tu as arrêté d'écrire des fiches se lit exactement comme un leak corrigé. Les fréquences mesurées de l'onglet Import, elles, ne dépendent pas de ta saisie — c'est là qu'il faut confirmer.</p>`
-    : `<p class="empty">Pas encore de fiches. Cette comparaison a besoin d'un peu d'historique pour dire quelque chose.</p>`;
+  $('leakCompare').innerHTML=DATA.players.map(p=>{
+    const h=DATA.hands.filter(x=>x.pid===p.id),cc={};
+    h.forEach(x=>cc[x.leak]=(cc[x.leak]||0)+1);
+    const top=Object.entries(cc).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    return `<div class="mb12"><div class="row-title">${esc(p.name)} <span class="row-meta">— ${h.length} fiche${h.length>1?'s':''}</span></div>
+      <div style="margin-top:5px">${top.length?top.map(([l,k])=>`<span class="tag ${k>=3?'hot':'warm'}">${esc(l)} ×${k}</span>`).join(''):'<span class="row-meta">—</span>'}</div></div>`;}).join('');
 
   const rows=DATA.hands.slice().sort((a,b)=>b.date.localeCompare(a.date)).slice(0,50);
-  $('hvTable').innerHTML=`<tr><th>Date</th><th>Stade</th><th>Pos</th><th class="num">Stack</th>
-    <th>Leak</th><th>Spot</th><th>Ligne notée à chaud</th><th>Conclusion</th><th></th></tr>`+
+  $('hvTable').innerHTML=`<tr><th>Date</th><th>Joueur</th><th>Stade</th><th>Pos</th><th class="num">Stack</th>
+    <th>Leak</th><th>Spot</th><th>Ligne correcte</th><th>Revue à trois</th><th></th></tr>`+
     (rows.length?rows.map(h=>{
-      // reviewed absent = fiche pas encore conclue
+      // reviewed absent = fiche anterieure a l'etape 4, ou simplement pas encore revue
       const rv=isReviewed(h)?h.reviewed:null;
-      return `<tr><td class="num">${esc(h.date)}</td>
+      const qui=rv?(rv.by||[]).map(id=>esc(P(id).name.slice(0,6))).join(', '):'';
+      return `<tr><td class="num">${esc(h.date)}</td><td>${esc(P(h.pid).name)}</td>
       <td>${esc(h.stage)}</td><td>${esc(h.pos)}</td><td class="num">${h.stack} bb</td><td>${esc(h.leak)}</td>
       <td>${esc(h.spot)}</td><td>${esc(h.fix)}</td>
-      <td>${rv?`<span class="tag cool">${esc(rv.date)}</span><div class="row-meta">${esc(rv.notes||'')}</div><button class="btn-mini" data-unrev="${h.id}">Rouvrir</button>`
+      <td>${rv?`<span class="tag cool">${esc(rv.date)}</span><div class="row-meta">${qui||'—'}</div><div class="row-meta">${esc(rv.notes||'')}</div>${h.pid===OWNER()?`<button class="btn-mini" data-unrev="${h.id}">Retirer</button>`:''}`
         :'<span class="row-meta">en attente</span>'}</td>
-      <td><button class="btn-mini" data-del-hv="${h.id}">×</button></td></tr>`;}).join('')
-     :`<tr><td colspan="9" class="empty">Aucune fiche pour l'instant.</td></tr>`);
+      <td>${h.pid===OWNER()?`<button class="btn-mini" data-del-hv="${h.id}">×</button>`:''}</td></tr>`;}).join('')
+     :`<tr><td colspan="10" class="empty">Aucune fiche pour l'instant.</td></tr>`);
   $('hvTable').querySelectorAll('[data-del-hv]').forEach(b=>b.onclick=()=>{
     DATA.hands=DATA.hands.filter(x=>x.id!==b.dataset.delHv);save();renderReview();renderDash();renderAgenda();});
   $('hvTable').querySelectorAll('[data-unrev]').forEach(b=>b.onclick=()=>{
@@ -1940,67 +1668,93 @@ function renderReview(){
     if(!h)return;delete h.reviewed;save();renderReview();renderDash();renderAgenda();});
 }
 
-/* ============ BASE DE MAINS ============
-   Vue transverse : toutes les mains conservees, tous formats, filtrables.
-   Elle ne cree aucune donnee — elle relit `rep` et les fiches, rien d'autre.
-   Rappel de la limite : `rep` est plafonne et purge (REP_PER_T par tournoi,
-   REP_KEEP tournois par joueur). Cette base ne montre donc pas tout ce qui a
-   ete joue, seulement ce qui a survecu a la contrainte de stockage — et elle
-   le dit a l'ecran. */
-const BM={fmt:'',pos:'',res:'',leak:'',du:'',au:'',sort:'abs'};
-let BMOPEN=null;
-const BM_MAX=80;   // lignes affichees ; le compte total reste annonce
+/* ============ TES TOURNOIS ============
+   Remplace l'ancienne Base de mains et son jeu de filtres. Le detour etait
+   necessaire tant que le carnet ne gardait que cinq mains par tournoi : il
+   fallait fouiller un echantillon eparpille. Maintenant que les historiques
+   sont conserves en entier, le tournoi redevient l'unite naturelle — une
+   ligne, puis toutes ses mains, dans l'ordre ou elles ont ete jouees. */
+let OPENTOUR=null, OPENTMAIN=null;
+const TOUR_MAX=60;
+function renderTournois(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
+  const tbl=$('ldTable');if(!tbl)return;
+  const Tous=toursOf(ME,FMT).slice().reverse();
+  const pko=Tous.some(t=>+t.bounty>0);
+  const nMains=t=>mainsDe(ME,null,t.id).length;
+  tbl.innerHTML=`<tr><th>Date</th><th>Épreuve</th><th class="num">Champ</th><th class="num">Buy-in</th>
+    <th class="num">Place</th>${pko?'<th class="num">Primes</th>':''}<th class="num">Gain</th>
+    <th class="num">Net</th><th class="num">Mains</th><th></th></tr>`+
+    (Tous.length?Tous.slice(0,TOUR_MAX).map(t=>{
+      const net=(+t.won||0)-(+t.buyin||0), n=nMains(t);
+      return `<tr class="row-click${OPENTOUR===t.id?' row-open':''}" data-tour="${esc(t.id)}">
+      <td class="num">${esc(String(t.date).slice(0,10))}</td>
+      <td>${esc(t.game)}${t.mult?' '+esc(t.mult):''}</td>
+      <td class="num">${t.field||'—'}</td>
+      <td class="num">${(+t.buyin).toFixed(2)} €</td>
+      <td class="num">${t.finish||'—'}</td>
+      ${pko?`<td class="num">${+t.bounty?`${(+t.bounty).toFixed(2)} €${t.ko?' · '+t.ko+' KO':''}`:'—'}</td>`:''}
+      <td class="num">${t.res===false?'<span class="row-meta">résumé manquant</span>':(+t.won).toFixed(2)+' €'}</td>
+      <td class="num ${t.res===false?'':(net>=0?'pos':'neg')}">${t.res===false?'—':eur(net)}</td>
+      <td class="num">${n||'<span class="row-meta">—</span>'}</td>
+      <td>${ME===OWNER()?`<button class="btn-mini" data-del-t="${esc(t.id)}">×</button>`:''}</td></tr>`;}).join('')
+     :`<tr><td colspan="${pko?10:9}" class="empty">Aucun tournoi de ce format. Dépose un historique dans l'onglet Import.</td></tr>`);
 
-function bmFiltre(){
-  const idx=fichesParMain();
-  let R=allReplays(ME,BM.fmt||null);
-  R=R.filter(r=>{
-    if(BM.pos&&!String(r.pos||'').split(/\s+/).includes(BM.pos))return false;
-    if(BM.res==='gain'&&!(r.d>0))return false;
-    if(BM.res==='perte'&&!(r.d<0))return false;
-    if(BM.du&&r.tdate<BM.du)return false;
-    if(BM.au&&r.tdate>BM.au)return false;
-    if(BM.leak){
-      const f=idx[r.pid+'|'+r.tid+'|'+r.i]||[];
-      if(BM.leak==='__sans'){if(f.length)return false;}
-      else if(!f.some(h=>h.leak===BM.leak))return false;
-    }
-    return true;});
-  R.sort((a,b)=>BM.sort==='loss'?a.d-b.d
-    :BM.sort==='win'?b.d-a.d
-    :BM.sort==='date'?String(b.tdate).localeCompare(String(a.tdate))
-    :Math.abs(b.d)-Math.abs(a.d));
-  return{R,idx};
+  tbl.querySelectorAll('[data-tour]').forEach(tr=>tr.onclick=()=>{
+    OPENTOUR=(OPENTOUR===tr.dataset.tour)?null:tr.dataset.tour;
+    OPENTMAIN=null;renderTournois();});
+  tbl.querySelectorAll('[data-del-t]').forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    if(VIEW!==OWNER())return;
+    GONE.add(OWNER()+'|'+b.dataset.delT);
+    supprimeMainsDe(OWNER(),b.dataset.delT);
+    CACHE_MAINS=null;
+    DATA.tournaments=DATA.tournaments.filter(x=>!(x.id===b.dataset.delT&&x.pid===OWNER()));
+    if(OPENTOUR===b.dataset.delT)OPENTOUR=null;
+    save();renderAll();});
+  renderTourBox();
 }
 
-function renderBase(){
-  const tbl=$('bmTable');if(!tbl)return;
-  const{R,idx}=bmFiltre();
-  const vus=R.slice(0,BM_MAX);
-  $('bmCount').textContent=R.length
-    ? `${R.length} main${R.length>1?'s':''}${R.length>BM_MAX?`, les ${BM_MAX} premières affichées`:''}`
-    : 'aucune main';
-  tbl.innerHTML=`<tr><th>Jour</th><th>Heure</th><th>Format</th><th>Position</th>
-    <th class="num">Tapis</th><th>Main</th><th>Tableau</th><th class="num">Résultat</th><th>Fiche</th><th></th></tr>`+
-    (vus.length?vus.map((r,i)=>{
-      const f=idx[r.pid+'|'+r.tid+'|'+r.i]||[];
-      return `<tr class="row-click${BMOPEN&&BMOPEN.pid===r.pid&&BMOPEN.tid===r.tid&&BMOPEN.i===r.i?' row-open':''}" data-bm="${i}">
-      <td class="num">${esc(r.tdate)}</td><td class="num">${esc(r.ts)}</td>
-      <td>${esc(FMTS[r.fmt]||r.fmt||'—')}</td>
-      <td>${esc(r.pos||'—')}${r.posInf?'<span class="row-meta"> ≈</span>':''}</td>
-      <td class="num">${(r.stack/r.bb).toFixed(0)} bb</td>
-      <td style="font-family:var(--mono);font-size:12px">${esc(r.hole||'—')}</td>
-      <td style="font-family:var(--mono);font-size:12px">${esc(r.board||'pas de flop')}</td>
-      <td class="num ${r.d>=0?'pos':'neg'}">${r.d>=0?'+':''}${r.d} bb</td>
-      <td>${f.length?f.map(h=>`<span class="tag warm">${esc(h.leak)}</span>`).join(''):'<span class="row-meta">—</span>'}</td>
-      <td><button class="btn-mini" data-bmrep="${i}">Rejouer</button></td></tr>`;}).join('')
-     :`<tr><td colspan="10" class="empty">Aucune main ne correspond à ces filtres.</td></tr>`);
-  const ouvrir=i=>{const r=vus[+i];
-    BMOPEN=(BMOPEN&&BMOPEN.tid===r.tid&&BMOPEN.i===r.i&&BMOPEN.pid===r.pid)?null:r;
-    renderBase();};
-  tbl.querySelectorAll('[data-bmrep]').forEach(b=>b.onclick=e=>{e.stopPropagation();ouvrir(b.dataset.bmrep);});
-  tbl.querySelectorAll('[data-bm]').forEach(tr=>tr.onclick=()=>ouvrir(tr.dataset.bm));
-  renderReplayBox(BMOPEN,'bmReplay',()=>{BMOPEN=null;renderBase();});
+/* Toutes les mains d'un tournoi, dans l'ordre de jeu. Le tri par heure et non
+   par montant est deliberé : on relit une progression, pas un palmares. */
+function renderTourBox(){
+  const box=$('tourBox');if(!box)return;
+  if(!OPENTOUR){box.innerHTML='';return;}
+  const ME=VIEW;
+  const t=DATA.tournaments.find(x=>x.id===OPENTOUR&&x.pid===ME);
+  if(!t){OPENTOUR=null;box.innerHTML='';return;}
+  const M=mainsDe(ME,null,t.id).slice()
+    .sort((a,b)=>String(a.ts).localeCompare(String(b.ts)));
+  const idx=fichesParMain();
+  const partiel=M.length&&!M[0].complete;
+  box.innerHTML=`<div class="card mt14" style="background:var(--paper)">
+    <div class="cal-nav"><div class="sec-label" style="margin:0">${esc(t.game)} — ${esc(String(t.date).slice(0,10))}</div>
+      <button class="btn-mini" id="tbClose">Fermer</button></div>
+    ${!M.length?`<p class="empty">Aucune main conservée pour ce tournoi. Réimporte son fichier d'historique : le carnet garde désormais tout.</p>`
+     :`${partiel?`<div class="notice" style="margin-top:10px"><b>${M.length} main${M.length>1?'s':''} seulement.</b> Ce tournoi a été importé avant que le carnet conserve les historiques en entier — il n'en reste que les plus gros mouvements de jetons. Redépose son fichier pour retrouver la partie complète.</div>`
+       :`<p class="row-meta mt14">${M.length} mains, dans l'ordre où elles ont été jouées.</p>`}
+      <div class="tbl-wrap"><table>
+        <tr><th>Heure</th><th>Position</th><th class="num">Tapis</th><th>Main</th><th>Tableau</th>
+        <th class="num">Résultat</th><th>Fiche</th><th></th></tr>
+        ${M.map((r,i)=>{const f=idx[r.pid+'|'+r.tid+'|'+r.i]||[];
+          return `<tr class="row-click${OPENTMAIN===String(i)?' row-open':''}" data-tm="${i}">
+          <td class="num">${esc(r.ts)}</td>
+          <td>${esc(r.pos||'—')}${r.posInf?'<span class="row-meta"> ≈</span>':''}</td>
+          <td class="num">${(r.stack/r.bb).toFixed(0)} bb</td>
+          <td style="font-family:var(--mono);font-size:12px">${esc(r.hole||'—')}</td>
+          <td style="font-family:var(--mono);font-size:12px">${esc(r.board||'pas de flop')}</td>
+          <td class="num ${r.d>=0?'pos':'neg'}">${r.d>=0?'+':''}${r.d} bb</td>
+          <td>${f.length?f.map(h=>`<span class="tag warm">${esc(h.leak)}</span>`).join(''):'<span class="row-meta">—</span>'}</td>
+          <td><button class="btn-mini" data-tmrep="${i}">Rejouer</button></td></tr>`;}).join('')}
+      </table></div>
+      <div id="tourReplay"></div>`}
+  </div>`;
+  $('tbClose').onclick=()=>{OPENTOUR=null;OPENTMAIN=null;renderTournois();};
+  const ouvrir=i=>{OPENTMAIN=(OPENTMAIN===String(i))?null:String(i);renderTourBox();};
+  box.querySelectorAll('[data-tmrep]').forEach(b=>b.onclick=e=>{e.stopPropagation();ouvrir(b.dataset.tmrep);});
+  box.querySelectorAll('[data-tm]').forEach(tr=>tr.onclick=()=>ouvrir(tr.dataset.tm));
+  if(OPENTMAIN!==null&&M[+OPENTMAIN])
+    renderReplayBox(M[+OPENTMAIN],'tourReplay',()=>{OPENTMAIN=null;renderTourBox();});
 }
 
 /* ============ BANKROLL ============
@@ -2055,39 +1809,44 @@ function renderStore(){
     <p class="row-meta">${nT} tournois, ${nR} mains rejouables, ${par} octets par tournoi en moyenne.
     Marge avant saturation : environ ${reste.toLocaleString('fr-FR')} tournois. Au-delà, les rejeux les plus anciens
     sont purgés automatiquement ; les résultats et les statistiques ne le sont jamais.
-    ${DIRTY.size?`<br>${DIRTY.size} tournoi${DIRTY.size>1?'s':''} en attente d'envoi.`:''}</p>`;
+    ${DIRTY.size?`<br>${DIRTY.size} tournoi${DIRTY.size>1?'s':''} en attente d'envoi.`:''}</p>
+    <div id="storeMains" class="mt14"></div>`;
+  /* Le compte des mains completes vit dans une base a part, donc en asynchrone.
+     Il arrive apres le reste plutot que de faire attendre tout le panneau. */
+  compteMains().then(n=>{
+    const b=$('storeMains');if(!b)return;
+    b.innerHTML=n===null
+      ? `<p class="row-meta">Stockage étendu indisponible sur ce navigateur — navigation privée, ou espace refusé. Le carnet fonctionne normalement, seul l'atelier de ranges reste limité aux mains rejouables ci-dessus.</p>`
+      : `<div class="lbar"><span class="lbar-name">Mains conservées en entier</span>
+          <span class="lbar-track"><i style="width:${Math.min(100,n/50000*100).toFixed(1)}%;background:var(--sage)"></i></span>
+          <span class="lbar-n">${n.toLocaleString('fr-FR')}</span></div>
+        <p class="row-meta">Base séparée, hors du plafond de 5 Mo ci-dessus et <b>non synchronisée</b> : elle vit sur cet appareil seulement.
+        Compte environ 0,7 Ko par main — de quoi tenir des années. C'est elle qu'interroge <a href="review.html" style="color:var(--clay)">l'atelier de ranges</a>.
+        ${n?'':' Elle se remplira au prochain import ; les fichiers déjà déposés peuvent être redéposés pour rattraper l\'historique.'}</p>`;
+  });
 }
 function renderBankroll(){
-  const p=P(ME);
-  const max=p.bankroll/(p.rule||200);
-  const T=DATA.tournaments.filter(t=>t.pid===ME&&t.res!==false);
-  const net=T.reduce((a,t)=>a+(+t.won||0)-(+t.buyin||0),0);
-  const hb=horsBankroll(ME);
-  // Buy-in reellement joue : le plafond ne veut rien dire sans lui.
-  const bis=T.map(t=>+t.buyin||0).filter(x=>x>0);
-  const biMoy=bis.length?bis.reduce((a,b)=>a+b,0)/bis.length:0;
-  const biMax=bis.length?Math.max(...bis):0;
-  $('brCards').innerHTML=`
-    <div class="kpi clay"><div class="kpi-label">Bankroll</div>
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
+  $('brCards').innerHTML=DATA.players.map(p=>{
+    const max=p.bankroll/(p.rule||200);
+    const net=DATA.tournaments.filter(t=>t.pid===p.id)
+      .reduce((a,t)=>a+(+t.won||0)-(+t.buyin||0),0);
+    const hb=horsBankroll(p.id);
+    return `<div class="kpi ${hb.recents?'gold':hb.n?'clay':'olive'}"><div class="kpi-label">${esc(p.name)}</div>
       <div class="kpi-value">${p.bankroll.toFixed(0)}<span class="unit">€</span></div>
-      <div class="kpi-sub">règle : ${p.rule||200} caves de sécurité</div></div>
-    <div class="kpi olive"><div class="kpi-label">Buy-in maximum</div>
-      <div class="kpi-value">${max.toFixed(2)}<span class="unit">€</span></div>
-      <div class="kpi-sub">${bis.length?`joué en moyenne ${biMoy.toFixed(2)} € · plus haut ${biMax.toFixed(2)} €`:'aucun tournoi importé'}</div></div>
-    <div class="kpi ${net>=0?'olive':'gold'}"><div class="kpi-label">Net cumulé</div>
-      <div class="kpi-value">${(net>=0?'+':'−')+Math.abs(net).toFixed(0)}<span class="unit">€</span></div>
-      <div class="kpi-sub">${T.length} tournoi${T.length>1?'s':''} au résultat connu</div></div>
-    <div class="kpi ${hb.recents?'gold':hb.n?'night':'olive'}"><div class="kpi-label">Hors bankroll</div>
-      <div class="kpi-value">${hb.n}<span class="unit">tournois</span></div>
+      <div class="kpi-sub">Plafond ${max.toFixed(2)} € · ${p.rule} caves</div>
+      <div class="kpi-sub ${net>=0?'up':'down'}">Net cumulé ${eur(net)}</div>
       <div class="kpi-sub">${hb.n
-        ? `${hb.recents} sur ${BR_FENETRE} j · dernier il y a ${hb.jours} j`
-        : 'jamais au-dessus du plafond'}</div></div>`;
-  $('brAmount').value=p.bankroll;$('brRule').value=p.rule||200;
+        ? `${hb.n} hors bankroll · ${hb.recents} sur ${BR_FENETRE} j · dernier il y a ${hb.jours} j`
+        : 'Jamais au-dessus du plafond'}</div></div>`;}).join('');
+  const me=P(ME);$('brAmount').value=me.bankroll;$('brRule').value=me.rule||200;
+  const bn=$('brLogName');if(bn)bn.textContent=P(ME).name;
 
   /* Historique de la regle : sans lui, impossible de distinguer un vrai
      depassement d'une regle durcie apres coup. */
   const box=$('brLog');if(!box)return;
-  const log=(p.ruleLog||[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const p=P(ME), log=(p.ruleLog||[]).slice().sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+  const hb=horsBankroll(ME);
   box.innerHTML=(log.length
     ? `<div class="tbl-wrap"><table>
         <tr><th>Date</th><th class="num">Bankroll</th><th class="num">Caves</th><th class="num">Plafond</th></tr>`
@@ -2096,7 +1855,7 @@ function renderBankroll(){
         <td class="num">${+e.rule||200}</td>
         <td class="num">${((+e.bankroll||0)/(+e.rule||200)).toFixed(2)} €</td></tr>`).join('')
       +`</table></div>`
-    : `<p class="empty">Aucun changement enregistré pour l'instant. L'historique démarre à ta première modification — il n'est pas reconstitué en arrière, faute de savoir depuis quand la règle actuelle tient.</p>`)
+    : `<p class="empty">Aucun changement enregistré pour ${esc(p.name)}. L'historique démarre à la première modification faite depuis cette version — il n'est pas reconstitué en arrière, faute de savoir depuis quand la règle actuelle tient.</p>`)
     +(hb.n?`<p class="row-meta mt14">${hb.n} tournoi${hb.n>1?'s':''} au-dessus du plafond, du ${esc(String(hb.premier.date).slice(0,10))} au ${esc(String(hb.dernier.date).slice(0,10))}.${hb.sansTrace?` Dont ${hb.sansTrace} jugé${hb.sansTrace>1?'s':''} avec la règle actuelle, faute d'historique à leur date : le dépassement y est peut-être un durcissement de règle décidé après coup, pas un écart réel.`:' Chacun jugé avec la règle en vigueur ce jour-là.'}</p>`
       :`<p class="row-meta mt14">Aucun tournoi au-dessus du plafond.</p>`);
 }
@@ -2188,10 +1947,7 @@ function ruleState(s,r,fmt){
 }
 
 const FMTS={spin:'Spin',mtt:'MTT / PKO'};
-/* Format consulte. Par defaut MTT / PKO : c'est celui que jouent les fichiers
-   qu'on importe ici, et un carnet qui s'ouvre sur un onglet Spin vide donne
-   l'impression que l'import a echoue. */
-let FMT=localStorage.getItem(FMTKEY)||'mtt';
+let FMT=localStorage.getItem('carnet-poker-fmt')||'spin';
 
 function detectFormat(txt,name){
   if(/^\*\*\* HEADER \*\*\*/m.test(txt)&&/Site:\s*Betclic/i.test(txt))return 'betclic';
@@ -2286,7 +2042,16 @@ function inferPos(seats){
   });
 }
 function applySummary(t,s){
-  t.finish=s.finish; t.won=s.won||0; t.field=s.players||0;
+  t.finish=s.finish;
+  /* Meme convention que l'adaptateur Betclic : `won` INCLUT les primes — c'est
+     ce montant que lisent le net, le ROI et le graphe — et `bounty` les isole
+     pour l'affichage PKO. Le fichier de mains Winamax ne portant aucune prime,
+     meme en knockout, le resume en est la seule source : sans cette ligne, tout
+     un historique PKO se lit ampute du montant des primes.
+     `ko` reste inconnu — le resume ne dit pas combien d'eliminations. */
+  t.bounty=+s.bounty||0;
+  t.won=(+s.won||0)+t.bounty;
+  t.field=s.players||0;
   if(s.buyin)t.buyin=s.buyin;
   if(s.date&&!t.date)t.date=s.date;
   t.res=true;
@@ -2318,6 +2083,125 @@ function posKey(seat){
   return tags.length?tags[tags.length-1]:null;
 }
 
+/* ============ MAINS COMPLÈTES ============
+   localStorage plafonne a 5 Mo par origine. C'est ce plafond, et rien d'autre,
+   qui a dicte REP_PER_T = 5 : cinq mains par tournoi, choisies sur l'amplitude
+   du mouvement de jetons. Or ce tri est le plus defavorable qui soit pour
+   auditer des ranges — l'erreur preflop typique coute deux blindes et demie et
+   ne fait jamais un gros pot, donc elle n'est jamais retenue. Sur le tournoi
+   qui a servi de test, 444 mains jouees, 5 conservees.
+
+   IndexedDB leve la contrainte sans rien ajouter au projet : natif au
+   navigateur, donc toujours zero build, zero dependance.
+
+   TOUT CE QUI SUIT EST ADDITIF. Si la base est indisponible, refusee, pleine ou
+   bloquee par un autre onglet, l'import se deroule exactement comme avant et
+   aucune lecture du carnet n'en depend. C'est la condition pour qu'un stockage
+   experimental ne puisse pas casser un carnet qui marche.
+
+   Ces mains ne sont PAS synchronisees : plusieurs centaines de Ko par tournoi
+   n'ont rien a faire dans une ligne Supabase, et l'analyse fine se fait la ou
+   l'on importe. Le telephone continue de recevoir agregats et fiches. */
+const MDB_NOM=KEY.replace(/-v\d+$/,'')+'-mains', MDB_VER=1, MDB_STORE='mains';
+let mdb=null, mdbKO=false;
+
+function ouvreMains(){
+  if(mdb)return Promise.resolve(mdb);
+  if(mdbKO||!window.indexedDB)return Promise.resolve(null);
+  return new Promise(res=>{
+    let rq;
+    try{rq=indexedDB.open(MDB_NOM,MDB_VER);}catch(e){mdbKO=true;return res(null);}
+    rq.onupgradeneeded=()=>{
+      const d=rq.result;
+      if(!d.objectStoreNames.contains(MDB_STORE)){
+        const s=d.createObjectStore(MDB_STORE,{keyPath:'k'});
+        s.createIndex('pid','pid');
+        s.createIndex('tid','tid');
+        s.createIndex('date','date');
+      }
+    };
+    rq.onsuccess=()=>{mdb=rq.result;res(mdb);};
+    // Un echec n'est jamais fatal : on le note une fois et on n'y revient pas.
+    rq.onerror=()=>{mdbKO=true;res(null);};
+    rq.onblocked=()=>{mdbKO=true;res(null);};
+  });
+}
+function txMains(mode,fn){
+  return ouvreMains().then(d=>{
+    if(!d)return null;
+    return new Promise(res=>{
+      let tx;
+      try{tx=d.transaction(MDB_STORE,mode);}catch(e){return res(null);}
+      let sortie=null;
+      try{sortie=fn(tx.objectStore(MDB_STORE));}catch(e){}
+      // `== null` attrape null ET undefined : une fonction d'ecriture ne rend
+      // rien, et sans ca la transaction reussie serait rapportee comme un echec.
+      tx.oncomplete=()=>res(sortie==null?true:sortie);
+      tx.onerror=()=>res(null);
+      tx.onabort=()=>res(null);
+    });
+  }).catch(()=>null);
+}
+function ecritMains(liste){
+  if(!liste||!liste.length)return Promise.resolve(0);
+  return txMains('readwrite',st=>{liste.forEach(m=>{try{st.put(m);}catch(e){}});})
+    .then(ok=>ok?liste.length:0);
+}
+function compteMains(){
+  return txMains('readonly',st=>{
+    const r=st.count();const box={};r.onsuccess=()=>box.n=r.result;return box;})
+    .then(b=>b&&b.n!==undefined?b.n:null);
+}
+/* Suppression d'un tournoi : ses mains partent avec lui, sinon la base
+   grossirait de fantomes que plus rien ne reference. */
+function supprimeMainsDe(pid,tid){
+  return txMains('readwrite',st=>{
+    const i=st.index('tid'), r=i.openCursor(IDBKeyRange.only(String(tid)));
+    r.onsuccess=()=>{const c=r.result;if(!c)return;
+      if(c.value&&c.value.pid===pid)c.delete();c.continue();};
+  });
+}
+function videMains(){return txMains('readwrite',st=>{st.clear();});}
+
+/* Une main telle qu'elle sera relue par l'atelier de review. On garde ce qui
+   sert a analyser, pas le texte d'origine : environ deux fois plus leger, et
+   deja exploitable sans reparser.
+   `chipOk` a false signale que la reconstitution des jetons n'est pas bouclee.
+   La main est conservee quand meme — l'analyse preflop n'en depend pas, et
+   l'ecarter la ferait disparaitre d'un audit de range. */
+function mainComplete(H,hero,me,t,bb,dChips,C){
+  const FIN=/^(.+?) finished (\d+)\w*(?: and wins €?\s*([\d.,]+)(?: EUR)?)?/;
+  const elim=[];
+  H.summary.forEach(l=>{const m=l.match(FIN);
+    if(m)elim.push({n:m[1]===hero?'moi':m[1],place:+m[2],
+      gain:m[3]?parseFloat(String(m[3]).replace(',','.')):0});});
+  return{
+    k:OWNER()+'|'+t.id+'|'+(H.hdr['Hand ID']||''),
+    pid:OWNER(), tid:String(t.id), hid:H.hdr['Hand ID']||'',
+    date:String(H.hdr['Date & Time']||'').slice(0,10),
+    ts:String(H.hdr['Date & Time']||'').slice(11,19),
+    site:t.site, game:t.game, fmt:t.fmt, buyin:t.buyin,
+    // Niveau : Winamax l'ecrit dans l'en-tete de chaque main. Betclic ne le
+    // donne pas, mais ses blindes et son ante le situent tout aussi bien.
+    lvl:+H.hdr['Level']||null, ante:+H.hdr['Ante']||0, bb,
+    pos:(me.pos||[]).join(' '), posInf:!!me.inferred,
+    stack:me.stack, prime:+me.bounty||0,
+    hole:H.hole[hero]||'', board:H.board.join(' '),
+    d:Math.round(dChips/bb*10)/10, chipOk:!!C.ok,
+    sd:H.summary.some(l=>/shows/.test(l)),
+    // La prime de chaque adversaire est la clef du PSR en PKO. Betclic la donne
+    // a chaque main ; le format agrege la jetait, elle est conservee ici.
+    seats:H.seats.map(s=>({n:s.name===hero?'moi':s.name,s:s.stack,
+      p:(s.pos||[]).join(' '),b:+s.bounty||0})),
+    a:H.actions.filter(x=>!/^(Sits|Disconnected|Reconnected)/.test(x.act))
+      .map(x=>({s:x.street[0]+(x.street==='PRE-FLOP'?'F':''),
+        p:x.p===hero?'moi':x.p,v:x.act,m:x.amt,ai:x.allin,t:x.t||''})),
+    // Eliminations vues a cette table : chacune date le tournoi (« a cet
+    // instant il restait N joueurs ») et revele le gain de la place.
+    fin:elim
+  };
+}
+
 /* Chaque tournoi porte ses propres compteurs : le dédoublonnage protège
    les statistiques autant que le registre. */
 function aggregate(hands){
@@ -2325,6 +2209,10 @@ function aggregate(hands){
   for(const H of hands){const s=H.seats.find(x=>x.hero);if(s){hero=s.name;break;}}
   const esc2=s=>String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   const tour={};
+  // Toutes les mains, sans plafond : elles partiront dans IndexedDB. `rep`
+  // continue de recevoir les cinq plus gros mouvements pour le rejeu du
+  // carnet, qui lui vit dans localStorage.
+  const pleines=[];
   hands.forEach(H=>{
     const g=H.hdr['Game ID']||H.hdr['Tournament ID']||'?';
     const mode=(H.hdr['Game Mode']||'').toLowerCase();
@@ -2350,6 +2238,7 @@ function aggregate(hands){
     if(!C.ok)t.chipErr++;
     const bb=parseFloat(String(H.hdr['Blinds']||'0/0').split('/')[1])||0;
     const dChips=(C.won[hero]||0)-(C.put[hero]||0);
+    if(bb>0)pleines.push(mainComplete(H,hero,me,t,bb,dChips,C));
     if(C.ok&&bb>0){
       t.rep.push({i:(H.hdr['Hand ID']||'').slice(-6),
         ts:(H.hdr['Date & Time']||'').slice(11,19),
@@ -2405,7 +2294,7 @@ function aggregate(hands){
   // on ne garde que les plus gros mouvements de jetons de chaque tournoi
   out.forEach(t=>{t.rep.sort((a,b)=>Math.abs(b.d)-Math.abs(a.d));
     t.rep=t.rep.slice(0,REP_PER_T);});
-  return{hero,tournaments:out};
+  return{hero,tournaments:out,mains:pleines};
 }
 
 function diagnose(txt,name){
@@ -2458,6 +2347,10 @@ function parseWinamax(txt){
         H.hdr['Blinds']=(bl.length===3?bl[1]+'/'+bl[2]:bl[0]+'/'+bl[1]);
         H.hdr['Date & Time']=head[6].replace(/\//g,'-');
         H.hdr['Game Mode']='Tournament';
+        // Niveau de blindes, ecrit dans chaque en-tete Winamax. Combine a la
+        // structure complete que porte le fichier _summary, il situe la main
+        // dans le tournoi sans avoir besoin du nombre de joueurs restants.
+        H.hdr['Level']=+head[3]||null;
         continue;
       }
       const tbl=line.match(/^Table:\s*'(.+?)\((\d+)\)#\S*'\s+(\d+)-max.*?Seat #(\d+) is the button/);
@@ -2534,12 +2427,21 @@ function parseWinamaxSummary(txt){
     const fin=b.match(/You finished in (\d+)\w*\s+place/i);
     const pp=b.match(/Prizepool\s*:\s*([\d.,]+)/);
     const reg=b.match(/Registered players\s*:\s*(\d+)/);
-    const won=b.match(/You won\s*([\d.,]+)/i);
+    /* En knockout, la ligne de gain porte DEUX montants :
+         « You won 600.58€ + Bounty 51.50€ »
+       L'expression precedente s'arretait au premier et jetait les primes. Sur
+       un PKO elles font couramment la moitie du resultat — le net et le ROI
+       etaient donc sous-estimes sur tout l'historique Winamax. On isole la
+       ligne, puis on y lit les deux montants separement. */
+    const lg=(b.match(/^You won.*$/mi)||[''])[0];
+    const won=lg.match(/You won\s*([\d.,]+)/i);
+    const bty=lg.match(/Bounty\s*([\d.,]+)/i);
     const st=b.match(/Tournament started\s+(\d{4}\/\d\d\/\d\d \d\d:\d\d:\d\d)/);
     out.push({tid:id[2],game:id[1].trim(),
       buyin:bi?sommeEuros(bi[1]):0,
       finish:fin?+fin[1]:null, prizepool:pp?parseFloat(pp[1].replace(',','.')):0,
       players:reg?+reg[1]:0, won:won?parseFloat(won[1].replace(',','.')):0,
+      bounty:bty?parseFloat(bty[1].replace(',','.')):0,
       date:st?st[1].replace(/\//g,'-').slice(0,16):''});
   });
   return out;
@@ -2577,6 +2479,9 @@ function recalcTour(ex,t,nomFichier,batch,src){
 }
 async function handleFiles(files){
   const rep=[];LAST_DIAG=[];
+  // Mains completes de tous les fichiers du lot, ecrites en une fois a la fin :
+  // une transaction plutot qu'une par fichier.
+  const TOUTES=[];
   const batch=(DATA.batch||0)+1;DATA.batch=batch;
   for(const f of files){
     let txt='';try{txt=await f.text();}catch(e){rep.push(`<div class="notice"><b>${esc(f.name)}</b> — fichier illisible.</div>`);continue;}
@@ -2604,25 +2509,26 @@ async function handleFiles(files){
       rep.push(`<div class="notice"><b>${esc(f.name)}</b> — format « ${fmt} » non pris en charge. Structure relevée dans le diagnostic, en bas de page.</div>`);continue;}
     const hands=fmt==='winamax'?parseWinamax(txt):parseBetclic(txt);
     if(!hands.length){rep.push(`<div class="notice"><b>${esc(f.name)}</b> — aucune main reconnue.</div>`);continue;}
-    const {hero,tournaments}=aggregate(hands);
+    const {hero,tournaments,mains:pleines}=aggregate(hands);
     // Le pseudo du fichier doit correspondre a celui de l'appareil.
     // Cela intercepte l'import de l'historique d'un autre, ce qu'aucun
     // choix manuel de joueur ne saurait detecter.
     DATA.pseudos=DATA.pseudos||{};
-    DATA.pseudos[MOI]=DATA.pseudos[MOI]||[];
-    if(hero&&!DATA.pseudos[MOI].includes(hero)){
-      /* Nouveau pseudo. Deux causes possibles, et le carnet ne peut pas les
-         distinguer : un second compte a toi (Betclic et Winamax n'imposent pas
-         le meme pseudo), ou le fichier de quelqu'un d'autre. Melanger deux
-         joueurs fausserait tout sans jamais rien signaler — d'ou la question,
-         posee une seule fois par pseudo. */
-      if(DATA.pseudos[MOI].length&&
-         !confirm(`Le fichier « ${f.name} » est joué par « ${hero} », un pseudo que ce carnet ne connaît pas.\n\nDéjà enregistré${DATA.pseudos[MOI].length>1?'s':''} ici : ${DATA.pseudos[MOI].join(', ')}.\n\nSi c'est bien un autre de tes comptes, continue. Si c'est l'historique de quelqu'un d'autre, annule : les deux jeux seraient mélangés dans les mêmes statistiques, sans moyen de les séparer ensuite.`)){
-        rep.push(`<div class="notice"><b>${esc(f.name)} — import annulé.</b> Le pseudo « ${esc(hero)} » n'a pas été reconnu comme l'un des tiens. Rien n'a été ajouté.</div>`);
+    if(hero){
+      const proprio=Object.keys(DATA.pseudos).find(pid=>(DATA.pseudos[pid]||[]).includes(hero));
+      if(proprio&&proprio!==OWNER()){
+        rep.push(`<div class="notice"><b>${esc(f.name)} — import refusé.</b> Le pseudo « ${esc(hero)} » appartient au registre de ${esc(P(proprio).name)}. Cet appareil est celui de ${esc(P(OWNER()).name)}. Rien n'a été ajouté.</div>`);
         continue;
       }
-      DATA.pseudos[MOI].push(hero);
+      if(!proprio){
+        DATA.pseudos[OWNER()]=DATA.pseudos[OWNER()]||[];
+        if(!DATA.pseudos[OWNER()].includes(hero))DATA.pseudos[OWNER()].push(hero);
+      }
     }
+    /* APRES le controle de pseudo, jamais avant : un fichier refuse parce
+       qu'il appartient a un autre joueur ne doit pas laisser ses mains dans
+       la base de celui-ci. Le refus serait sans effet. */
+    TOUTES.push(...pleines);
     let added=0,dup=0,noSeat=0,repaired=0,recalcule=0;
     tournaments.forEach(t=>{
       const ex=DATA.tournaments.find(x=>x.id===t.id&&x.pid===ME);
@@ -2647,19 +2553,37 @@ async function handleFiles(files){
     rep.push(`<div class="notice ${warn.length?'':'good'}"><b>${esc(f.name)}</b> — ${hands.length} mains, hero « ${esc(hero||'?')} ». ${added} tournoi${added>1?'s':''} ajouté${added>1?'s':''}${dup?`, ${dup} doublon${dup>1?'s':''} ignoré${dup>1?'s':''} (registre et statistiques)`:''}${recalcule?`, ${recalcule} tournoi${recalcule>1?'s':''} recalculé${recalcule>1?'s':''}${fmt==='winamax'?' (classement et gain du résumé préservés)':''}`:''}${repaired?`, ${repaired} tournoi${repaired>1?'s':''} complété${repaired>1?'s':''} avec ses statistiques`:''}${warn.length?`. À vérifier : ${warn.join(', ')}.`:'.'}</div>`);
   }
   pruneReplays();
+  /* Ecriture des mains completes, apres coup et sans bloquer : le carnet est
+     deja a jour a ce stade. Un echec ne remonte donc pas en erreur d'import —
+     on le dit dans le rapport, et c'est tout. Elles sont ecrites meme pour les
+     tournois ignores comme doublons : c'est ce qui permet de rattraper
+     l'historique d'avant cette version en redeposant les memes fichiers. */
+  if(TOUTES.length){
+    const n=await ecritMains(TOUTES);
+    CACHE_MAINS=null;         // le cache de lecture est perime des qu'on ecrit
+    await chargeMains();      // et on le reconstruit avant de redessiner
+    rep.push(n
+      ? `<div class="notice good"><b>${n} main${n>1?'s':''} conservée${n>1?'s':''} en entier.</b> Elles alimentent l'atelier de ranges — le carnet, lui, n'en garde que les plus gros mouvements de jetons.</div>`
+      : `<div class="notice"><b>Mains complètes non enregistrées.</b> Le stockage étendu du navigateur n'a pas répondu : navigation privée, espace saturé, ou carnet ouvert dans un autre onglet. Le reste de l'import est intact — seul l'atelier de ranges sera moins fourni.</div>`);
+  }
   save();$('impReport').innerHTML=rep.join('');renderAll();
 }
 function pruneReplays(){
   // Sous la contrainte des 5 Mo, on sacrifie les rejeux les plus anciens.
   // Resultats et statistiques ne sont jamais purges.
-  const avecRejeux=()=>DATA.tournaments.filter(t=>t.rep&&t.rep.length)
-    .sort((a,b)=>String(b.date).localeCompare(String(a.date)));
   let garde=REP_KEEP;
   while(localSize()>4.2*1048576&&garde>5){garde=Math.floor(garde/2);
-    avecRejeux().slice(garde).forEach(t=>{t.rep=[];markDirty(t);});
+    DATA.players.forEach(p=>{
+      DATA.tournaments.filter(t=>t.pid===p.id&&t.rep&&t.rep.length)
+        .sort((a,b)=>String(b.date).localeCompare(String(a.date)))
+        .slice(garde).forEach(t=>{t.rep=[];markDirty(t);});});
     saveLocal();
   }
-  avecRejeux().slice(REP_KEEP).forEach(t=>{t.rep=[];markDirty(t);});
+  DATA.players.forEach(p=>{
+    const ts=DATA.tournaments.filter(t=>t.pid===p.id&&t.rep&&t.rep.length)
+      .sort((a,b)=>String(b.date).localeCompare(String(a.date)));
+    ts.slice(REP_KEEP).forEach(t=>{if(t.rep&&t.rep.length){t.rep=[];markDirty(t);}});
+  });
 }
 
 /* ============ IMPORT : AGRÉGATS ============ */
@@ -2717,6 +2641,10 @@ function statVal(s,rule){
 
 /* ============ IMPORT : RENDU ============ */
 function renderImport(){
+  const ME=VIEW;   // lecture seule : suit le joueur consulté
+  const dw=$('dropWho');if(dw)dw.textContent=P(OWNER()).name;
+  const dz0=$('drop');if(dz0)dz0.style.opacity=1;
+  $('ldName').textContent=P(ME).name;
   const sel=$('fmtSel');
   if(sel&&sel.value!==FMT)sel.value=FMT;
   const Tous=toursOf(ME,FMT);
@@ -2748,10 +2676,15 @@ function renderImport(){
       + gate(mults.length>=1000,`<div class="kpi-label">Seuil de rentabilité</div>
           <div class="kpi-value">${mults.length>=1000?seuil.toFixed(1)+'<span class="unit">%</span>':'—'}</div>`,
           mults.length>=1000?`multiplicateur moyen ${eM.toFixed(2)}`:`n = ${mults.length} / 1000 requis · estimateur à queue lourde`)
-      : (T.some(t=>t.ko)
-        ? `<div class="kpi olive"><div class="kpi-label">Primes encaissées</div>
-            <div class="kpi-value">${T.reduce((a,t)=>a+(+t.bounty||0),0).toFixed(2)}<span class="unit">€</span></div>
-            <div class="kpi-sub">${T.reduce((a,t)=>a+(+t.ko||0),0)} élimination(s) · ${(T.reduce((a,t)=>a+(+t.bounty||0),0)/Math.max(1,inv)*100).toFixed(0)} % des mises</div></div>`
+      /* Declenche sur les primes, pas sur le nombre d'eliminations : Winamax
+         donne le montant encaisse mais jamais le compte des KO, et se fier a
+         `ko` masquait la carte sur tout un historique PKO. */
+      : (T.some(t=>+t.bounty>0)
+        ? (()=>{const bt=T.reduce((a,t)=>a+(+t.bounty||0),0),
+                      ko=T.reduce((a,t)=>a+(+t.ko||0),0);
+            return `<div class="kpi olive"><div class="kpi-label">Primes encaissées</div>
+            <div class="kpi-value">${bt.toFixed(2)}<span class="unit">€</span></div>
+            <div class="kpi-sub">${ko?ko+' élimination(s) · ':''}${(bt/Math.max(1,inv)*100).toFixed(0)} % des mises</div></div>`;})()
         : gate(n>=200,`<div class="kpi-label">ROI</div>
           <div class="kpi-value">${n>=200?roi.toFixed(0)+'<span class="unit">%</span>':'—'}</div>`,
           n>=200?`± ${ciR.toFixed(0)} pts à 95 %`:`n = ${n} / 200 requis`))
@@ -2772,22 +2705,6 @@ function renderImport(){
     +(sansRes?`<div class="notice" style="margin-top:14px"><b>${sansRes} tournoi${sansRes>1?'s':''} sans résultat.</b> Le fichier de mains Winamax ne contient pas le classement : il vit dans le fichier <code>_summary</code> du même tournoi. Ces tournois sont exclus du net et du ROI tant qu'il manque, plutôt que comptés comme perdus.</div>`:'')
     +`<p class="verdict" style="font-size:15px;margin-top:16px">${v}</p>`;
 
-  const rows=Tous.slice().reverse().slice(0,40);
-  const pko=T.some(t=>t.ko);
-  $('ldTable').innerHTML=`<tr><th>Date</th><th>Épreuve</th><th class="num">À table</th><th class="num">Champ</th><th class="num">Buy-in</th>
-    <th class="num">Place</th>${pko?'<th class="num">Primes</th>':''}<th class="num">Gain</th><th class="num">Net</th><th class="num">Mains</th><th></th></tr>`+
-    (rows.length?rows.map(t=>{const net=(+t.won||0)-(+t.buyin||0);
-      void net;
-      return `<tr><td class="num">${esc(String(t.date).slice(0,10))}</td><td>${esc(t.game)}${t.mult?' '+esc(t.mult):''}</td>
-      <td class="num">${t.seats||'—'}</td><td class="num">${t.field||'—'}</td><td class="num">${(+t.buyin).toFixed(2)} €</td>
-      <td class="num">${t.finish||'—'}</td>${pko?`<td class="num">${t.ko?`${(+t.bounty).toFixed(2)} € · ${t.ko} KO`:'—'}</td>`:''}<td class="num">${t.res===false?'<span class="row-meta">résumé manquant</span>':(+t.won).toFixed(2)+' €'}</td>
-      <td class="num ${t.res===false?'':(net>=0?'pos':'neg')}">${t.res===false?'—':eur(net)}</td><td class="num">${t.hands}</td>
-      <td><button class="btn-mini" data-del-t="${esc(t.id)}">×</button></td></tr>`;}).join('')
-     :`<tr><td colspan="11" class="empty">Aucun tournoi de ce format. Dépose un fichier d'historique ci-dessus.</td></tr>`);
-  $('ldTable').querySelectorAll('[data-del-t]').forEach(b=>b.onclick=()=>{
-    GONE.add(OWNER()+'|'+b.dataset.delT);
-    DATA.tournaments=DATA.tournaments.filter(x=>!(x.id===b.dataset.delT&&x.pid===OWNER()));
-    save();renderImport();renderDash();});
 
   const s=statsOf(ME,FMT);
   $('statGrid').innerHTML=Object.entries(GATES).map(([k,[lbl,den,min]])=>{
@@ -2934,9 +2851,17 @@ function renderRules(s){
 
 /* ============ RENDER ALL ============ */
 function renderAll(){fillWho();renderImport();renderDash();renderCal();renderStudy();
-  renderSessions();renderReview();renderBase();renderBankroll();renderAgenda();renderStore();
-  const c=$('cmpFmt');if(c)c.textContent=FMTS[FMT];}
-function fillWho(){$('meName').textContent=P(ME).name;}
+  renderSessions();renderReview();renderTournois();renderBankroll();renderAgenda();renderStore();
+  const c=$('cmpFmt');if(c)c.textContent=FMTS[FMT];
+  const f=$('fmtSel');if(f&&f.value!==FMT)f.value=FMT;}
+function fillWho(){
+  $('meName').textContent=P(ME).name;
+  const w=$('viewSel');
+  w.innerHTML=DATA.players.map(p=>`<option value="${p.id}">${esc(p.name)}${p.id===ME?' (moi)':''}</option>`).join('');
+  w.value=VIEW;
+  $('roBanner').innerHTML = VIEW===ME ? '' :
+    `<div class="notice" style="margin-top:18px"><b>Lecture seule.</b> Tu consultes les données de ${esc(P(VIEW).name)}. Tes imports et tes saisies iront dans ton registre, celui de ${esc(P(ME).name)}.</div>`;
+}
 
 /* ============ INIT ============ */
 function fillStatics(){
@@ -2945,23 +2870,6 @@ function fillStatics(){
     `<optgroup label="${g}">${list.map(l=>`<option>${esc(l)}</option>`).join('')}</optgroup>`).join('');
   const t=iso(new Date());['stDate','hvDate'].forEach(id=>$(id).value=t);
   selDay=t;
-  // Filtres de la base de mains. La liste des leaks est la meme que celle des
-  // fiches, plus une entree pour les mains qu'aucune fiche ne commente.
-  $('bmLeak').innerHTML='<option value="">Tous</option><option value="__sans">Sans fiche rattachée</option>'+
-    LEAKS.map(([g,list])=>`<optgroup label="${g}">${list.map(l=>`<option>${esc(l)}</option>`).join('')}</optgroup>`).join('');
-}
-function wireBase(){
-  const maj=()=>{BMOPEN=null;renderBase();};
-  const champs={bmFmt:'fmt',bmPos:'pos',bmRes:'res',bmLeak:'leak',
-                bmDu:'du',bmAu:'au',bmSort:'sort'};
-  Object.entries(champs).forEach(([id,cle])=>{
-    const el=$(id);if(!el)return;
-    el.onchange=()=>{BM[cle]=el.value;maj();};});
-  $('bmReset').onclick=()=>{
-    Object.entries(champs).forEach(([id,cle])=>{
-      BM[cle]=(cle==='sort')?'abs':'';
-      const el=$(id);if(el)el.value=BM[cle];});
-    maj();};
 }
 
 /* Bascule d'onglet, appelable depuis le code : les raccourcis d'un panneau
@@ -2983,66 +2891,48 @@ async function init(){
   // passe par migrate() pour que la structure ait un seul point de verite.
   let raw=null;try{raw=localStorage.getItem(KEY);}catch(e){}
   try{DATA=migrate(raw?JSON.parse(raw):blank());}catch(e){console.error(e);DATA=blank();}
-  /* Instantane de reference, pris AVANT la moindre synchro. Sans lui, le
-     premier stampChanges() verrait tout le carnet comme neuf et re-daterait
-     chaque enregistrement a maintenant — cet appareil gagnerait alors toutes
-     les comparaisons, ce qui est exactement le comportement qu'on corrige. */
-  resnap();
+  ME=localStorage.getItem(MEKEY)||'p1';
   GROUP=localStorage.getItem(GRPKEY)||'';
   $('grpCode').value=GROUP;
 
-  if(SUPA_OK&&window.supabase&&GROUP){
+  if(window.supabase&&GROUP){
     try{sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
       await pullCloud(true);await pushCloud();}
     catch(e){setSync('err','Hors ligne');}
   }else setSync('','Local');
-  majSync();
 
   rebuildDirty();
   fillStatics();
-  wireBase();
-  wireApp();          // AVANT tout retour anticipe : dans la version d'origine,
-                      // le cablage venait apres l'ecran d'accueil et un carnet
-                      // tout neuf s'affichait avec des boutons inertes jusqu'au
-                      // premier rechargement de la page.
+  /* Les mains completes arrivent apres coup : le carnet s'affiche sans les
+     attendre, et se redessine quand elles sont la. Sur un historique fourni la
+     lecture prend un instant, et bloquer l'ouverture pour ca serait absurde. */
+  chargeMains().then(m=>{if(m.length&&$('app').style.display!=='none'){
+    renderPrio();renderTournois();}});
   $('boot').style.display='none';
 
-  /* Premiere ouverture : on demande un prenom. Il ne sert qu'a l'affichage —
-     rien dans les donnees n'en depend — mais un carnet qui dit « Moi » partout
-     n'appartient a personne. */
-  const nomConnu=localStorage.getItem(MEKEY);
-  const ouvrir=()=>{
-    $('whoami').style.display='none';
-    $('app').style.display='block';
-    renderAll();
-  };
-  if(!nomConnu){
+  // L'identite de l'appareil se choisit une seule fois, avant toute saisie.
+  const claimed=localStorage.getItem(MEKEY);
+  if(!claimed){
     $('whoami').style.display='block';
-    const valider=()=>{
-      const n=($('whoName').value||'').trim().slice(0,20);
-      if(!n){$('whoName').focus();return;}
-      P(ME).name=n;localStorage.setItem(MEKEY,n);
-      save();ouvrir();
-    };
-    $('whoGo').onclick=valider;
-    $('whoName').onkeydown=e=>{if(e.key==='Enter')valider();};
-    $('whoName').focus();
-  }else{
-    // Le nom fait foi cote DATA ; la cle locale n'est qu'un marqueur de
-    // « premiere ouverture deja passee », resynchronise a chaque demarrage.
-    localStorage.setItem(MEKEY,P(ME).name);
-    ouvrir();
+    $('whoamiList').innerHTML=DATA.players.map(p=>
+      `<div class="row-line"><div class="row-main"><div class="row-title">${esc(p.name)}</div></div>
+       <button class="btn" data-claim="${p.id}">C'est moi</button></div>`).join('');
+    $('whoamiList').querySelectorAll('[data-claim]').forEach(b=>b.onclick=()=>{
+      ME=b.dataset.claim;VIEW=ME;localStorage.setItem(MEKEY,ME);
+      $('whoami').style.display='none';$('app').style.display='block';
+      rebuildDirty();renderAll();});
+    return;
   }
+  ME=claimed;VIEW=ME;
+  $('app').style.display='block';
+  renderAll();
 
-  setInterval(()=>{if(sb&&GROUP)pullCloud(false).then(ok=>{if(ok)renderAll();});},45000);
-}
-
-/* Tous les gestionnaires d'evenements de l'application, en un seul endroit.
-   Extrait d'init() pour pouvoir etre appele avant l'ecran d'accueil. */
-function wireApp(){
-  $('renameBtn').onclick=()=>{const n=prompt('Ton prénom ou ton pseudo',P(ME).name);
-    if(!n)return;P(ME).name=n.trim().slice(0,20);
-    localStorage.setItem(MEKEY,P(ME).name);save();renderAll();};
+  // Changer de joueur consulte referme les panneaux ouverts : ils parleraient
+  // des donnees de quelqu'un d'autre sous un en-tete inchange.
+  $('viewSel').onchange=e=>{VIEW=e.target.value;
+    OPENREP=null;OPENSESSION=null;OPENTOUR=null;OPENTMAIN=null;renderAll();};
+  $('renameBtn').onclick=()=>{const n=prompt('Ton nom sur cet appareil',P(ME).name);
+    if(!n)return;P(ME).name=n.trim().slice(0,20);save();renderAll();};
   $('sdIn').onchange=e=>{DATA.sd=Math.max(.5,+e.target.value||2.5);save();renderDash();};
   $('tauIn').onchange=e=>{DATA.tau=tauValide(e.target.value);save();renderDash();};
 
@@ -3085,39 +2975,18 @@ function wireApp(){
     }
     me.bankroll=b;me.rule=r;save();renderBankroll();renderDash();};
 
-  /* Code de sauvegarde. Il n'y a ni compte ni mot de passe : le code EST
-     l'identifiant et le secret a la fois. Un code court ou devinable expose
-     donc le carnet, d'ou le generateur ci-dessous — six caracteres tires au
-     hasard cryptographique derriere le prenom, soit environ un milliard de
-     combinaisons, ce qui met le tirage a l'aveugle hors de portee. */
-  $('grpGen').onclick=()=>{
-    const base=(P(ME).name||'carnet').toLowerCase()
-      .normalize('NFD').replace(/[̀-ͯ]/g,'')   // accents retires : le code voyage par SMS
-      .replace(/[^a-z0-9]+/g,'').slice(0,12)||'carnet';
-    const abc='abcdefghijkmnpqrstuvwxyz23456789';        // ni l ni o ni 0 ni 1 : illisibles a l'oeil
-    const buf=new Uint32Array(6);crypto.getRandomValues(buf);
-    $('grpCode').value=base+'-'+[...buf].map(x=>abc[x%abc.length]).join('');
-    $('grpCode').focus();};
-
   $('grpSave').onclick=async()=>{
-    if(!SUPA_OK){alert("La sauvegarde en ligne n'est pas configurée sur cette copie du carnet. Tout continue de fonctionner en local — sers-toi de l'export JSON, juste en dessous.");return;}
-    const code=$('grpCode').value.trim().toLowerCase().replace(/\s+/g,'-');
-    if(code&&code.length<8){
-      alert("Ce code est trop court pour être une clé. Il n'y a pas de mot de passe derrière : qui le devine ouvre ton carnet. Utilise « Proposer un code ».");
-      return;}
-    GROUP=code;
+    GROUP=$('grpCode').value.trim().toLowerCase().replace(/\s+/g,'-');
     localStorage.setItem(GRPKEY,GROUP);
     if(!GROUP){sb=null;setSync('','Local');return;}
     if(!window.supabase){setSync('err','Supabase absent');return;}
     sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
     await pullCloud(true);await pushCloud();renderAll();};
-  $('grpPull').onclick=async()=>{
-    if(!GROUP){alert("Aucun code enregistré : il n'y a rien à récupérer.");return;}
-    if(await pullCloud(true))renderAll();};
+  $('grpPull').onclick=async()=>{if(await pullCloud(true))renderAll();};
 
-  $('fmtSel').onchange=e=>{FMT=e.target.value;localStorage.setItem(FMTKEY,FMT);
-    OPENREP=null;renderAll();};
-  $('revSort').onchange=e=>{REVSORT=e.target.value;renderReplays();};
+  $('fmtSel').onchange=e=>{FMT=e.target.value;localStorage.setItem('carnet-poker-fmt',FMT);
+    OPENREP=null;OPENTOUR=null;OPENTMAIN=null;renderAll();};
+  $('prioSort').onchange=e=>{PRIOSORT=e.target.value;renderPrio();};
   $('noSave').onclick=()=>{
     const d=$('noDate').value;if(!d){alert("Aucun jour joué : importe d'abord un historique.");return;}
     DATA.notes=DATA.notes||{};DATA.notes[ME]=DATA.notes[ME]||{};
@@ -3140,51 +3009,20 @@ function wireApp(){
 
   $('exportBtn').onclick=()=>{const a=document.createElement('a');
     a.href=URL.createObjectURL(new Blob([JSON.stringify(DATA,null,2)],{type:'application/json'}));
-    a.download='carnet-poker-'+iso(new Date())+'.json';a.click();};
+    a.download='carnet-poker.json';a.click();};
   $('importBtn').onclick=()=>$('importFile').click();
   $('importFile').onchange=e=>{const f=e.target.files[0];if(!f)return;
-    if(!confirm("Importer ce fichier REMPLACE tout le contenu actuel du carnet — il ne le complète pas. Exporte d'abord une sauvegarde si tu as un doute.\n\nContinuer ?")){
-      e.target.value='';return;}
-    const avantImport=[...etatCles().keys()];
     const r=new FileReader();r.onload=()=>{try{const d=JSON.parse(r.result);
       if(!d.players)throw new Error('format');
-      // Une sauvegarde peut dater d'un schema anterieur : meme chemin qu'au
-      // chargement. shapeUp() ne retient au passage que le premier joueur —
-      // un export du carnet a trois s'importe donc, ampute des deux autres.
-      DATA=migrate(d);
-      localStorage.setItem(MEKEY,P(ME).name);
-      /* Une sauvegarde restauree remplace tout : on repart de son instantane,
-         puis on re-date l'ensemble pour que cette version-la gagne la prochaine
-         fusion. C'est le sens de « restaurer » — sinon le distant, plus recent,
-         effacerait aussitot ce qu'on vient de remettre. */
-      const now=Date.now(), apres=etatCles();
-      apres.forEach((v,k)=>{DATA.ts[k]=now;});
-      // Ce que la sauvegarde ne contient pas doit MOURIR, pas seulement
-      // disparaitre de l'ecran : sans pierre tombale, la copie en ligne le
-      // ferait revenir a la synchro suivante, et la restauration serait vaine.
-      avantImport.forEach(k=>{if(!apres.has(k))DATA.tomb2[k]=now;});
-      resnap(apres);
-      rebuildDirty();save();renderAll();}
-      catch(err){alert("Fichier illisible. Attendu : un export JSON de ce carnet.");}};
-    r.readAsText(f);e.target.value='';};
-  $('resetBtn').onclick=()=>{
-    if(!confirm("Effacer tout le carnet : tournois, fiches, étude, calendrier, bankroll. L'action est définitive et vaut aussi pour la copie en ligne si tu as un code.\n\nContinuer ?"))return;
-    if(!confirm("Dernière confirmation. Rien ne sera récupérable."))return;
+      // Une sauvegarde peut dater d'un schema anterieur : meme chemin qu'au chargement.
+      DATA=migrate(d);rebuildDirty();save();renderAll();}
+      catch(err){alert("Fichier illisible. Attendu : un export JSON de ce carnet.");}};r.readAsText(f);};
+  $('resetBtn').onclick=()=>{if(!confirm("Effacer les données des trois joueurs, y compris les mains conservées pour l'atelier de ranges ? L'action est définitive."))return;
     DATA.tournaments.forEach(t=>GONE.add(TK(t)));
-    /* Effacer ne suffit pas : sans pierre tombale, chaque enregistrement
-       redescendrait a la premiere synchro depuis la copie en ligne — ou depuis
-       l'autre appareil. On declare donc tout mort avant de repartir a vide, et
-       on conserve ces declarations dans le carnet neuf. */
-    const now=Date.now(), tombes={};
-    etatCles().forEach((v,k)=>{tombes[k]=now;});
-    Object.assign(tombes,DATA.tomb2);
-    DIRTY.clear();const nom=P(ME).name;
-    DATA=blank();DATA.tomb2=tombes;P(ME).name=nom;
-    // Le carnet neuf doit gagner la prochaine fusion, sinon la version
-    // distante du joueur — prenom, bankroll — reviendrait par-dessus.
-    etatCles().forEach((v,k)=>{DATA.ts[k]=now+1;});
-    resnap();
-    save();renderAll();};
+    videMains();     // sinon le carnet repart a vide mais la base reste pleine
+    DIRTY.clear();DATA=blank();save();renderAll();};
+
+  setInterval(()=>{if(sb&&GROUP)pullCloud(false).then(ok=>{if(ok)renderAll();});},45000);
 }
 init();
 </script>
