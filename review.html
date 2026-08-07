@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>Review — Ranges et écarts</title>
+<meta name="description" content="Éditeur de ranges préflop et détection des écarts, adossé au carnet poker." />
+<meta name="theme-color" content="#0B1412" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=Public+Sans:wght@300;400;600;700;800&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:#0B1412; --paper-deep:#18302B; --card:#122220;
+    --ink:#E8E4D9; --ink-soft:#B4C2BB;
+    --olive:#1B4D40; --clay:#4FD1A5; --clay-soft:#7FE0C0; --clay-deep:#2FA982;
+    --sage:#6FBF9E; --gold:#C9922F; --alert:#E2574C;
+    --line:#25403A; --muted:#8FA39D; --shadow:rgba(0,0,0,.35);
+    --display:'Archivo Black', Impact, sans-serif;
+    --body:'Public Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+    --mono:'JetBrains Mono', ui-monospace, monospace;
+    /* Une couleur par action. Elles servent a la fois dans la grille, dans la
+       legende et dans le tableau des ecarts : un seul vocabulaire visuel. */
+    --a-open:#4FD1A5; --a-3bet:#E2574C; --a-call:#C9922F; --a-fold:#1B2C28;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html{scroll-behavior:smooth;overflow-x:hidden;}
+  body{background:var(--paper);color:var(--ink);font-family:var(--body);font-size:15px;
+    line-height:1.55;-webkit-font-smoothing:antialiased;overflow-x:hidden;}
+  body::before{content:"";position:fixed;inset:0;z-index:0;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E");
+    opacity:.045;mix-blend-mode:overlay;}
+  .wrap{max-width:1120px;margin:0 auto;padding:0 20px 70px;position:relative;z-index:1;}
+
+  header.top{background:linear-gradient(158deg,#13302A,#0B1412);padding:20px 0 16px;
+    position:relative;overflow:hidden;border-bottom:1px solid var(--line);}
+  header.top::after{content:"";position:absolute;right:-50px;top:-70px;width:240px;height:240px;
+    background:radial-gradient(circle,rgba(79,209,165,.13),transparent 68%);border-radius:50%;}
+  header.top .wrap{padding-bottom:0;}
+  .kicker{font-family:var(--mono);font-size:10px;letter-spacing:.18em;text-transform:uppercase;
+    color:var(--muted);margin-bottom:6px;}
+  header.top h1{font-family:var(--display);font-weight:400;font-size:clamp(21px,4.4vw,28px);
+    line-height:1;letter-spacing:-.02em;text-transform:uppercase;}
+  header.top h1 em{font-style:normal;color:var(--clay);}
+  .back{display:inline-block;margin-top:9px;font-family:var(--mono);font-size:10px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;
+    border-bottom:1px solid var(--line);padding-bottom:2px;transition:.15s;}
+  .back:hover{color:var(--clay);border-bottom-color:var(--clay);}
+
+  nav.tabs{position:sticky;top:0;z-index:50;background:rgba(11,20,18,.97);
+    backdrop-filter:blur(8px);border-bottom:1px solid var(--line);}
+  nav.tabs .inner{max-width:1120px;margin:0 auto;padding:0 12px;display:flex;overflow-x:auto;
+    scrollbar-width:none;}
+  nav.tabs .inner::-webkit-scrollbar{display:none;}
+  nav.tabs a{flex:0 0 auto;padding:14px 15px;font-family:var(--mono);font-size:11px;
+    letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;
+    white-space:nowrap;cursor:pointer;border-bottom:2px solid transparent;transition:.15s;}
+  nav.tabs a:hover{color:var(--ink);}
+  nav.tabs a.active{color:var(--clay);border-bottom-color:var(--clay);}
+
+  .panel{display:none;padding:26px 0 12px;}
+  .panel.on{display:block;animation:fadeIn .25s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(5px);}to{opacity:1;transform:none;}}
+  @media(prefers-reduced-motion:reduce){.panel.on{animation:none;}}
+
+  .sec-label{font-family:var(--mono);letter-spacing:.16em;text-transform:uppercase;font-size:10px;
+    color:var(--clay);display:flex;align-items:center;gap:9px;margin-bottom:10px;}
+  .sec-label::before{content:"";width:20px;height:1px;background:var(--clay);}
+  h2{font-family:var(--display);font-weight:400;font-size:clamp(19px,3.2vw,25px);line-height:1.2;
+    letter-spacing:-.02em;margin-bottom:9px;}
+  h2 em{font-style:normal;color:var(--clay);}
+  .lead{font-size:14.5px;color:var(--ink-soft);max-width:70ch;margin-bottom:15px;}
+  .mb12{margin-bottom:12px;}.mb18{margin-bottom:18px;}.mt14{margin-top:14px;}.mt22{margin-top:22px;}
+
+  .card{background:var(--card);border:1px solid var(--line);border-radius:4px;
+    box-shadow:0 2px 14px var(--shadow);padding:18px;}
+  .grid2{display:grid;gap:16px;grid-template-columns:minmax(0,1fr) minmax(0,320px);}
+  @media(max-width:900px){.grid2{grid-template-columns:1fr;}}
+
+  .field{display:flex;flex-direction:column;gap:5px;min-width:0;}
+  .field label{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);}
+  input,select,textarea{font-family:var(--body);font-size:14px;color:var(--ink);background:var(--paper);
+    border:1px solid var(--line);border-radius:4px;padding:9px 10px;width:100%;min-width:0;}
+  select option{background:#122220;color:var(--ink);}
+  input:focus,select:focus,textarea:focus{outline:2px solid var(--clay);outline-offset:1px;}
+  textarea{resize:vertical;min-height:70px;font-family:var(--mono);font-size:12.5px;line-height:1.6;}
+  .form-row{display:flex;gap:11px;flex-wrap:wrap;align-items:flex-end;}
+  .btn{background:var(--clay);border:1px solid var(--clay);color:#08120F;border-radius:4px;
+    padding:10px 16px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;cursor:pointer;transition:.15s;white-space:nowrap;}
+  .btn:hover{background:var(--clay-soft);border-color:var(--clay-soft);}
+  .btn-outline{background:transparent;border:1px solid var(--line);color:var(--muted);border-radius:4px;
+    padding:10px 16px;font-family:var(--mono);font-size:11px;font-weight:700;letter-spacing:.1em;
+    text-transform:uppercase;cursor:pointer;transition:.15s;white-space:nowrap;}
+  .btn-outline:hover{background:var(--line);color:var(--ink);}
+  .btn-mini{background:transparent;border:1px solid var(--line);border-radius:3px;padding:4px 9px;
+    font-family:var(--mono);font-size:10px;font-weight:700;color:var(--muted);cursor:pointer;transition:.15s;}
+  .btn-mini:hover{background:var(--clay);border-color:var(--clay);color:#08120F;}
+  .btn:disabled,.btn-outline:disabled{opacity:.4;cursor:not-allowed;}
+
+  .notice{border-left:3px solid var(--alert);background:rgba(226,87,76,.09);border-radius:0 4px 4px 0;
+    padding:11px 14px;font-size:14px;margin-bottom:9px;}
+  .notice b{color:var(--alert);}
+  .notice.good{border-left-color:var(--clay);background:rgba(79,209,165,.08);}
+  .notice.good b{color:var(--clay);}
+  .notice.warm{border-left-color:var(--gold);background:rgba(201,146,47,.08);}
+  .notice.warm b{color:var(--gold);}
+
+  /* ---- GRILLE 13x13 ----
+     Une case = une combinaison canonique. La diagonale porte les paires, le
+     dessus les assorties, le dessous les depareillees — convention universelle,
+     on n'invente rien ici : la grille doit etre lisible sans mode d'emploi. */
+  .rgrid{display:grid;grid-template-columns:repeat(13,1fr);gap:2px;width:100%;
+    user-select:none;-webkit-user-select:none;touch-action:none;}
+  .rcell{aspect-ratio:1;border-radius:2px;display:flex;align-items:center;justify-content:center;
+    font-family:var(--mono);font-size:clamp(7px,1.05vw,11px);font-weight:700;cursor:pointer;
+    background:var(--a-fold);color:#5C7A70;border:1px solid transparent;transition:background .08s;}
+  .rcell.open{background:var(--a-open);color:#08120F;}
+  .rcell.a3bet{background:var(--a-3bet);color:#2A0A07;}
+  .rcell.call{background:var(--a-call);color:#231603;}
+  .rcell:hover{border-color:var(--ink);}
+  .rcell.pair{box-shadow:inset 0 0 0 1px rgba(232,228,217,.22);}
+
+  .palette{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px;}
+  .swatch{display:flex;align-items:center;gap:7px;padding:7px 12px;border-radius:4px;cursor:pointer;
+    border:1px solid var(--line);background:transparent;font-family:var(--mono);font-size:10.5px;
+    font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);transition:.15s;}
+  .swatch i{width:12px;height:12px;border-radius:2px;display:inline-block;}
+  .swatch.on{border-color:var(--ink);color:var(--ink);background:rgba(232,228,217,.06);}
+
+  .meter{height:6px;background:#0B1412;border:1px solid var(--line);border-radius:99px;
+    overflow:hidden;margin:10px 0 6px;display:flex;}
+  .meter i{display:block;height:100%;}
+
+  .tbl-wrap{overflow-x:auto;margin-top:12px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;}
+  th{font-family:var(--mono);font-size:10px;letter-spacing:.12em;text-transform:uppercase;
+    color:var(--muted);text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap;}
+  td{padding:9px 10px;border-bottom:1px solid rgba(37,64,58,.5);vertical-align:top;}
+  tr:last-child td{border-bottom:none;}
+  td.num{text-align:right;font-family:var(--mono);font-size:12px;white-space:nowrap;}
+  .mono{font-family:var(--mono);}
+  .empty{color:var(--muted);font-size:13.5px;padding:16px 0;}
+  .row-meta{font-size:12.5px;color:var(--muted);}
+  .tag{display:inline-block;font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:99px;
+    border:1px solid var(--line);background:transparent;color:var(--muted);margin:0 4px 4px 0;}
+  .tag.hot{border-color:var(--alert);color:var(--alert);}
+  .tag.warm{border-color:var(--gold);color:var(--gold);}
+  .tag.cool{border-color:var(--clay);color:var(--clay);}
+  .ctx-done{color:var(--clay);}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="wrap">
+    <div class="kicker">Atelier de review</div>
+    <h1>Ranges <em>et écarts</em></h1>
+    <a class="back" href="carnet-poker.html">← Retour au carnet</a>
+  </div>
+</header>
+
+<nav class="tabs">
+  <div class="inner" id="tabBar">
+    <a data-tab="ranges" class="active">Mes ranges</a>
+    <a data-tab="ecarts">Écarts détectés</a>
+    <a data-tab="donnees">Données</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- =================== RANGES =================== -->
+<div class="panel on" data-panel="ranges">
+  <div class="sec-label">Saisie</div>
+  <h2>Tes ranges, <em>position par position</em></h2>
+  <p class="lead">Rien n'est imposé ici : ces grilles sont les tiennes, et c'est volontaire — une range juste contre un pool de 2 € n'est pas celle d'un solveur. Tu n'es pas obligé de tout remplir. Le détecteur d'écarts n'examine que les situations pour lesquelles une grille existe : commence par les deux ou trois qui te coûtent le plus, le reste viendra.</p>
+
+  <div class="card mb18">
+    <div class="form-row">
+      <div class="field" style="flex:1 1 180px"><label>Situation</label><select id="cType">
+        <option value="rfi">Ouverture (personne n'a relancé)</option>
+        <option value="vs">Face à une ouverture</option>
+      </select></div>
+      <div class="field" style="flex:1 1 130px"><label>Ma position</label><select id="cPos"></select></div>
+      <div class="field" style="flex:1 1 150px" id="cOpenerBox"><label>Ouvreur</label><select id="cOpener"></select></div>
+      <div class="field" style="flex:1 1 150px"><label>Tapis effectif</label><select id="cDepth">
+        <option value="60">Profond — 50 bb et plus</option>
+        <option value="40">Moyen — 30 à 49 bb</option>
+        <option value="25">Court — moins de 30 bb</option>
+      </select></div>
+      <button class="btn-outline" id="copyFrom">Copier depuis…</button>
+    </div>
+    <p class="row-meta mt14" id="ctxInfo"></p>
+  </div>
+
+  <div class="grid2 mb18">
+    <div class="card">
+      <div class="palette" id="palette"></div>
+      <div class="rgrid" id="rgrid"></div>
+      <div class="meter" id="meter"></div>
+      <p class="row-meta" id="stats"></p>
+      <div class="form-row mt14">
+        <button class="btn-mini" id="selAll">Tout sélectionner</button>
+        <button class="btn-mini" id="selNone">Tout effacer</button>
+        <button class="btn-mini" id="selPairs">Paires</button>
+        <button class="btn-mini" id="selSuited">Assorties</button>
+        <button class="btn-mini" id="selBroad">Broadways</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sec-label">Notation</div>
+      <p class="row-meta mt14" style="margin-bottom:8px">Colle une range depuis GTO Wizard, Equilab ou un tableau papier, puis Appliquer. La zone se met à jour toute seule quand tu peins dans la grille.</p>
+      <div class="field"><label id="notaLabel">Range</label><textarea id="nota" spellcheck="false" placeholder="Ex : 77+, ATs+, KQs, AJo+"></textarea></div>
+      <div class="form-row mt14">
+        <button class="btn" id="applyNota">Appliquer</button>
+        <button class="btn-outline" id="copyNota">Copier</button>
+      </div>
+      <div id="notaErr"></div>
+      <div class="sec-label mt22">Grilles remplies</div>
+      <div id="ctxList" class="mt14"></div>
+    </div>
+  </div>
+</div>
+
+<!-- =================== ÉCARTS =================== -->
+<div class="panel" data-panel="ecarts">
+  <div class="sec-label">Confrontation</div>
+  <h2>Là où tu es <em>sorti de ta propre range</em></h2>
+  <p class="lead">Chaque main conservée est reclassée — position, séquence d'action, tapis effectif — puis confrontée à la grille correspondante. Un écart n'est pas forcément une erreur : c'est un endroit où tu as joué autre chose que ce que tu as écrit à froid. À toi de décider qui avait raison, de la main ou de la grille.</p>
+
+  <div id="srcBox" class="mb18"></div>
+  <div id="biasBox" class="mb18"></div>
+
+  <div class="card mb18">
+    <div class="form-row">
+      <div class="field" style="flex:1 1 150px"><label>Situation</label><select id="fType">
+        <option value="">Toutes</option><option value="rfi">Ouverture</option>
+        <option value="vs">Face à une ouverture</option></select></div>
+      <div class="field" style="flex:1 1 130px"><label>Ma position</label><select id="fPos"></select></div>
+      <div class="field" style="flex:1 1 150px"><label>Verdict</label><select id="fVerdict">
+        <option value="ecart">Écarts seulement</option>
+        <option value="">Tout</option>
+        <option value="ok">Conformes seulement</option></select></div>
+      <button class="btn-outline" id="fReset">Réinitialiser</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">Résultats — <span id="ecCount"></span></div>
+    <div id="ecSummary"></div>
+    <div class="tbl-wrap"><table id="ecTable"></table></div>
+  </div>
+</div>
+
+<!-- =================== DONNÉES =================== -->
+<div class="panel" data-panel="donnees">
+  <div class="sec-label">Sauvegarde</div>
+  <h2>Tes grilles, <em>en sécurité</em></h2>
+  <p class="lead">Les ranges vivent dans ce navigateur, dans leur propre espace — elles ne dépendent ni du carnet à trois ni de celui des amis, et ne partent sur aucun serveur. Tu vas y passer du temps : exporte-les une fois la saisie terminée.</p>
+
+  <div class="card mb18">
+    <div id="storeStat"></div>
+    <div class="form-row mt14">
+      <button class="btn" id="expBtn">Exporter mes ranges</button>
+      <button class="btn-outline" id="impBtn">Importer</button>
+      <input type="file" id="impFile" accept="application/json" style="display:none">
+      <button class="btn-outline" id="wipeBtn" style="border-color:var(--alert);color:var(--alert)">Tout effacer</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">Ce que cette page lit, et ce qu'elle ne touche pas</div>
+    <p class="row-meta mt14">Elle lit les mains conservées par le carnet, en lecture seule : elle n'écrit jamais dedans, ne synchronise rien et ne peut rien y casser. Tes ranges, elles, lui appartiennent en propre.</p>
+    <div id="srcDetail" class="mt14"></div>
+  </div>
+</div>
+
+</div>
+
+<script>
+/* ============================================================
+   ATELIER DE REVIEW — v1 : ranges preflop et detection d'ecarts
+
+   Perimetre assume de cette premiere version :
+   - deux familles de situations, l'ouverture et la defense face a une
+     ouverture. Le 4bet est ecarte : les spots sont rares, et confronter
+     trois mains a une grille ne dit rien ;
+   - ranges PURES, une main = une action. Le detecteur doit pouvoir
+     trancher ; avec des frequences il ne dirait plus « ecart » mais
+     « ligne minoritaire », ce qui n'est pas une erreur ;
+   - trois bandes de profondeur seulement. Un decoupage plus fin
+     multiplierait la saisie sans rien apporter tant que le volume de
+     mains par case reste faible.
+   ============================================================ */
+
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+/* ---------- Grille canonique ---------- */
+const RANGS='AKQJT98765432';
+const POSN=['EP','MP','CO','BTN','SB','BB'];
+/* Ordre de parole : sert a savoir qui peut ouvrir avant qui. La BB ne peut
+   jamais etre l'ouvreuse d'un pot non relance, elle n'apparait donc pas
+   comme ouvreur possible. */
+const ORDRE={EP:0,MP:1,CO:2,BTN:3,SB:4,BB:5};
+const PROFS=['60','40','25'];
+const PROF_LBL={60:'50 bb et +',40:'30–49 bb',25:'moins de 30 bb'};
+
+/* Nombre de combinaisons par case : une paire en compte 6, une assortie 4,
+   une depareillee 12. Raisonner en cases plutot qu'en combinaisons ferait
+   croire qu'une range de paires est enorme alors qu'elle est minuscule. */
+function combos(m){return m.length===2?6:(m[2]==='s'?4:12);}
+const TOTAL_COMBOS=1326;
+
+function toutesLesMains(){
+  const out=[];
+  for(let i=0;i<13;i++)for(let j=0;j<13;j++){
+    if(i===j)out.push(RANGS[i]+RANGS[i]);
+    else if(i<j)out.push(RANGS[i]+RANGS[j]+'s');
+    else out.push(RANGS[j]+RANGS[i]+'o');
+  }
+  return [...new Set(out)];
+}
+const MAINS=toutesLesMains();
+
+/* Case de la grille en position (i,j). i<j au-dessus de la diagonale =
+   assorties, i>j en dessous = depareillees. */
+function mainDeCase(i,j){
+  if(i===j)return RANGS[i]+RANGS[i];
+  return i<j ? RANGS[i]+RANGS[j]+'s' : RANGS[j]+RANGS[i]+'o';
+}
+
+/* ---------- Actions par famille de situation ---------- */
+const ACTIONS={
+  rfi:[{v:'open',lbl:'Ouvrir',cls:'open',c:'var(--a-open)'},
+       {v:'fold',lbl:'Fold',cls:'',c:'var(--a-fold)'}],
+  vs: [{v:'3bet',lbl:'3bet',cls:'a3bet',c:'var(--a-3bet)'},
+       {v:'call',lbl:'Call',cls:'call',c:'var(--a-call)'},
+       {v:'fold',lbl:'Fold',cls:'',c:'var(--a-fold)'}]
+};
+const CLS={open:'open','3bet':'a3bet',call:'call'};
+
+/* ============ STOCKAGE ============
+   Cle distincte de celles des carnets : ces ranges appartiennent au joueur,
+   pas a un carnet. Elles survivent donc a une remise a zero de l'un comme
+   de l'autre, et se partagent entre les deux. */
+const RKEY='carnet-ranges-v1';
+let R={v:1,g:{}};      // g : { 'rfi|CO|40': {AKs:'open', ...} }
+function chargeRanges(){
+  try{const raw=localStorage.getItem(RKEY);if(raw){const d=JSON.parse(raw);
+    if(d&&d.g)R=d;}}catch(e){console.error(e);}
+}
+function sauveRanges(){
+  try{localStorage.setItem(RKEY,JSON.stringify(R));}
+  catch(e){console.error(e);alert("Impossible d'enregistrer : stockage plein.");}
+}
+const cleCtx=(t,p,o,d)=>t==='rfi'?`rfi|${p}|${d}`:`vs|${p}|${o}|${d}`;
+function grille(k){return R.g[k]||(R.g[k]={});}
+
+/* ============ NOTATION ============
+   Lecture permissive d'une notation standard : « 77+ », « ATs+ »,
+   « A2s-A5s », « KQo », « AK » (les deux formes). C'est le format que
+   sortent GTO Wizard, Equilab et la plupart des tableaux : imposer une
+   saisie case par case pour 45 grilles serait une punition. */
+function litNotation(txt){
+  const mains=new Set(); const erreurs=[];
+  String(txt||'').split(/[,;\n]+/).map(s=>s.trim()).filter(Boolean).forEach(tok=>{
+    const t=tok.replace(/\s+/g,'');
+    let m;
+    // Intervalle : A2s-A5s, 22-99
+    if((m=t.match(/^([AKQJT2-9])([AKQJT2-9])([so]?)-([AKQJT2-9])([AKQJT2-9])([so]?)$/i))){
+      const [,a1,b1,s1,a2,b2,s2]=m;
+      const suf=(s1||s2||'').toLowerCase();
+      if(a1.toUpperCase()!==a2.toUpperCase()&&b1.toUpperCase()!==b2.toUpperCase()){
+        // 22-99 : les deux rangs bougent ensemble, c'est un intervalle de paires
+        if(a1.toUpperCase()===b1.toUpperCase()&&a2.toUpperCase()===b2.toUpperCase()){
+          const i1=RANGS.indexOf(a1.toUpperCase()), i2=RANGS.indexOf(a2.toUpperCase());
+          for(let i=Math.min(i1,i2);i<=Math.max(i1,i2);i++)mains.add(RANGS[i]+RANGS[i]);
+          return;
+        }
+        erreurs.push(tok);return;
+      }
+      // Rang haut fixe, rang bas qui varie : A2s-A5s
+      const hi=a1.toUpperCase();
+      const i1=RANGS.indexOf(b1.toUpperCase()), i2=RANGS.indexOf(b2.toUpperCase());
+      for(let i=Math.min(i1,i2);i<=Math.max(i1,i2);i++){
+        const lo=RANGS[i];if(lo===hi)continue;
+        if(suf)mains.add(hi+lo+suf); else {mains.add(hi+lo+'s');mains.add(hi+lo+'o');}
+      }
+      return;
+    }
+    // Avec ou sans « + » : 77+, ATs+, KQo, AK
+    if((m=t.match(/^([AKQJT2-9])([AKQJT2-9])([so]?)(\+?)$/i))){
+      let [,a,b,suf,plus]=m;
+      a=a.toUpperCase();b=b.toUpperCase();suf=suf.toLowerCase();
+      let ia=RANGS.indexOf(a), ib=RANGS.indexOf(b);
+      if(ia<0||ib<0){erreurs.push(tok);return;}
+      if(ia>ib){const x=ia;ia=ib;ib=x;}      // le rang le plus fort d'abord
+      if(ia===ib){                            // paire
+        if(plus)for(let i=ia;i>=0;i--)mains.add(RANGS[i]+RANGS[i]);
+        else mains.add(RANGS[ia]+RANGS[ia]);
+        return;
+      }
+      const ajoute=(x,y)=>{
+        if(suf)mains.add(RANGS[x]+RANGS[y]+suf);
+        else {mains.add(RANGS[x]+RANGS[y]+'s');mains.add(RANGS[x]+RANGS[y]+'o');}};
+      // « + » fait remonter le rang FAIBLE vers le fort : ATs+ = ATs, AJs, AQs, AKs
+      if(plus)for(let y=ib;y>ia;y--)ajoute(ia,y);
+      else ajoute(ia,ib);
+      return;
+    }
+    erreurs.push(tok);
+  });
+  return{mains:[...mains],erreurs};
+}
+
+/* Ecriture compacte : on regroupe ce qui se suit, sinon une range large
+   produirait cent jetons illisibles. */
+function ecritNotation(liste){
+  const S=new Set(liste), out=[];
+  // Paires
+  let i=0;
+  while(i<13){
+    if(!S.has(RANGS[i]+RANGS[i])){i++;continue;}
+    let j=i;while(j+1<13&&S.has(RANGS[j+1]+RANGS[j+1]))j++;
+    // Suite jusqu'aux As : notation « + »
+    if(i===0)out.push(RANGS[j]+RANGS[j]+'+');
+    else if(i===j)out.push(RANGS[i]+RANGS[i]);
+    else out.push(RANGS[j]+RANGS[j]+'-'+RANGS[i]+RANGS[i]);
+    i=j+1;
+  }
+  // Assorties puis depareillees, par rang haut
+  ['s','o'].forEach(suf=>{
+    for(let a=0;a<13;a++){
+      let b=a+1;
+      while(b<13){
+        if(!S.has(RANGS[a]+RANGS[b]+suf)){b++;continue;}
+        let c=b;while(c+1<13&&S.has(RANGS[a]+RANGS[c+1]+suf))c++;
+        if(c===a+1)out.push(RANGS[a]+RANGS[b]+suf+(b===a+1?'':''));
+        if(b===a+1&&c>b)out.push(RANGS[a]+RANGS[c]+suf+'+');
+        else if(b===a+1&&c===b)out.push(RANGS[a]+RANGS[b]+suf);
+        else if(c===b)out.push(RANGS[a]+RANGS[b]+suf);
+        else out.push(RANGS[a]+RANGS[b]+suf+'-'+RANGS[a]+RANGS[c]+suf);
+        b=c+1;
+      }
+    }
+  });
+  return [...new Set(out)].join(', ');
+}
+
+/* ============ CONTEXTE COURANT ============ */
+let CTX={t:'rfi',p:'CO',o:'EP',d:'40'};
+let BRUSH='open';
+
+function ouvreursPossibles(p){
+  // On ne peut faire face qu'a une ouverture venue d'une position anterieure.
+  return POSN.filter(x=>x!=='BB'&&ORDRE[x]<ORDRE[p]);
+}
+function majSelecteurs(){
+  $('cType').value=CTX.t;
+  const vs=CTX.t==='vs';
+  $('cOpenerBox').style.display=vs?'':'none';
+  // En ouverture, la BB n'a personne derriere a qui voler : elle est exclue.
+  const posDispo=vs?POSN.filter(p=>ouvreursPossibles(p).length>0):POSN.filter(p=>p!=='BB');
+  if(!posDispo.includes(CTX.p))CTX.p=posDispo[posDispo.length-1];
+  $('cPos').innerHTML=posDispo.map(p=>`<option${p===CTX.p?' selected':''}>${p}</option>`).join('');
+  if(vs){
+    const ops=ouvreursPossibles(CTX.p);
+    if(!ops.includes(CTX.o))CTX.o=ops[ops.length-1];
+    $('cOpener').innerHTML=ops.map(p=>`<option${p===CTX.o?' selected':''}>${p}</option>`).join('');
+  }
+  $('cDepth').value=CTX.d;
+  const acts=ACTIONS[CTX.t];
+  if(!acts.some(a=>a.v===BRUSH))BRUSH=acts[0].v;
+  $('palette').innerHTML=acts.map(a=>
+    `<button class="swatch${a.v===BRUSH?' on':''}" data-brush="${a.v}">
+      <i style="background:${a.c};${a.v==='fold'?'border:1px solid var(--line)':''}"></i>${esc(a.lbl)}</button>`).join('');
+  $('palette').querySelectorAll('[data-brush]').forEach(b=>b.onclick=()=>{
+    BRUSH=b.dataset.brush;majSelecteurs();});
+  $('notaLabel').textContent=CTX.t==='rfi'?"Mains ouvertes":`Mains jouées en « ${BRUSH==='fold'?'3bet':BRUSH} »`;
+  $('ctxInfo').innerHTML=CTX.t==='rfi'
+    ? `Tu es en <b class="mono">${CTX.p}</b>, personne n'a relancé avant toi, tapis effectif <b class="mono">${PROF_LBL[CTX.d]}</b>.`
+    : `Tu es en <b class="mono">${CTX.p}</b>, <b class="mono">${CTX.o}</b> a ouvert, tapis effectif <b class="mono">${PROF_LBL[CTX.d]}</b>. Le tapis effectif est le plus petit des deux, le tien ou le sien.`;
+  dessineGrille();
+  majListeCtx();
+}
+
+function cleCourante(){return cleCtx(CTX.t,CTX.p,CTX.o,CTX.d);}
+
+function dessineGrille(){
+  const g=grille(cleCourante());
+  let html='';
+  for(let i=0;i<13;i++)for(let j=0;j<13;j++){
+    const m=mainDeCase(i,j), a=g[m]||'fold';
+    html+=`<div class="rcell ${CLS[a]||''}${i===j?' pair':''}" data-m="${m}">${m}</div>`;
+  }
+  $('rgrid').innerHTML=html;
+  majStats();
+  majNotation();
+}
+
+function majStats(){
+  const g=grille(cleCourante());
+  const acts=ACTIONS[CTX.t].filter(a=>a.v!=='fold');
+  const parAct={},total={};
+  acts.forEach(a=>{parAct[a.v]=0;});
+  MAINS.forEach(m=>{const a=g[m];if(a&&a!=='fold')parAct[a]=(parAct[a]||0)+combos(m);});
+  const somme=Object.values(parAct).reduce((x,y)=>x+y,0);
+  $('meter').innerHTML=acts.map(a=>
+    `<i style="width:${(parAct[a.v]/TOTAL_COMBOS*100).toFixed(2)}%;background:${a.c}"></i>`).join('')
+    +`<i style="flex:1;background:transparent"></i>`;
+  $('stats').innerHTML=acts.map(a=>
+    `<span class="tag" style="border-color:${a.c};color:${a.c}">${esc(a.lbl)} ${(parAct[a.v]/TOTAL_COMBOS*100).toFixed(1)} %</span>`).join('')
+    +`<span class="tag">Total joué ${(somme/TOTAL_COMBOS*100).toFixed(1)} % · ${somme} combinaisons sur ${TOTAL_COMBOS}</span>`;
+  void total;
+}
+
+function majNotation(){
+  const g=grille(cleCourante());
+  const cible=CTX.t==='rfi'?'open':(BRUSH==='fold'?'3bet':BRUSH);
+  $('nota').value=ecritNotation(MAINS.filter(m=>g[m]===cible));
+  $('notaLabel').textContent=CTX.t==='rfi'?'Mains ouvertes':`Mains jouées en « ${cible} »`;
+}
+
+/* --- peinture --- */
+let PEINT=false;
+function applique(m){
+  const g=grille(cleCourante());
+  if(BRUSH==='fold')delete g[m]; else g[m]=BRUSH;
+}
+function cellule(el){
+  if(!el||!el.dataset||!el.dataset.m)return;
+  applique(el.dataset.m);
+  el.className='rcell '+(CLS[grille(cleCourante())[el.dataset.m]]||'')
+    +(el.textContent.length===2?' pair':'');
+  majStats();
+}
+function cableGrille(){
+  const gr=$('rgrid');
+  gr.addEventListener('pointerdown',e=>{
+    const c=e.target.closest('.rcell');if(!c)return;
+    PEINT=true;gr.setPointerCapture(e.pointerId);cellule(c);e.preventDefault();});
+  gr.addEventListener('pointermove',e=>{
+    if(!PEINT)return;
+    const c=document.elementFromPoint(e.clientX,e.clientY);
+    if(c&&c.classList.contains('rcell'))cellule(c);});
+  const fin=()=>{if(PEINT){PEINT=false;sauveRanges();majNotation();majListeCtx();}};
+  gr.addEventListener('pointerup',fin);
+  gr.addEventListener('pointercancel',fin);
+  window.addEventListener('pointerup',fin);
+}
+
+/* --- selections rapides --- */
+function peintLot(filtre){
+  const g=grille(cleCourante());
+  MAINS.forEach(m=>{if(!filtre(m))return;if(BRUSH==='fold')delete g[m];else g[m]=BRUSH;});
+  sauveRanges();dessineGrille();majListeCtx();
+}
+
+/* --- liste des grilles remplies --- */
+function majListeCtx(){
+  const cles=Object.keys(R.g).filter(k=>Object.keys(R.g[k]).length);
+  if(!cles.length){$('ctxList').innerHTML='<p class="empty">Aucune grille remplie pour l\'instant.</p>';return;}
+  const lignes=cles.sort().map(k=>{
+    const p=k.split('|');
+    const g=R.g[k];
+    const c=MAINS.reduce((a,m)=>a+(g[m]&&g[m]!=='fold'?combos(m):0),0);
+    const lbl=p[0]==='rfi'?`Ouverture ${p[1]} · ${PROF_LBL[p[2]]}`
+                          :`${p[1]} face à ${p[2]} · ${PROF_LBL[p[3]]}`;
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(37,64,58,.5)">
+      <span style="flex:1;font-size:13px"${k===cleCourante()?' class="ctx-done"':''}>${esc(lbl)}</span>
+      <span class="row-meta mono">${(c/TOTAL_COMBOS*100).toFixed(1)} %</span>
+      <button class="btn-mini" data-go="${esc(k)}">Ouvrir</button></div>`;}).join('');
+  $('ctxList').innerHTML=lignes+`<p class="row-meta mt14">${cles.length} grille${cles.length>1?'s':''} remplie${cles.length>1?'s':''}. Le détecteur n'examine que celles-ci.</p>`;
+  $('ctxList').querySelectorAll('[data-go]').forEach(b=>b.onclick=()=>{
+    const p=b.dataset.go.split('|');
+    CTX = p[0]==='rfi' ? {t:'rfi',p:p[1],o:CTX.o,d:p[2]} : {t:'vs',p:p[1],o:p[2],d:p[3]};
+    majSelecteurs();});
+}
+
+/* ============ LECTURE DES CARNETS ============
+   En lecture seule, et sans rien supposer : les deux carnets peuvent
+   coexister sur la meme origine, l'un, l'autre, ou aucun. */
+const SOURCES=[
+  {cle:'carnet-poker-v1', me:'carnet-poker-me', db:'carnet-poker-mains', nom:'Carnet à trois'},
+  {cle:'carnet-solo-v1',  me:null,              db:'carnet-solo-mains',  nom:'Carnet solo'}
+];
+let SRC=null, MAINS_DISPO=[];
+
+/* Les mains rejouables de localStorage : cinq par tournoi, choisies sur
+   l'amplitude du mouvement de jetons. C'est le repli quand la base complete
+   est vide ou indisponible — mieux que rien, mais c'est un echantillon
+   defavorable a cet exercice, et l'ecran le dit. */
+function litCarnets(){
+  const trouves=[];
+  SOURCES.forEach(s=>{
+    let d=null;
+    try{const raw=localStorage.getItem(s.cle);if(raw)d=JSON.parse(raw);}catch(e){}
+    if(!d||!Array.isArray(d.tournaments))return;
+    const pid=s.me?(localStorage.getItem(s.me)||'p1'):'p1';
+    const reps=[];
+    d.tournaments.forEach(t=>{
+      if(t.pid!==pid||!Array.isArray(t.rep))return;
+      t.rep.forEach(r=>reps.push(Object.assign({tdate:String(t.date).slice(0,10),
+        game:t.game,fmt:t.fmt},r)));
+    });
+    trouves.push({...s,pid,tournois:d.tournaments.filter(t=>t.pid===pid).length,reps});
+  });
+  return trouves;
+}
+
+/* ---- Base des mains completes ----
+   Ecrite par le carnet a l'import, en lecture seule ici. Elle n'existe qu'a
+   partir de la version qui l'a introduite : un carnet plus ancien renvoie
+   simplement une liste vide, et l'atelier retombe sur les mains rejouables. */
+function litBase(nomDb,pid){
+  return new Promise(res=>{
+    if(!window.indexedDB)return res(null);
+    let rq;
+    try{rq=indexedDB.open(nomDb);}catch(e){return res(null);}
+    rq.onupgradeneeded=()=>{
+      /* La base n'existait pas : l'ouvrir vient de la creer. On annule pour ne
+         pas laisser de coquille vide derriere nous — cette page ne doit jamais
+         rien ecrire. L'annulation fait echouer l'ouverture, donc on repartira
+         par onerror avec `null`, ce qui est exactement le bon signal : pas de
+         base, on retombe sur les mains rejouables. */
+      try{rq.transaction.abort();}catch(e){}
+    };
+    rq.onerror=()=>res(null);
+    rq.onblocked=()=>res(null);
+    rq.onsuccess=()=>{
+      const d=rq.result;
+      if(!d.objectStoreNames.contains('mains')){d.close();return res([]);}
+      let tx;
+      try{tx=d.transaction('mains','readonly');}catch(e){d.close();return res(null);}
+      const out=[];
+      const c=tx.objectStore('mains').openCursor();
+      c.onsuccess=()=>{const cur=c.result;
+        if(!cur){return;}
+        if(!pid||cur.value.pid===pid)out.push(cur.value);
+        cur.continue();};
+      tx.oncomplete=()=>{d.close();res(out);};
+      tx.onerror=()=>{d.close();res(null);};
+      tx.onabort=()=>{d.close();res(null);};
+    };
+  });
+}
+
+/* Une main de la base complete, ramenee a la forme que `classe()` attend.
+   Les deux sources decrivent la meme chose ; seuls quelques noms de champs
+   different, et il vaut mieux les reconcilier ici qu'en dupliquant le
+   classificateur. */
+function normalise(m){
+  return{tdate:m.date, ts:m.ts, game:m.game, fmt:m.fmt, bb:m.bb, stack:m.stack,
+    pos:m.pos, posInf:m.posInf, hole:m.hole, board:m.board, d:m.d,
+    seats:m.seats, a:m.a, lvl:m.lvl, prime:m.prime, fin:m.fin, complete:true};
+}
+
+/* ============ CLASSIFICATION D'UN SPOT ============
+   On reconstitue la sequence preflop depuis les actions enregistrees.
+   Trois cas seulement sont exploitables en v1 ; tout le reste est ecarte
+   explicitement plutot que range de force dans une categorie. */
+function positionDe(rep,nom){
+  const s=(rep.seats||[]).find(x=>x.n===nom);
+  if(!s)return null;
+  const tags=String(s.p||'').split(/\s+/).filter(x=>POSN.includes(x));
+  return tags.length?tags[tags.length-1]:null;
+}
+function tapisDe(rep,nom){
+  const s=(rep.seats||[]).find(x=>x.n===nom);
+  return s?+s.s||0:0;
+}
+function bande(bb){return bb>=50?'60':bb>=30?'40':'25';}
+
+/* Carte -> case canonique. Les deux adaptateurs recopient la notation du
+   fichier sans la normaliser : on accepte donc « Ah Kd » comme « A♠ K♦ ». */
+function mainCanon(hole){
+  const re=/([AKQJTakqjt2-9])\s*([hcdsHCDS♥♣♦♠])/g;
+  const cartes=[];let m;
+  while((m=re.exec(String(hole||'')))&&cartes.length<2)
+    cartes.push({r:m[1].toUpperCase(),s:m[2].toLowerCase()});
+  if(cartes.length<2)return null;
+  const ia=RANGS.indexOf(cartes[0].r), ib=RANGS.indexOf(cartes[1].r);
+  if(ia<0||ib<0)return null;
+  const hi=ia<=ib?cartes[0]:cartes[1], lo=ia<=ib?cartes[1]:cartes[0];
+  if(hi.r===lo.r)return hi.r+lo.r;
+  return hi.r+lo.r+(hi.s===lo.s?'s':'o');
+}
+
+function classe(rep){
+  const bb=+rep.bb||0;
+  if(!bb)return{ko:'blindes inconnues'};
+  const main=mainCanon(rep.hole);
+  if(!main)return{ko:'main illisible'};
+  const pos=positionDe(rep,'moi')||(String(rep.pos||'').split(/\s+/).filter(x=>POSN.includes(x)).pop());
+  if(!pos)return{ko:'position inconnue'};
+
+  const pf=(rep.a||[]).filter(a=>a.s==='PF'&&!/^Posts/i.test(a.v));
+  const i=pf.findIndex(a=>a.p==='moi');
+  if(i<0)return{ko:'aucune action préflop'};
+  const avant=pf.slice(0,i);
+  const raises=avant.filter(a=>a.v==='Raises to');
+  const mien=pf[i].v;
+
+  if(raises.length===0){
+    // Personne n'a relance. Un limpeur avant soi change le spot : on l'ecarte
+    // plutot que de le confondre avec une ouverture a tapis mort.
+    if(avant.some(a=>a.v==='Calls'))return{ko:'limpeur avant moi'};
+    if(pos==='BB')return{ko:'BB sans ouverture'};
+    return{type:'rfi',pos,main,
+      action:mien==='Raises to'?'open':'fold',
+      bbEff:Math.round((+rep.stack||0)/bb),
+      libelle:mien==='Raises to'?'Ouvert':(mien==='Folds'?'Foldé':mien)};
+  }
+  if(raises.length===1){
+    const nom=raises[0].p;
+    const posOuvreur=positionDe(rep,nom);
+    if(!posOuvreur)return{ko:"position de l'ouvreur inconnue"};
+    if(ORDRE[posOuvreur]>=ORDRE[pos])return{ko:'ordre de parole incohérent'};
+    // Tapis effectif = le plus petit des deux. C'est lui qui commande la range.
+    const eff=Math.min(+rep.stack||0, tapisDe(rep,nom)||Infinity);
+    return{type:'vs',pos,opener:posOuvreur,main,
+      action:mien==='Raises to'?'3bet':mien==='Calls'?'call':'fold',
+      bbEff:Math.round(eff/bb),
+      libelle:mien==='Raises to'?'3bet':mien==='Calls'?'Call':'Foldé'};
+  }
+  return{ko:'face à un 3bet ou plus'};
+}
+
+function confronte(rep){
+  const c=classe(rep);
+  if(c.ko)return Object.assign({rep},c);
+  const d=bande(c.bbEff);
+  const k=c.type==='rfi'?cleCtx('rfi',c.pos,null,d):cleCtx('vs',c.pos,c.opener,d);
+  const g=R.g[k];
+  if(!g||!Object.keys(g).length)return Object.assign({rep,d,k},c,{ko:'grille non remplie'});
+  const attendu=g[c.main]||'fold';
+  return Object.assign({rep,d,k,attendu},c,{ecart:attendu!==c.action});
+}
+
+/* ============ RENDU DES ÉCARTS ============ */
+const F={type:'',pos:'',verdict:'ecart'};
+const CACHE={};   // mains completes deja chargees, par carnet
+async function renderEcarts(){
+  const src=$('srcBox');
+  const dispo=litCarnets();
+  if(!dispo.length){
+    src.innerHTML=`<div class="notice"><b>Aucun carnet trouvé dans ce navigateur.</b> Cette page lit les mains conservées par le carnet, sur la même adresse. Ouvre d'abord le carnet, importe au moins un historique, puis reviens ici.</div>`;
+    $('ecTable').innerHTML='';$('ecCount').textContent='—';$('ecSummary').innerHTML='';
+    $('biasBox').innerHTML='';return;
+  }
+  if(!SRC||!dispo.some(s=>s.cle===SRC))SRC=dispo[0].cle;
+  const cur=dispo.find(s=>s.cle===SRC);
+
+  if(CACHE[SRC]===undefined){
+    $('biasBox').innerHTML='<p class="row-meta">Lecture de la base des mains…</p>';
+    CACHE[SRC]=await litBase(cur.db,cur.pid);
+  }
+  const base=CACHE[SRC];
+  // La base complete fait foi des qu'elle contient quelque chose. Sinon on
+  // retombe sur les mains rejouables, avec l'avertissement qui va avec.
+  const complet=Array.isArray(base)&&base.length>0;
+  MAINS_DISPO=complet?base.map(normalise):cur.reps;
+
+  src.innerHTML=`<div class="card"><div class="form-row">
+    <div class="field" style="flex:1 1 300px"><label>Carnet source</label><select id="srcSel">
+      ${dispo.map(s=>`<option value="${s.cle}"${s.cle===SRC?' selected':''}>${esc(s.nom)} — ${s.tournois} tournoi${s.tournois>1?'s':''}</option>`).join('')}
+    </select></div></div></div>`;
+  $('srcSel').onchange=e=>{SRC=e.target.value;renderEcarts();};
+
+  $('biasBox').innerHTML=complet
+    ? `<div class="notice good"><b>${MAINS_DISPO.length.toLocaleString('fr-FR')} mains lues, l'intégralité de ce qui a été importé.</b>
+        Le comptage ci-dessous est donc représentatif : c'est bien la fréquence de tes écarts, pas un aperçu.</div>`
+    : `<div class="notice warm">
+        <b>Ce que tu vas lire porte sur ${MAINS_DISPO.length} mains seulement, et elles sont mal choisies pour cet exercice.</b>
+        Le carnet ne conservait que les cinq plus gros mouvements de jetons par tournoi — c'est ce qu'il faut pour rejouer des coups marquants, c'est le contraire de ce qu'il faut pour auditer des ranges.
+        Un écart d'ouverture typique — tu ouvres K9o en EP, tu jettes au 3bet, tu perds 2,5 bb — ne devient jamais un gros pot, donc il n'est jamais conservé.
+        <br><br>Le carnet garde désormais tout : <b>réimporte tes fichiers d'historique</b> et ce bandeau disparaîtra. Rien n'est perdu tant que tu as gardé les fichiers.</div>`;
+
+  const res=MAINS_DISPO.map(confronte);
+  const exploitables=res.filter(x=>!x.ko);
+  const sansGrille=res.filter(x=>x.ko==='grille non remplie');
+  const ecartes=res.filter(x=>x.ko&&x.ko!=='grille non remplie');
+
+  const vus=exploitables.filter(x=>{
+    if(F.type&&x.type!==F.type)return false;
+    if(F.pos&&x.pos!==F.pos)return false;
+    if(F.verdict==='ecart'&&!x.ecart)return false;
+    if(F.verdict==='ok'&&x.ecart)return false;
+    return true;
+  }).sort((a,b)=>String(b.rep.tdate).localeCompare(String(a.rep.tdate)));
+
+  const nEcarts=exploitables.filter(x=>x.ecart).length;
+  $('ecCount').textContent=`${vus.length} ligne${vus.length>1?'s':''}`;
+  $('ecSummary').innerHTML=`<p class="row-meta mt14">
+    ${exploitables.length} main${exploitables.length>1?'s':''} confrontée${exploitables.length>1?'s':''} à une grille, dont <b style="color:${nEcarts?'var(--alert)':'var(--clay)'}">${nEcarts} écart${nEcarts>1?'s':''}</b>.
+    ${sansGrille.length?`${sansGrille.length} main${sansGrille.length>1?'s':''} tombe${sansGrille.length>1?'nt':''} dans une situation dont la grille n'est pas remplie.`:''}
+    ${ecartes.length?`${ecartes.length} écartée${ecartes.length>1?'s':''} : ${[...new Set(ecartes.map(x=>x.ko))].map(esc).join(', ')}.`:''}</p>`;
+
+  $('ecTable').innerHTML=`<tr><th>Jour</th><th>Situation</th><th class="num">Tapis eff.</th>
+    <th>Main</th><th>Ce que tu as fait</th><th>Ce que dit ta grille</th><th></th></tr>`+
+    (vus.length?vus.slice(0,150).map(x=>{
+      const sit=x.type==='rfi'?`Ouverture ${x.pos}`:`${x.pos} face à ${x.opener}`;
+      const att=x.attendu==='fold'?'Fold':x.attendu==='open'?'Ouvrir':x.attendu==='3bet'?'3bet':'Call';
+      return `<tr><td class="num">${esc(x.rep.tdate)}</td><td>${esc(sit)}</td>
+        <td class="num">${x.bbEff} bb</td>
+        <td class="mono" style="font-weight:700">${esc(x.main)}</td>
+        <td>${esc(x.libelle)}</td>
+        <td><span class="tag ${x.ecart?'hot':'cool'}">${esc(att)}</span></td>
+        <td><button class="btn-mini" data-ouvre="${esc(x.k)}">Voir la grille</button></td></tr>`;}).join('')
+     :`<tr><td colspan="7" class="empty">Aucune main ne correspond. Si tu n'as encore rempli aucune grille, commence par l'onglet « Mes ranges » — le détecteur n'examine que les situations que tu as décrites.</td></tr>`);
+  $('ecTable').querySelectorAll('[data-ouvre]').forEach(b=>b.onclick=()=>{
+    const p=b.dataset.ouvre.split('|');
+    CTX = p[0]==='rfi' ? {t:'rfi',p:p[1],o:CTX.o,d:p[2]} : {t:'vs',p:p[1],o:p[2],d:p[3]};
+    montre('ranges');majSelecteurs();});
+}
+
+function renderDonnees(){
+  const cles=Object.keys(R.g).filter(k=>Object.keys(R.g[k]).length);
+  const combosTot=cles.reduce((a,k)=>a+MAINS.reduce((s,m)=>s+(R.g[k][m]&&R.g[k][m]!=='fold'?combos(m):0),0),0);
+  $('storeStat').innerHTML=`<p class="row-meta">${cles.length} grille${cles.length>1?'s':''} remplie${cles.length>1?'s':''}, ${combosTot} combinaison${combosTot>1?'s':''} décrite${combosTot>1?'s':''} au total.</p>`;
+  const dispo=litCarnets();
+  $('srcDetail').innerHTML=dispo.length
+    ? dispo.map(s=>`<div class="row-meta">• <b style="color:var(--ink)">${esc(s.nom)}</b> — ${s.tournois} tournoi${s.tournois>1?'s':''}, ${s.reps.length} main${s.reps.length>1?'s':''} rejouable${s.reps.length>1?'s':''}.</div>`).join('')
+    : `<p class="row-meta">Aucun carnet détecté sur cette adresse.</p>`;
+}
+
+/* ============ NAVIGATION ============ */
+function montre(nom){
+  document.querySelectorAll('#tabBar a').forEach(x=>x.classList.toggle('active',x.dataset.tab===nom));
+  document.querySelectorAll('.panel').forEach(x=>x.classList.toggle('on',x.dataset.panel===nom));
+  if(nom==='ecarts')renderEcarts();
+  if(nom==='donnees')renderDonnees();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+/* ============ INIT ============ */
+(function init(){
+  chargeRanges();
+
+  document.querySelectorAll('#tabBar a').forEach(a=>a.onclick=()=>montre(a.dataset.tab));
+
+  $('cType').onchange=e=>{CTX.t=e.target.value;majSelecteurs();};
+  $('cPos').onchange=e=>{CTX.p=e.target.value;majSelecteurs();};
+  $('cOpener').onchange=e=>{CTX.o=e.target.value;majSelecteurs();};
+  $('cDepth').onchange=e=>{CTX.d=e.target.value;majSelecteurs();};
+
+  cableGrille();
+  $('selAll').onclick=()=>peintLot(()=>true);
+  $('selNone').onclick=()=>{R.g[cleCourante()]={};sauveRanges();dessineGrille();majListeCtx();};
+  $('selPairs').onclick=()=>peintLot(m=>m.length===2);
+  $('selSuited').onclick=()=>peintLot(m=>m[2]==='s');
+  $('selBroad').onclick=()=>peintLot(m=>'AKQJT'.includes(m[0])&&'AKQJT'.includes(m[1]));
+
+  $('applyNota').onclick=()=>{
+    const{mains,erreurs}=litNotation($('nota').value);
+    const cible=CTX.t==='rfi'?'open':(BRUSH==='fold'?'3bet':BRUSH);
+    const g=grille(cleCourante());
+    // On remplace l'action visee, on ne touche pas aux autres : appliquer une
+    // range de 3bet ne doit pas effacer la range de call saisie a cote.
+    MAINS.forEach(m=>{if(g[m]===cible)delete g[m];});
+    mains.forEach(m=>{if(MAINS.includes(m))g[m]=cible;});
+    sauveRanges();dessineGrille();majListeCtx();
+    $('notaErr').innerHTML=erreurs.length
+      ? `<div class="notice mt14"><b>${erreurs.length} élément${erreurs.length>1?'s':''} non compris</b> et ignoré${erreurs.length>1?'s':''} : ${erreurs.map(esc).join(', ')}. Formes acceptées : <span class="mono">77+</span>, <span class="mono">ATs+</span>, <span class="mono">A2s-A5s</span>, <span class="mono">KQo</span>, <span class="mono">AK</span>.</div>`
+      : `<div class="notice good mt14"><b>${mains.length} case${mains.length>1?'s':''} appliquée${mains.length>1?'s':''}.</b></div>`;
+  };
+  $('copyNota').onclick=()=>{
+    const t=$('nota');t.select();
+    try{document.execCommand('copy');}catch(e){}
+    t.blur();
+  };
+
+  $('copyFrom').onclick=()=>{
+    const cles=Object.keys(R.g).filter(k=>k!==cleCourante()&&Object.keys(R.g[k]).length);
+    if(!cles.length){alert("Aucune autre grille remplie pour l'instant.");return;}
+    const liste=cles.map((k,i)=>{const p=k.split('|');
+      return `${i+1}. ${p[0]==='rfi'?`Ouverture ${p[1]} · ${PROF_LBL[p[2]]}`:`${p[1]} face à ${p[2]} · ${PROF_LBL[p[3]]}`}`;}).join('\n');
+    const n=prompt("Copier depuis quelle grille ? Entre son numéro.\n\n"+liste);
+    const i=parseInt(n,10)-1;
+    if(!(i>=0&&i<cles.length))return;
+    // Copie profonde : sans elle, les deux grilles partageraient le meme objet
+    // et peindre dans l'une modifierait l'autre.
+    R.g[cleCourante()]=Object.assign({},R.g[cles[i]]);
+    sauveRanges();dessineGrille();majListeCtx();
+  };
+
+  ['fType','fPos','fVerdict'].forEach(id=>{
+    const el=$(id);if(!el)return;
+    el.onchange=()=>{F[id.slice(1).toLowerCase()]=el.value;renderEcarts();};});
+  $('fPos').innerHTML='<option value="">Toutes</option>'+POSN.map(p=>`<option>${p}</option>`).join('');
+  $('fReset').onclick=()=>{F.type='';F.pos='';F.verdict='ecart';
+    $('fType').value='';$('fPos').value='';$('fVerdict').value='ecart';renderEcarts();};
+
+  $('expBtn').onclick=()=>{const a=document.createElement('a');
+    a.href=URL.createObjectURL(new Blob([JSON.stringify(R,null,2)],{type:'application/json'}));
+    a.download='mes-ranges-'+new Date().toISOString().slice(0,10)+'.json';a.click();};
+  $('impBtn').onclick=()=>$('impFile').click();
+  $('impFile').onchange=e=>{const f=e.target.files[0];if(!f)return;
+    if(!confirm("Importer remplace toutes tes grilles actuelles. Continuer ?")){e.target.value='';return;}
+    const rd=new FileReader();rd.onload=()=>{try{const d=JSON.parse(rd.result);
+      if(!d||!d.g)throw new Error('format');
+      R=d;sauveRanges();majSelecteurs();renderDonnees();}
+      catch(err){alert("Fichier illisible. Attendu : un export de ranges de cette page.");}};
+    rd.readAsText(f);e.target.value='';};
+  $('wipeBtn').onclick=()=>{
+    if(!confirm("Effacer toutes tes grilles ? L'action est définitive."))return;
+    R={v:1,g:{}};sauveRanges();majSelecteurs();renderDonnees();};
+
+  majSelecteurs();
+})();
+</script>
+</body>
+</html>
