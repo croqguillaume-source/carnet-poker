@@ -266,6 +266,12 @@
       <label>Carnet de</label>
       <span id="meName" style="font-weight:700;font-size:15px"></span>
       <button class="btn-mini" id="renameBtn">Renommer</button>
+      <!-- Le format n'est pas un reglage d'un onglet : il change ce que TOUT
+           le carnet mesure — KPI, seuils de leaks, courbe, registre. Il vit
+           donc dans l'en-tete, visible en permanence. -->
+      <label style="margin-left:14px">Format</label>
+      <select id="fmtSel" style="width:auto">
+        <option value="spin">Spin</option><option value="mtt">MTT / PKO</option></select>
       <span class="sync-dot" id="syncDot"><i></i><span id="syncTxt">Local</span></span>
     </div>
   </div>
@@ -273,15 +279,11 @@
 
 <nav class="tabs">
   <div class="inner" id="tabBar">
-    <a data-tab="dashboard" class="active"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Dashboard</a>
-    <a data-tab="calendrier"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 8h18M7 3v4m10-4v4M4 6h16v15H4z"/></svg>Calendrier</a>
-    <a data-tab="etude"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 4h7a2 2 0 012 2v14a2 2 0 00-2-2H4zM20 4h-7a2 2 0 00-2 2v14a2 2 0 012-2h7z"/></svg>Étude</a>
-    <a data-tab="sessions"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 5h16v14H4zM8 5v14M4 9h4M4 15h4"/></svg>Sessions</a>
+    <a data-tab="dashboard" class="active"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 12l9-9 9 9M5 10v10h14V10"/></svg>Tableau de bord</a>
+    <a data-tab="progresser"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 19V9m5 10V5m5 14v-7m5 7V8"/></svg>Progresser</a>
     <a data-tab="review"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4.5-4.5"/></svg>Review</a>
-    <a data-tab="mains"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M4 6h9v14H4zM15 4l5 1.5-3.5 13L12 17"/></svg>Base de mains</a>
-    <a data-tab="import"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v3h16v-3"/></svg>Import
-    </a>
-    <a data-tab="bankroll"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 7h18v12H3zM3 11h18M7 15h3"/></svg>Bankroll</a>
+    <a data-tab="import"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 17v3h16v-3"/></svg>Import</a>
+    <a data-tab="reglages"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3M4.9 4.9l2.1 2.1m10 10l2.1 2.1M19.1 4.9L17 7M7 17l-2.1 2.1"/></svg>Réglages</a>
   </div>
 </nav>
 
@@ -314,7 +316,9 @@
 <div id="app" style="display:none">
 <div id="firstRun"></div>
 
-<!-- =================== DASHBOARD =================== -->
+<!-- =================== TABLEAU DE BORD ===================
+     Absorbe l'ancien onglet Calendrier et l'ancien onglet Sessions : trois
+     pages qui repondaient a la meme question — ou j'en suis cette semaine. -->
 <div class="panel on" data-panel="dashboard">
   <div class="sec-label">Vue d'ensemble</div>
   <h2>La semaine <em>en cours</em></h2>
@@ -363,12 +367,8 @@
       <p class="row-meta" style="flex:1 1 240px;padding-bottom:9px">De combien les joueurs de ce pool s'écartent-ils typiquement de l'équilibre ? 0,20 = ±20 % de ROI. <b>C'est une hypothèse, pas une mesure</b> : rien dans tes données ne permet de l'estimer, il faudrait les résultats de tout le pool. Elle ne sert qu'au ROI ajusté ci-dessus — fais-la varier pour voir à quel point ce chiffre en dépend.</p>
     </div>
   </div>
-</div>
 
-<!-- =================== CALENDRIER =================== -->
-<div class="panel" data-panel="calendrier">
-  <div class="sec-label">Planning</div>
-  <h2>Trois sessions, <em>trois créneaux d'étude</em></h2>
+  <div class="sec-label mt22">Planning</div>
   <p class="lead">Clique un jour pour le planifier, puis reviens le cocher une fois fait. Un jour prévu et non fait reste visible : c'est le but.</p>
 
   <div class="card mb18">
@@ -387,35 +387,7 @@
   </div>
 
   <div class="card" id="dayEditor"></div>
-</div>
 
-<!-- =================== ETUDE =================== -->
-<div class="panel" data-panel="etude">
-  <div class="sec-label">Programme</div>
-  <h2>Douze blocs, <em>dans l'ordre</em></h2>
-  <p class="lead">Un bloc par semaine, le contenu complet dans <a href="guide.html" style="color:var(--clay)">le guide</a>. Coche ici quand tu l'as travaillé. L'ordre reste le même quoi qu'il arrive — ce que tes leaks changent, c'est la priorité, jamais le programme.</p>
-  <div id="curricNote" class="mb12"></div>
-  <div class="card mb18" id="curriculum"></div>
-
-  <div class="sec-label">Journal</div>
-  <h2>Ce que tu as <em>réellement travaillé</em></h2>
-  <p class="lead">Une séance sans phrase actionnable ne compte pas. Le champ est obligatoire.</p>
-  <div class="card">
-    <div class="form-row">
-      <div class="field" style="flex:0 0 150px"><label>Date</label><input type="date" id="stDate"></div>
-      <div class="field" style="flex:2 1 260px"><label>Thème</label><select id="stTheme"></select></div>
-      <div class="field" style="flex:0 0 110px"><label>Minutes</label><input type="number" id="stMin" value="45" min="5" step="5"></div>
-    </div>
-    <div class="form-row mt14">
-      <div class="field" style="flex:3 1 300px"><label>Ce que j'en retiens, en une phrase actionnable</label><input id="stNote" placeholder="Ex : je 3bet trop peu depuis le BTN contre un open CO à 40bb"></div>
-      <button class="btn" id="stAdd">Ajouter</button>
-    </div>
-    <div class="tbl-wrap"><table id="stTable"></table></div>
-  </div>
-</div>
-
-<!-- =================== SESSIONS =================== -->
-<div class="panel" data-panel="sessions">
   <div class="sec-label">Sessions</div>
   <h2>Reconstituées <em>depuis tes imports</em></h2>
   <p class="lead">Une session est un jour où tu as joué. Le carnet la déduit de l'historique : ni date, ni volume, ni résultat à ressaisir. Reste ce qu'aucun fichier ne contient — ton état pendant la session.</p>
@@ -441,11 +413,85 @@
   </div>
 </div>
 
-<!-- =================== REVIEW =================== -->
+<!-- =================== PROGRESSER ===================
+     Le moteur de leaks vivait dans l'onglet Import, alors que c'est lui qui
+     designe les blocs a travailler dans l'onglet Etude. De l'analyse rangee
+     avec de la saisie de fichiers, et deux onglets pour une seule boucle. -->
+<div class="panel" data-panel="progresser">
+  <div class="sec-label">Ce que tes mains disent</div>
+  <h2>Tes fréquences, <em>et ce qu'elles coûtent</em></h2>
+  <p class="lead">Rien ici n'est déclaratif : tout est mesuré sur les historiques que tu as déposés. Chaque chiffre reste masqué tant que son échantillon ne le porte pas, et le programme d'étude plus bas se réordonne d'après ce que ces règles déclenchent.</p>
+
+  <div class="card mb18">
+    <div class="sec-label">Statistiques mesurées</div>
+    <p class="lead mt14">Chaque statistique reste masquée tant que son échantillon est insuffisant. Une valeur affichée trop tôt est plus dangereuse qu'une valeur absente : c'est le même piège que la courbe de crédibilité, à l'échelle d'une fréquence.</p>
+    <div id="statGrid" class="grid g4"></div>
+  </div>
+
+  <div class="card mb18">
+    <div class="sec-label">Détail par position</div>
+    <p class="lead mt14">Une fréquence globale mélange six situations qui n'ont rien à voir : ouvrir sous le pistolet et défendre sa grosse blinde ne sont pas le même jeu. Une position suivie de « ≈ » a été déduite de la place du bouton, pas lue dans le fichier — la distinction est conservée et affichée, jamais fondue dans la moyenne.</p>
+    <div id="posBox"></div>
+  </div>
+
+  <div class="card mb18">
+    <div class="sec-label">Moteur de leaks</div>
+    <p class="lead mt14">Une règle ne dit rien tant que son échantillon minimum n'est pas atteint. Au-delà, elle ne répond plus par oui ou non : <b>dans la zone</b>, <b>à surveiller</b> — moins de 15 % au-delà du seuil — ou <b>dépassé</b>. Cette marge de 15 % est un choix arbitraire, pas une mesure. <b>Les seuils eux-mêmes sont provisoires</b> : ce sont des valeurs théoriques, jamais calibrées sur les pools que tu joues réellement. Modifie-les si tu as mieux — le champ à droite de chaque règle est fait pour ça.</p>
+    <p class="row-meta">Sur chaque barre : le <b style="color:var(--ink)">trait clair</b> est ta valeur actuelle, le <b style="color:var(--muted)">trait gris</b> celle de l'import précédent. La zone verte est la cible, l'ambre la marge de surveillance, la rouge le dépassement — toutes trois déduites du seuil que tu fixes juste à côté, et de rien d'autre. L'échelle va de zéro à deux fois le seuil : le seuil est donc toujours au milieu de la barre.</p>
+    <div id="leakEngine"></div>
+  </div>
+
+
+  <div class="sec-label">Programme</div>
+  <h2>Douze blocs, <em>dans l'ordre</em></h2>
+  <p class="lead">Un bloc par semaine, le contenu complet dans <a href="guide.html" style="color:var(--clay)">le guide</a>. Coche ici quand tu l'as travaillé. L'ordre reste le même quoi qu'il arrive — ce que tes leaks changent, c'est la priorité, jamais le programme.</p>
+  <div id="curricNote" class="mb12"></div>
+  <div class="card mb18" id="curriculum"></div>
+
+  <div class="sec-label">Journal</div>
+  <h2>Ce que tu as <em>réellement travaillé</em></h2>
+  <p class="lead">Une séance sans phrase actionnable ne compte pas. Le champ est obligatoire.</p>
+  <div class="card">
+    <div class="form-row">
+      <div class="field" style="flex:0 0 150px"><label>Date</label><input type="date" id="stDate"></div>
+      <div class="field" style="flex:2 1 260px"><label>Thème</label><select id="stTheme"></select></div>
+      <div class="field" style="flex:0 0 110px"><label>Minutes</label><input type="number" id="stMin" value="45" min="5" step="5"></div>
+    </div>
+    <div class="form-row mt14">
+      <div class="field" style="flex:3 1 300px"><label>Ce que j'en retiens, en une phrase actionnable</label><input id="stNote" placeholder="Ex : je 3bet trop peu depuis le BTN contre un open CO à 40bb"></div>
+      <button class="btn" id="stAdd">Ajouter</button>
+    </div>
+    <div class="tbl-wrap"><table id="stTable"></table></div>
+  </div>
+</div>
+
+<!-- =================== REVIEW ===================
+     Absorbe l'ancienne Base de mains. La liste des tournois y sert de porte
+     d'entree : une ligne, puis toutes ses mains. -->
 <div class="panel" data-panel="review">
   <div class="sec-label">Review</div>
   <h2>Trois mains par session, <em>revues sous 48 h</em></h2>
   <p class="lead">Le tracker sort les statistiques, cette page sort les décisions. Chaque fiche est rattachée à un leak nommé, et le classement se construit tout seul en dessous. Quarante-huit heures parce qu'au-delà tu ne te souviens plus de ce que tu pensais au moment de jouer — et c'est précisément ça qu'on cherche à corriger.</p>
+
+  <div class="card mb18">
+    <div class="cal-nav"><div class="sec-label" style="margin:0">À revoir en priorité</div>
+      <select id="prioSort" style="width:auto">
+        <option value="prio">Priorité</option>
+        <option value="loss">Plus grosses pertes</option>
+        <option value="abs">Plus gros écarts</option>
+        <option value="win">Plus gros gains</option></select></div>
+    <p class="lead mt14">Le classement par défaut ne suit pas la taille du pot. Perdre un tapis avec les As contre les Rois ne s'analyse pas : il n'y avait rien à décider. Le carnet cherche l'inverse — les mains où tu as eu un vrai choix, et où ce choix a coûté ou rapporté. Sur les historiques Betclic, une décision importante prise en moins de trois secondes est remontée : c'est là que se trouvent les erreurs, pas dans les coups évidents.</p>
+    <p class="row-meta mb18">La pondération est un choix assumé, pas une mesure. Les autres tris restent disponibles au-dessus. Une position suivie de « ≈ » a été déduite de la place du bouton : Betclic n'étiquette que BTN, SB et BB à table pleine.</p>
+    <div class="tbl-wrap"><table id="prioTable"></table></div>
+    <div id="prioBox"></div>
+  </div>
+
+  <div class="card mb18">
+    <div class="sec-label">Tes tournois</div>
+    <p class="lead mt14">Clique une ligne pour dérouler toutes les mains du tournoi. Depuis que le carnet conserve les historiques en entier, ce n'est plus un échantillon : c'est tout ce que tu as joué.</p>
+    <div class="tbl-wrap"><table id="ldTable"></table></div>
+    <div id="tourBox"></div>
+  </div>
 
   <div class="card mb18">
     <div class="form-row">
@@ -462,13 +508,6 @@
     </div>
   </div>
 
-  <div class="card mb18">
-    <div class="cal-nav"><div class="sec-label" style="margin:0">Mains à revoir — les plus gros mouvements</div>
-      <select id="revSort" style="width:auto"><option value="loss">Plus grosses pertes</option><option value="abs">Plus gros écarts</option><option value="win">Plus gros gains</option></select></div>
-    <p class="lead mt14">Ces mains sont sélectionnées par le carnet sur le résultat en jetons, pas par toi. C'est ce qui permet de tomber sur un leak que tu ne cherchais pas — les fiches que tu écris de mémoire ne peuvent contenir que ce que tu sais déjà. Une position suivie de « ≈ » a été déduite de la place du bouton : Betclic n'étiquette que BTN, SB et BB à table pleine.</p>
-    <div class="tbl-wrap"><table id="revTable"></table></div>
-    <div id="replayBox"></div>
-  </div>
 
   <div class="grid g2 mb18">
     <div class="card">
@@ -485,41 +524,6 @@
   <div class="card">
     <div class="sec-label">Fiches</div>
     <div class="tbl-wrap"><table id="hvTable"></table></div>
-  </div>
-</div>
-
-<!-- =================== BASE DE MAINS =================== -->
-<div class="panel" data-panel="mains">
-  <div class="sec-label">Recherche</div>
-  <h2>Toutes <em>tes mains</em></h2>
-  <p class="lead">Le tableau de review ne montre que les plus gros mouvements de jetons du format en cours. Ici, tout ce qui a été conservé, avec des filtres — pour retrouver une main précise, ou vérifier une intuition sur une position plutôt que sur une impression.</p>
-  <p class="row-meta mb18">Ce n'est pas l'intégralité de ce que tu as joué : seules les mains aux plus gros mouvements de jetons sont conservées, cinq par tournoi et cinquante tournois au total, pour tenir sous le plafond du stockage du navigateur. Le filtre par leak s'appuie sur le lien posé quand une fiche est créée depuis un rejeu ; une fiche saisie à la main n'est rattachée à aucune main, et n'est donc jamais devinée par recoupement de date.</p>
-
-  <div class="card mb18">
-    <div class="form-row">
-      <div class="field" style="flex:1 1 120px"><label>Format</label><select id="bmFmt">
-        <option value="">Tous</option><option value="spin">Spin</option><option value="mtt">MTT / PKO</option></select></div>
-      <div class="field" style="flex:1 1 110px"><label>Position</label><select id="bmPos">
-        <option value="">Toutes</option><option>EP</option><option>MP</option><option>CO</option>
-        <option>BTN</option><option>SB</option><option>BB</option></select></div>
-      <div class="field" style="flex:1 1 120px"><label>Résultat</label><select id="bmRes">
-        <option value="">Tous</option><option value="gain">Gains</option><option value="perte">Pertes</option></select></div>
-    </div>
-    <div class="form-row mt14">
-      <div class="field" style="flex:2 1 220px"><label>Leak de la fiche rattachée</label><select id="bmLeak"></select></div>
-      <div class="field" style="flex:0 0 150px"><label>Du</label><input type="date" id="bmDu"></div>
-      <div class="field" style="flex:0 0 150px"><label>Au</label><input type="date" id="bmAu"></div>
-      <div class="field" style="flex:1 1 150px"><label>Trier par</label><select id="bmSort">
-        <option value="abs">Plus gros écarts</option><option value="loss">Plus grosses pertes</option>
-        <option value="win">Plus gros gains</option><option value="date">Plus récentes</option></select></div>
-      <button class="btn-outline" id="bmReset">Réinitialiser</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="sec-label">Résultats — <span id="bmCount"></span></div>
-    <div class="tbl-wrap"><table id="bmTable"></table></div>
-    <div id="bmReplay"></div>
   </div>
 </div>
 
@@ -546,6 +550,56 @@
     <p class="row-meta" style="margin-top:6px">Par défaut, un tournoi déjà présent est ignoré. Coche cette case pour le réanalyser et écraser son agrégat : c'est ce qui permet d'enrichir d'anciens imports quand le carnet gagne en finesse — le détail par position, par exemple, n'existe que pour les fichiers lus depuis. Le classement et le gain venus d'un fichier <code>_summary</code> Winamax ne sont jamais écrasés. La case se remet d'elle-même à zéro au prochain chargement.</p>
     <div id="impReport" class="mt14"></div>
   </div>
+
+  <div class="card mb18">
+    <div class="sec-label">Volume et résultat</div>
+    <p class="row-meta mt14">Le détail tournoi par tournoi, et les mains de chacun, sont dans l'onglet Review.</p>
+    <div id="ledgerKpi" class="grid g4 mt14"></div>
+    <div id="ledgerVerdict"></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">Diagnostic de format</div>
+    <p class="lead mt14">Si un fichier n'est pas reconnu, le carnet en décrit la structure sans rien interpréter. Exporte le diagnostic et envoie-le : c'est ce qu'il faut pour écrire l'adaptateur manquant.</p>
+    <div id="diagBox"></div>
+    <div class="form-row mt14"><button class="btn-outline" id="diagExport">Exporter le diagnostic</button></div>
+  </div>
+</div>
+
+<!-- =================== REGLAGES ===================
+     Bankroll, sauvegarde et donnees : trois reglages qu'on ouvre rarement et
+     qui n'ont rien a faire dans le chemin quotidien. -->
+<div class="panel" data-panel="reglages">
+  <div class="sec-label">Garde-fou</div>
+  <h2>La règle est chiffrée, <em>et elle ne se négocie pas</em></h2>
+  <p class="lead">Buy-in maximum = bankroll ÷ caves de sécurité. Un dépassement s'affiche sur ton dashboard, en permanence, jusqu'à ce que la bankroll rattrape le niveau joué. Le compte ne s'efface jamais : il vieillit.</p>
+
+  <div class="grid mb18" id="brCards" style="grid-template-columns:repeat(auto-fit,minmax(185px,1fr))"></div>
+
+  <div class="card mb18">
+    <div class="form-row">
+      <div class="field" style="flex:0 0 170px"><label>Bankroll actuelle €</label><input type="number" id="brAmount" min="0" step="10"></div>
+      <div class="field" style="flex:2 1 260px"><label>Caves de sécurité</label><select id="brRule">
+        <option value="150">150 — MTT classique, plancher</option>
+        <option value="200" selected>200 — PKO, standard</option>
+        <option value="250">250 — PKO gros field, prudent</option>
+        <option value="300">300 — niveau « en vivre »</option>
+      </select></div>
+      <button class="btn" id="brSave">Mettre à jour</button>
+    </div>
+  </div>
+
+  <div class="card mb18">
+    <div class="sec-label">Historique de la règle</div>
+    <p class="lead mt14">Chaque changement de bankroll ou de caves de sécurité est daté. Sans cette trace, un tournoi signalé « hors bankroll » resterait ambigu : écart réel au moment de jouer, ou règle durcie après coup ? Les tournois sont désormais jugés contre la règle en vigueur le jour où ils ont été joués, chaque fois qu'elle est connue.</p>
+    <div id="brLog"></div>
+  </div>
+
+  <div class="card">
+    <div class="sec-label">Ce que ce carnet ne fait pas</div>
+    <p style="font-size:14.5px;color:var(--ink-soft);margin-top:10px">Ce n'est pas un tracker. Les statistiques de main fines — EV ajustée, équité par range, HUD en temps réel — viennent de PokerTracker 4, Hold'em Manager 3 ou Hand2Note. Le carnet fait ce qu'aucun tracker ne fait : il tient le planning, le programme d'étude, le protocole de review, la règle de bankroll, et il refuse d'afficher un chiffre tant que l'échantillon ne le porte pas. C'est ce dernier point qui compte le plus : la plupart des joueurs prennent des décisions sur des statistiques calculées à partir de trop peu de mains.</p>
+  </div>
+
 
   <div class="card mb18">
     <div class="sec-label">Sauvegarde en ligne</div>
@@ -603,73 +657,6 @@ create policy "groupe" on poker_tournament
       <input type="file" id="importFile" accept="application/json" style="display:none">
       <button class="btn-outline" id="resetBtn" style="border-color:var(--clay);color:var(--clay)">Tout effacer</button>
     </div>
-  </div>
-
-  <div class="card mb18">
-    <div class="cal-nav"><div class="sec-label" style="margin:0">Ton registre</div>
-      <select id="fmtSel" style="width:auto"><option value="spin">Spin</option><option value="mtt">MTT / PKO</option></select></div>
-    <div id="ledgerKpi" class="grid g4 mt14"></div>
-    <div id="ledgerVerdict"></div>
-    <div class="tbl-wrap"><table id="ldTable"></table></div>
-  </div>
-
-  <div class="card mb18">
-    <div class="sec-label">Statistiques mesurées</div>
-    <p class="lead mt14">Chaque statistique reste masquée tant que son échantillon est insuffisant. Une valeur affichée trop tôt est plus dangereuse qu'une valeur absente : c'est le même piège que la courbe de crédibilité, à l'échelle d'une fréquence.</p>
-    <div id="statGrid" class="grid g4"></div>
-  </div>
-
-  <div class="card mb18">
-    <div class="sec-label">Détail par position</div>
-    <p class="lead mt14">Une fréquence globale mélange six situations qui n'ont rien à voir : ouvrir sous le pistolet et défendre sa grosse blinde ne sont pas le même jeu. Une position suivie de « ≈ » a été déduite de la place du bouton, pas lue dans le fichier — la distinction est conservée et affichée, jamais fondue dans la moyenne.</p>
-    <div id="posBox"></div>
-  </div>
-
-  <div class="card mb18">
-    <div class="sec-label">Moteur de leaks</div>
-    <p class="lead mt14">Une règle ne dit rien tant que son échantillon minimum n'est pas atteint. Au-delà, elle ne répond plus par oui ou non : <b>dans la zone</b>, <b>à surveiller</b> — moins de 15 % au-delà du seuil — ou <b>dépassé</b>. Cette marge de 15 % est un choix arbitraire, pas une mesure. <b>Les seuils eux-mêmes sont provisoires</b> : ce sont des valeurs théoriques, jamais calibrées sur les pools que tu joues réellement. Modifie-les si tu as mieux — le champ à droite de chaque règle est fait pour ça.</p>
-    <p class="row-meta">Sur chaque barre : le <b style="color:var(--ink)">trait clair</b> est ta valeur actuelle, le <b style="color:var(--muted)">trait gris</b> celle de l'import précédent. La zone verte est la cible, l'ambre la marge de surveillance, la rouge le dépassement — toutes trois déduites du seuil que tu fixes juste à côté, et de rien d'autre. L'échelle va de zéro à deux fois le seuil : le seuil est donc toujours au milieu de la barre.</p>
-    <div id="leakEngine"></div>
-  </div>
-
-  <div class="card">
-    <div class="sec-label">Diagnostic de format</div>
-    <p class="lead mt14">Si un fichier n'est pas reconnu, le carnet en décrit la structure sans rien interpréter. Exporte le diagnostic et envoie-le : c'est ce qu'il faut pour écrire l'adaptateur manquant.</p>
-    <div id="diagBox"></div>
-    <div class="form-row mt14"><button class="btn-outline" id="diagExport">Exporter le diagnostic</button></div>
-  </div>
-</div>
-
-<!-- =================== BANKROLL =================== -->
-<div class="panel" data-panel="bankroll">
-  <div class="sec-label">Garde-fou</div>
-  <h2>La règle est chiffrée, <em>et elle ne se négocie pas</em></h2>
-  <p class="lead">Buy-in maximum = bankroll ÷ caves de sécurité. Un dépassement s'affiche sur ton dashboard, en permanence, jusqu'à ce que la bankroll rattrape le niveau joué. Le compte ne s'efface jamais : il vieillit.</p>
-
-  <div class="grid mb18" id="brCards" style="grid-template-columns:repeat(auto-fit,minmax(185px,1fr))"></div>
-
-  <div class="card mb18">
-    <div class="form-row">
-      <div class="field" style="flex:0 0 170px"><label>Bankroll actuelle €</label><input type="number" id="brAmount" min="0" step="10"></div>
-      <div class="field" style="flex:2 1 260px"><label>Caves de sécurité</label><select id="brRule">
-        <option value="150">150 — MTT classique, plancher</option>
-        <option value="200" selected>200 — PKO, standard</option>
-        <option value="250">250 — PKO gros field, prudent</option>
-        <option value="300">300 — niveau « en vivre »</option>
-      </select></div>
-      <button class="btn" id="brSave">Mettre à jour</button>
-    </div>
-  </div>
-
-  <div class="card mb18">
-    <div class="sec-label">Historique de la règle</div>
-    <p class="lead mt14">Chaque changement de bankroll ou de caves de sécurité est daté. Sans cette trace, un tournoi signalé « hors bankroll » resterait ambigu : écart réel au moment de jouer, ou règle durcie après coup ? Les tournois sont désormais jugés contre la règle en vigueur le jour où ils ont été joués, chaque fois qu'elle est connue.</p>
-    <div id="brLog"></div>
-  </div>
-
-  <div class="card">
-    <div class="sec-label">Ce que ce carnet ne fait pas</div>
-    <p style="font-size:14.5px;color:var(--ink-soft);margin-top:10px">Ce n'est pas un tracker. Les statistiques de main fines — EV ajustée, équité par range, HUD en temps réel — viennent de PokerTracker 4, Hold'em Manager 3 ou Hand2Note. Le carnet fait ce qu'aucun tracker ne fait : il tient le planning, le programme d'étude, le protocole de review, la règle de bankroll, et il refuse d'afficher un chiffre tant que l'échantillon ne le porte pas. C'est ce dernier point qui compte le plus : la plupart des joueurs prennent des décisions sur des statistiques calculées à partir de trop peu de mains.</p>
   </div>
 
 </div>
@@ -1831,22 +1818,103 @@ function fichesParMain(){
     (idx[k]=idx[k]||[]).push(h);});
   return idx;
 }
-function renderReplays(){
-  let R=allReplays(ME,FMT);
-  R.sort((a,b)=>REVSORT==='loss'?a.d-b.d:REVSORT==='win'?b.d-a.d:Math.abs(b.d)-Math.abs(a.d));
-  $('revTable').innerHTML=`<tr><th>Jour</th><th>Heure</th><th>Position</th><th class="num">Tapis</th>
-    <th>Main</th><th>Tableau</th><th class="num">Résultat</th><th></th></tr>`+
-    (R.length?R.slice(0,25).map((r,i)=>`<tr><td class="num">${esc(r.tdate)}</td><td class="num">${esc(r.ts)}</td>
-      <td>${esc(r.pos||'—')}${r.posInf?'<span class="row-meta"> ≈</span>':''}</td><td class="num">${(r.stack/r.bb).toFixed(0)} bb</td>
+/* ---- Mains completes ----
+   La base IndexedDB porte l'integralite des historiques. `rep` (cinq mains par
+   tournoi) reste le repli pour les tournois importes avant qu'elle existe.
+   Le cache evite de relire la base a chaque tri ou changement d'onglet. */
+let CACHE_MAINS=null;
+function normMain(m){
+  // Les deux sources decrivent la meme chose sous des noms differents. On
+  // reconcilie ici pour que le rendu et le rejeu n'aient qu'une seule forme.
+  return{pid:m.pid,tid:m.tid,i:m.hid,tdate:m.date,ts:m.ts,game:m.game,fmt:m.fmt,
+    bb:m.bb,stack:m.stack,pos:m.pos,posInf:m.posInf,hole:m.hole,board:m.board,
+    d:m.d,sd:m.sd,seats:m.seats,a:m.a,lvl:m.lvl,prime:m.prime,complete:true};
+}
+function chargeMains(){
+  if(CACHE_MAINS)return Promise.resolve(CACHE_MAINS);
+  return txMains('readonly',st=>{const r=st.getAll();const b={};r.onsuccess=()=>b.v=r.result;return b;})
+    .then(b=>{CACHE_MAINS=(b&&b.v)?b.v.map(normMain):[];return CACHE_MAINS;})
+    .catch(()=>{CACHE_MAINS=[];return CACHE_MAINS;});
+}
+/* Toutes les mains du joueur pour un format : la base si elle en a, les rejeux
+   sinon. Melanger les deux ferait des doublons — la base contient deja les
+   mains que `rep` conserve. */
+function mainsDe(pid,fmt,tid){
+  const base=(CACHE_MAINS||[]).filter(m=>m.pid===pid&&(!fmt||m.fmt===fmt)&&(!tid||m.tid===tid));
+  if(base.length)return base;
+  return allReplays(pid,fmt).filter(r=>!tid||String(r.tid)===String(tid));
+}
+
+/* ---- Priorite de relecture ----
+   Trois idees, et aucune n'est une mesure — les coefficients sont arbitraires,
+   assumes, et le tri par montant reste offert juste a cote :
+   1. l'ampleur du mouvement de jetons donne l'enjeu ;
+   2. une main ou l'on n'a rien eu a decider — tapis preflop paye, fold
+      immediat — n'apprend rien, quelle que soit la somme perdue. C'est tout
+      l'inconvenient du classement par montant : il remonte les coolers ;
+   3. une decision importante prise en moins de trois secondes est suspecte.
+      Betclic horodate les actions, Winamax non : le signal est donc muet sur
+      la moitie de l'historique, et l'ecran le dit plutot que de faire comme si. */
+const PRIO_VITE=3;      // secondes : en deca, la decision n'a pas ete pesee
+function scorePrio(r){
+  const enjeu=Math.abs(+r.d||0);
+  if(!enjeu)return 0;
+  const pf=(r.a||[]).filter(a=>a.s==='PF'&&!/^Posts/i.test(a.v));
+  const moi=(r.a||[]).filter(a=>a.p==='moi'&&!/^Posts/i.test(a.v));
+  const streets=new Set(moi.map(a=>a.s));
+  let poids=1;
+  // Vrai choix : quelqu'un a relance avant moi et j'ai continue.
+  const iMoi=pf.findIndex(a=>a.p==='moi');
+  if(iMoi>0&&pf.slice(0,iMoi).some(a=>a.v==='Raises to')&&pf[iMoi].v!=='Folds')poids*=1.4;
+  // Main jouee sur plusieurs tours : les decisions s'y empilent.
+  if(streets.size>=3)poids*=1.35; else if(streets.size===2)poids*=1.15;
+  // Tapis preflop sans suite : gros montant, aucune decision a revoir.
+  if(streets.size<=1&&moi.some(a=>a.ai))poids*=0.55;
+  // Decision rapide sur un coup important (Betclic seulement).
+  let vite=false;
+  const sec=t=>{const p=String(t||'').split(':').map(Number);
+    return p.length===3?p[0]*3600+p[1]*60+p[2]:null;};
+  (r.a||[]).forEach((a,i)=>{
+    if(a.p!=='moi'||!i||!a.t)return;
+    const d=sec(a.t)-sec((r.a[i-1]||{}).t);
+    if(d!==null&&d>=0&&d<PRIO_VITE)vite=true;});
+  if(vite)poids*=1.5;
+  return{s:enjeu*poids,vite,streets:streets.size};
+}
+let PRIOSORT='prio';
+const PRIO_MAX=25;
+function renderPrio(){
+  const tbl=$('prioTable');if(!tbl)return;
+  let R=mainsDe(ME,FMT).map(r=>Object.assign({},r,{_p:scorePrio(r)}));
+  R.sort((a,b)=>PRIOSORT==='loss'?a.d-b.d
+    :PRIOSORT==='win'?b.d-a.d
+    :PRIOSORT==='abs'?Math.abs(b.d)-Math.abs(a.d)
+    :(b._p.s||0)-(a._p.s||0));
+  const vus=R.slice(0,PRIO_MAX);
+  const horodate=R.some(r=>(r.a||[]).some(a=>a.t));
+  tbl.innerHTML=`<tr><th>Jour</th><th>Heure</th><th>Position</th><th class="num">Tapis</th>
+    <th>Main</th><th>Tableau</th><th class="num">Résultat</th><th>Pourquoi</th><th></th></tr>`+
+    (vus.length?vus.map((r,i)=>{
+      const marques=[];
+      if(r._p.vite)marques.push('<span class="tag hot">décidé en moins de 3 s</span>');
+      if(r._p.streets>=3)marques.push('<span class="tag warm">jouée jusqu\'à la river</span>');
+      else if(r._p.streets===2)marques.push('<span class="tag">deux tours d\'enchères</span>');
+      return `<tr><td class="num">${esc(r.tdate)}</td><td class="num">${esc(r.ts)}</td>
+      <td>${esc(r.pos||'—')}${r.posInf?'<span class="row-meta"> ≈</span>':''}</td>
+      <td class="num">${(r.stack/r.bb).toFixed(0)} bb</td>
       <td style="font-family:var(--mono);font-size:12px">${esc(r.hole||'—')}</td>
       <td style="font-family:var(--mono);font-size:12px">${esc(r.board||'pas de flop')}</td>
       <td class="num ${r.d>=0?'pos':'neg'}">${r.d>=0?'+':''}${r.d} bb</td>
-      <td><button class="btn-mini" data-rep="${i}">Rejouer</button></td></tr>`).join('')
-     :`<tr><td colspan="8" class="empty">Aucune main enregistrée pour ce format. Importe un historique dans l'onglet Import.</td></tr>`);
-  $('revTable').querySelectorAll('[data-rep]').forEach(b=>b.onclick=()=>{
-    OPENREP=R[+b.dataset.rep];renderReplayBox();});
-  if(OPENREP&&!R.some(x=>x.i===OPENREP.i))OPENREP=null;
-  renderReplayBox();
+      <td>${marques.join('')||'<span class="row-meta">—</span>'}</td>
+      <td><button class="btn-mini" data-rep="${i}">Rejouer</button></td></tr>`;}).join('')
+     :`<tr><td colspan="9" class="empty">Aucune main pour ce format. Dépose un historique dans l'onglet Import.</td></tr>`);
+  tbl.querySelectorAll('[data-rep]').forEach(b=>b.onclick=()=>{
+    OPENREP=vus[+b.dataset.rep];renderReplayBox(OPENREP,'prioBox',()=>{OPENREP=null;renderPrio();});});
+  if(OPENREP&&!vus.some(x=>x.i===OPENREP.i))OPENREP=null;
+  renderReplayBox(OPENREP,'prioBox',()=>{OPENREP=null;renderPrio();});
+  const n=$('prioNote');
+  if(n)n.innerHTML=horodate?'':
+    `<p class="row-meta mt14">Aucune de ces mains n'est horodatée action par action — ce sont des historiques Winamax. Le signal « décidé trop vite » reste donc muet ici : il n'existe que sur Betclic.</p>`;
 }
 /* Affichage detaille d'une main rejouee. Deux appelants : le tableau de review
    (#replayBox, format en cours seulement) et la base de mains (#bmReplay, tous
@@ -1893,7 +1961,7 @@ function renderReplayBox(rep,boxId,fermer){
 }
 
 function renderReview(){
-  renderReplays();
+  renderPrio();
   const mine=DATA.hands.filter(h=>h.pid===ME),c={};
   mine.forEach(h=>c[h.leak]=(c[h.leak]||0)+1);
   const ranked=Object.entries(c).sort((a,b)=>b[1]-a[1]);
@@ -1941,67 +2009,91 @@ function renderReview(){
     if(!h)return;delete h.reviewed;save();renderReview();renderDash();renderAgenda();});
 }
 
-/* ============ BASE DE MAINS ============
-   Vue transverse : toutes les mains conservees, tous formats, filtrables.
-   Elle ne cree aucune donnee — elle relit `rep` et les fiches, rien d'autre.
-   Rappel de la limite : `rep` est plafonne et purge (REP_PER_T par tournoi,
-   REP_KEEP tournois par joueur). Cette base ne montre donc pas tout ce qui a
-   ete joue, seulement ce qui a survecu a la contrainte de stockage — et elle
-   le dit a l'ecran. */
-const BM={fmt:'',pos:'',res:'',leak:'',du:'',au:'',sort:'abs'};
-let BMOPEN=null;
-const BM_MAX=80;   // lignes affichees ; le compte total reste annonce
+/* ============ TES TOURNOIS ============
+   Remplace l'ancienne Base de mains et son jeu de filtres. Le detour etait
+   necessaire tant que le carnet ne gardait que cinq mains par tournoi : il
+   fallait fouiller un echantillon eparpille. Maintenant que les historiques
+   sont conserves en entier, le tournoi redevient l'unite naturelle — une
+   ligne, puis toutes ses mains, dans l'ordre ou elles ont ete jouees. */
+let OPENTOUR=null, OPENTMAIN=null;
+const TOUR_MAX=60;
+function renderTournois(){
+  const tbl=$('ldTable');if(!tbl)return;
+  const Tous=toursOf(ME,FMT).slice().reverse();
+  const pko=Tous.some(t=>+t.bounty>0);
+  const nMains=t=>mainsDe(ME,null,t.id).length;
+  tbl.innerHTML=`<tr><th>Date</th><th>Épreuve</th><th class="num">Champ</th><th class="num">Buy-in</th>
+    <th class="num">Place</th>${pko?'<th class="num">Primes</th>':''}<th class="num">Gain</th>
+    <th class="num">Net</th><th class="num">Mains</th><th></th></tr>`+
+    (Tous.length?Tous.slice(0,TOUR_MAX).map(t=>{
+      const net=(+t.won||0)-(+t.buyin||0), n=nMains(t);
+      return `<tr class="row-click${OPENTOUR===t.id?' row-open':''}" data-tour="${esc(t.id)}">
+      <td class="num">${esc(String(t.date).slice(0,10))}</td>
+      <td>${esc(t.game)}${t.mult?' '+esc(t.mult):''}</td>
+      <td class="num">${t.field||'—'}</td>
+      <td class="num">${(+t.buyin).toFixed(2)} €</td>
+      <td class="num">${t.finish||'—'}</td>
+      ${pko?`<td class="num">${+t.bounty?`${(+t.bounty).toFixed(2)} €${t.ko?' · '+t.ko+' KO':''}`:'—'}</td>`:''}
+      <td class="num">${t.res===false?'<span class="row-meta">résumé manquant</span>':(+t.won).toFixed(2)+' €'}</td>
+      <td class="num ${t.res===false?'':(net>=0?'pos':'neg')}">${t.res===false?'—':eur(net)}</td>
+      <td class="num">${n||'<span class="row-meta">—</span>'}</td>
+      <td>${ME===OWNER()?`<button class="btn-mini" data-del-t="${esc(t.id)}">×</button>`:''}</td></tr>`;}).join('')
+     :`<tr><td colspan="${pko?10:9}" class="empty">Aucun tournoi de ce format. Dépose un historique dans l'onglet Import.</td></tr>`);
 
-function bmFiltre(){
-  const idx=fichesParMain();
-  let R=allReplays(ME,BM.fmt||null);
-  R=R.filter(r=>{
-    if(BM.pos&&!String(r.pos||'').split(/\s+/).includes(BM.pos))return false;
-    if(BM.res==='gain'&&!(r.d>0))return false;
-    if(BM.res==='perte'&&!(r.d<0))return false;
-    if(BM.du&&r.tdate<BM.du)return false;
-    if(BM.au&&r.tdate>BM.au)return false;
-    if(BM.leak){
-      const f=idx[r.pid+'|'+r.tid+'|'+r.i]||[];
-      if(BM.leak==='__sans'){if(f.length)return false;}
-      else if(!f.some(h=>h.leak===BM.leak))return false;
-    }
-    return true;});
-  R.sort((a,b)=>BM.sort==='loss'?a.d-b.d
-    :BM.sort==='win'?b.d-a.d
-    :BM.sort==='date'?String(b.tdate).localeCompare(String(a.tdate))
-    :Math.abs(b.d)-Math.abs(a.d));
-  return{R,idx};
+  tbl.querySelectorAll('[data-tour]').forEach(tr=>tr.onclick=()=>{
+    OPENTOUR=(OPENTOUR===tr.dataset.tour)?null:tr.dataset.tour;
+    OPENTMAIN=null;renderTournois();});
+  tbl.querySelectorAll('[data-del-t]').forEach(b=>b.onclick=e=>{
+    e.stopPropagation();
+    if(VIEW!==OWNER())return;
+    GONE.add(OWNER()+'|'+b.dataset.delT);
+    supprimeMainsDe(OWNER(),b.dataset.delT);
+    CACHE_MAINS=null;
+    DATA.tournaments=DATA.tournaments.filter(x=>!(x.id===b.dataset.delT&&x.pid===OWNER()));
+    if(OPENTOUR===b.dataset.delT)OPENTOUR=null;
+    save();renderAll();});
+  renderTourBox();
 }
 
-function renderBase(){
-  const tbl=$('bmTable');if(!tbl)return;
-  const{R,idx}=bmFiltre();
-  const vus=R.slice(0,BM_MAX);
-  $('bmCount').textContent=R.length
-    ? `${R.length} main${R.length>1?'s':''}${R.length>BM_MAX?`, les ${BM_MAX} premières affichées`:''}`
-    : 'aucune main';
-  tbl.innerHTML=`<tr><th>Jour</th><th>Heure</th><th>Format</th><th>Position</th>
-    <th class="num">Tapis</th><th>Main</th><th>Tableau</th><th class="num">Résultat</th><th>Fiche</th><th></th></tr>`+
-    (vus.length?vus.map((r,i)=>{
-      const f=idx[r.pid+'|'+r.tid+'|'+r.i]||[];
-      return `<tr class="row-click${BMOPEN&&BMOPEN.pid===r.pid&&BMOPEN.tid===r.tid&&BMOPEN.i===r.i?' row-open':''}" data-bm="${i}">
-      <td class="num">${esc(r.tdate)}</td><td class="num">${esc(r.ts)}</td>
-      <td>${esc(FMTS[r.fmt]||r.fmt||'—')}</td>
-      <td>${esc(r.pos||'—')}${r.posInf?'<span class="row-meta"> ≈</span>':''}</td>
-      <td class="num">${(r.stack/r.bb).toFixed(0)} bb</td>
-      <td style="font-family:var(--mono);font-size:12px">${esc(r.hole||'—')}</td>
-      <td style="font-family:var(--mono);font-size:12px">${esc(r.board||'pas de flop')}</td>
-      <td class="num ${r.d>=0?'pos':'neg'}">${r.d>=0?'+':''}${r.d} bb</td>
-      <td>${f.length?f.map(h=>`<span class="tag warm">${esc(h.leak)}</span>`).join(''):'<span class="row-meta">—</span>'}</td>
-      <td><button class="btn-mini" data-bmrep="${i}">Rejouer</button></td></tr>`;}).join('')
-     :`<tr><td colspan="10" class="empty">Aucune main ne correspond à ces filtres.</td></tr>`);
-  const ouvrir=i=>{const r=vus[+i];
-    BMOPEN=(BMOPEN&&BMOPEN.tid===r.tid&&BMOPEN.i===r.i&&BMOPEN.pid===r.pid)?null:r;
-    renderBase();};
-  tbl.querySelectorAll('[data-bmrep]').forEach(b=>b.onclick=e=>{e.stopPropagation();ouvrir(b.dataset.bmrep);});
-  tbl.querySelectorAll('[data-bm]').forEach(tr=>tr.onclick=()=>ouvrir(tr.dataset.bm));
-  renderReplayBox(BMOPEN,'bmReplay',()=>{BMOPEN=null;renderBase();});
+/* Toutes les mains d'un tournoi, dans l'ordre de jeu. Le tri par heure et non
+   par montant est deliberé : on relit une progression, pas un palmares. */
+function renderTourBox(){
+  const box=$('tourBox');if(!box)return;
+  if(!OPENTOUR){box.innerHTML='';return;}
+  const t=DATA.tournaments.find(x=>x.id===OPENTOUR&&x.pid===ME);
+  if(!t){OPENTOUR=null;box.innerHTML='';return;}
+  const M=mainsDe(ME,null,t.id).slice()
+    .sort((a,b)=>String(a.ts).localeCompare(String(b.ts)));
+  const idx=fichesParMain();
+  const partiel=M.length&&!M[0].complete;
+  box.innerHTML=`<div class="card mt14" style="background:var(--paper)">
+    <div class="cal-nav"><div class="sec-label" style="margin:0">${esc(t.game)} — ${esc(String(t.date).slice(0,10))}</div>
+      <button class="btn-mini" id="tbClose">Fermer</button></div>
+    ${!M.length?`<p class="empty">Aucune main conservée pour ce tournoi. Réimporte son fichier d'historique : le carnet garde désormais tout.</p>`
+     :`${partiel?`<div class="notice" style="margin-top:10px"><b>${M.length} main${M.length>1?'s':''} seulement.</b> Ce tournoi a été importé avant que le carnet conserve les historiques en entier — il n'en reste que les plus gros mouvements de jetons. Redépose son fichier pour retrouver la partie complète.</div>`
+       :`<p class="row-meta mt14">${M.length} mains, dans l'ordre où elles ont été jouées.</p>`}
+      <div class="tbl-wrap"><table>
+        <tr><th>Heure</th><th>Position</th><th class="num">Tapis</th><th>Main</th><th>Tableau</th>
+        <th class="num">Résultat</th><th>Fiche</th><th></th></tr>
+        ${M.map((r,i)=>{const f=idx[r.pid+'|'+r.tid+'|'+r.i]||[];
+          return `<tr class="row-click${OPENTMAIN===String(i)?' row-open':''}" data-tm="${i}">
+          <td class="num">${esc(r.ts)}</td>
+          <td>${esc(r.pos||'—')}${r.posInf?'<span class="row-meta"> ≈</span>':''}</td>
+          <td class="num">${(r.stack/r.bb).toFixed(0)} bb</td>
+          <td style="font-family:var(--mono);font-size:12px">${esc(r.hole||'—')}</td>
+          <td style="font-family:var(--mono);font-size:12px">${esc(r.board||'pas de flop')}</td>
+          <td class="num ${r.d>=0?'pos':'neg'}">${r.d>=0?'+':''}${r.d} bb</td>
+          <td>${f.length?f.map(h=>`<span class="tag warm">${esc(h.leak)}</span>`).join(''):'<span class="row-meta">—</span>'}</td>
+          <td><button class="btn-mini" data-tmrep="${i}">Rejouer</button></td></tr>`;}).join('')}
+      </table></div>
+      <div id="tourReplay"></div>`}
+  </div>`;
+  $('tbClose').onclick=()=>{OPENTOUR=null;OPENTMAIN=null;renderTournois();};
+  const ouvrir=i=>{OPENTMAIN=(OPENTMAIN===String(i))?null:String(i);renderTourBox();};
+  box.querySelectorAll('[data-tmrep]').forEach(b=>b.onclick=e=>{e.stopPropagation();ouvrir(b.dataset.tmrep);});
+  box.querySelectorAll('[data-tm]').forEach(tr=>tr.onclick=()=>ouvrir(tr.dataset.tm));
+  if(OPENTMAIN!==null&&M[+OPENTMAIN])
+    renderReplayBox(M[+OPENTMAIN],'tourReplay',()=>{OPENTMAIN=null;renderTourBox();});
 }
 
 /* ============ BANKROLL ============
@@ -2822,6 +2914,8 @@ async function handleFiles(files){
      l'historique d'avant cette version en redeposant les memes fichiers. */
   if(TOUTES.length){
     const n=await ecritMains(TOUTES);
+    CACHE_MAINS=null;         // le cache de lecture est perime des qu'on ecrit
+    await chargeMains();      // et on le reconstruit avant de redessiner
     rep.push(n
       ? `<div class="notice good"><b>${n} main${n>1?'s':''} conservée${n>1?'s':''} en entier.</b> Le carnet n'en affiche que les plus gros mouvements de jetons, mais tout est gardé — de quoi analyser ton jeu bien plus finement plus tard.</div>`
       : `<div class="notice"><b>Mains complètes non enregistrées.</b> Le stockage étendu du navigateur n'a pas répondu : navigation privée, espace saturé, ou carnet ouvert dans un autre onglet. Le reste de l'import est intact.</div>`);
@@ -2956,25 +3050,6 @@ function renderImport(){
     +(sansRes?`<div class="notice" style="margin-top:14px"><b>${sansRes} tournoi${sansRes>1?'s':''} sans résultat.</b> Le fichier de mains Winamax ne contient pas le classement : il vit dans le fichier <code>_summary</code> du même tournoi. Ces tournois sont exclus du net et du ROI tant qu'il manque, plutôt que comptés comme perdus.</div>`:'')
     +`<p class="verdict" style="font-size:15px;margin-top:16px">${v}</p>`;
 
-  const rows=Tous.slice().reverse().slice(0,40);
-  const pko=T.some(t=>+t.bounty>0);
-  $('ldTable').innerHTML=`<tr><th>Date</th><th>Épreuve</th><th class="num">À table</th><th class="num">Champ</th><th class="num">Buy-in</th>
-    <th class="num">Place</th>${pko?'<th class="num">Primes</th>':''}<th class="num">Gain</th><th class="num">Net</th><th class="num">Mains</th><th></th></tr>`+
-    (rows.length?rows.map(t=>{const net=(+t.won||0)-(+t.buyin||0);
-      void net;
-      return `<tr><td class="num">${esc(String(t.date).slice(0,10))}</td><td>${esc(t.game)}${t.mult?' '+esc(t.mult):''}</td>
-      <td class="num">${t.seats||'—'}</td><td class="num">${t.field||'—'}</td><td class="num">${(+t.buyin).toFixed(2)} €</td>
-      <td class="num">${t.finish||'—'}</td>${pko?`<td class="num">${+t.bounty?`${(+t.bounty).toFixed(2)} €${t.ko?' · '+t.ko+' KO':''}`:'—'}</td>`:''}<td class="num">${t.res===false?'<span class="row-meta">résumé manquant</span>':(+t.won).toFixed(2)+' €'}</td>
-      <td class="num ${t.res===false?'':(net>=0?'pos':'neg')}">${t.res===false?'—':eur(net)}</td><td class="num">${t.hands}</td>
-      <td><button class="btn-mini" data-del-t="${esc(t.id)}">×</button></td></tr>`;}).join('')
-     :`<tr><td colspan="11" class="empty">Aucun tournoi de ce format. Dépose un fichier d'historique ci-dessus.</td></tr>`);
-  $('ldTable').querySelectorAll('[data-del-t]').forEach(b=>b.onclick=()=>{
-    GONE.add(OWNER()+'|'+b.dataset.delT);
-    // Les mains completes suivent le tournoi : sans ca la base garderait des
-    // fantomes que plus rien ne reference.
-    supprimeMainsDe(OWNER(),b.dataset.delT);
-    DATA.tournaments=DATA.tournaments.filter(x=>!(x.id===b.dataset.delT&&x.pid===OWNER()));
-    save();renderImport();renderDash();});
 
   const s=statsOf(ME,FMT);
   $('statGrid').innerHTML=Object.entries(GATES).map(([k,[lbl,den,min]])=>{
@@ -3121,8 +3196,9 @@ function renderRules(s){
 
 /* ============ RENDER ALL ============ */
 function renderAll(){fillWho();renderImport();renderDash();renderCal();renderStudy();
-  renderSessions();renderReview();renderBase();renderBankroll();renderAgenda();renderStore();
-  const c=$('cmpFmt');if(c)c.textContent=FMTS[FMT];}
+  renderSessions();renderReview();renderTournois();renderBankroll();renderAgenda();renderStore();
+  const c=$('cmpFmt');if(c)c.textContent=FMTS[FMT];
+  const f=$('fmtSel');if(f&&f.value!==FMT)f.value=FMT;}
 function fillWho(){$('meName').textContent=P(ME).name;}
 
 /* ============ INIT ============ */
@@ -3132,23 +3208,6 @@ function fillStatics(){
     `<optgroup label="${g}">${list.map(l=>`<option>${esc(l)}</option>`).join('')}</optgroup>`).join('');
   const t=iso(new Date());['stDate','hvDate'].forEach(id=>$(id).value=t);
   selDay=t;
-  // Filtres de la base de mains. La liste des leaks est la meme que celle des
-  // fiches, plus une entree pour les mains qu'aucune fiche ne commente.
-  $('bmLeak').innerHTML='<option value="">Tous</option><option value="__sans">Sans fiche rattachée</option>'+
-    LEAKS.map(([g,list])=>`<optgroup label="${g}">${list.map(l=>`<option>${esc(l)}</option>`).join('')}</optgroup>`).join('');
-}
-function wireBase(){
-  const maj=()=>{BMOPEN=null;renderBase();};
-  const champs={bmFmt:'fmt',bmPos:'pos',bmRes:'res',bmLeak:'leak',
-                bmDu:'du',bmAu:'au',bmSort:'sort'};
-  Object.entries(champs).forEach(([id,cle])=>{
-    const el=$(id);if(!el)return;
-    el.onchange=()=>{BM[cle]=el.value;maj();};});
-  $('bmReset').onclick=()=>{
-    Object.entries(champs).forEach(([id,cle])=>{
-      BM[cle]=(cle==='sort')?'abs':'';
-      const el=$(id);if(el)el.value=BM[cle];});
-    maj();};
 }
 
 /* Bascule d'onglet, appelable depuis le code : les raccourcis d'un panneau
@@ -3187,7 +3246,10 @@ async function init(){
 
   rebuildDirty();
   fillStatics();
-  wireBase();
+  /* Les mains completes arrivent apres coup : le carnet s'affiche sans les
+     attendre, et se redessine quand elles sont la. */
+  chargeMains().then(m=>{if(m.length&&$('app').style.display!=='none'){
+    renderPrio();renderTournois();}});
   wireApp();          // AVANT tout retour anticipe : dans la version d'origine,
                       // le cablage venait apres l'ecran d'accueil et un carnet
                       // tout neuf s'affichait avec des boutons inertes jusqu'au
@@ -3303,8 +3365,8 @@ function wireApp(){
     if(await pullCloud(true))renderAll();};
 
   $('fmtSel').onchange=e=>{FMT=e.target.value;localStorage.setItem(FMTKEY,FMT);
-    OPENREP=null;renderAll();};
-  $('revSort').onchange=e=>{REVSORT=e.target.value;renderReplays();};
+    OPENREP=null;OPENTOUR=null;OPENTMAIN=null;renderAll();};
+  $('prioSort').onchange=e=>{PRIOSORT=e.target.value;renderPrio();};
   $('noSave').onclick=()=>{
     const d=$('noDate').value;if(!d){alert("Aucun jour joué : importe d'abord un historique.");return;}
     DATA.notes=DATA.notes||{};DATA.notes[ME]=DATA.notes[ME]||{};
