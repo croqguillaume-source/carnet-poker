@@ -403,6 +403,12 @@
   <h2>Trois mains par session, <em>revues sous 48 h</em></h2>
   <p class="lead">Le tracker sort les statistiques, cette page sort les décisions. Chaque fiche est rattachée à un leak nommé, et le classement se construit tout seul en dessous.</p>
 
+  <div class="notice good mb18" style="margin-top:4px">
+    <b>Atelier de ranges — nouveau.</b> Une page à part, où tu saisis tes ranges préflop position par position.
+    Elle relit ensuite tes mains conservées, reclasse chaque spot et te montre où tu as joué autre chose que
+    ce que tu avais écrit à froid. <a href="review.html" style="color:var(--clay);font-weight:600">Ouvrir l'atelier →</a>
+  </div>
+
   <div class="card mb18">
     <div class="form-row">
       <div class="field" style="flex:0 0 150px"><label>Date</label><input type="date" id="hvDate"></div>
@@ -1709,7 +1715,21 @@ function renderStore(){
     <p class="row-meta">${nT} tournois, ${nR} mains rejouables, ${par} octets par tournoi en moyenne.
     Marge avant saturation : environ ${reste.toLocaleString('fr-FR')} tournois. Au-delà, les rejeux les plus anciens
     sont purgés automatiquement ; les résultats et les statistiques ne le sont jamais.
-    ${DIRTY.size?`<br>${DIRTY.size} tournoi${DIRTY.size>1?'s':''} en attente d'envoi.`:''}</p>`;
+    ${DIRTY.size?`<br>${DIRTY.size} tournoi${DIRTY.size>1?'s':''} en attente d'envoi.`:''}</p>
+    <div id="storeMains" class="mt14"></div>`;
+  /* Le compte des mains completes vit dans une base a part, donc en asynchrone.
+     Il arrive apres le reste plutot que de faire attendre tout le panneau. */
+  compteMains().then(n=>{
+    const b=$('storeMains');if(!b)return;
+    b.innerHTML=n===null
+      ? `<p class="row-meta">Stockage étendu indisponible sur ce navigateur — navigation privée, ou espace refusé. Le carnet fonctionne normalement, seul l'atelier de ranges reste limité aux mains rejouables ci-dessus.</p>`
+      : `<div class="lbar"><span class="lbar-name">Mains conservées en entier</span>
+          <span class="lbar-track"><i style="width:${Math.min(100,n/50000*100).toFixed(1)}%;background:var(--sage)"></i></span>
+          <span class="lbar-n">${n.toLocaleString('fr-FR')}</span></div>
+        <p class="row-meta">Base séparée, hors du plafond de 5 Mo ci-dessus et <b>non synchronisée</b> : elle vit sur cet appareil seulement.
+        Compte environ 0,7 Ko par main — de quoi tenir des années. C'est elle qu'interroge <a href="review.html" style="color:var(--clay)">l'atelier de ranges</a>.
+        ${n?'':' Elle se remplira au prochain import ; les fichiers déjà déposés peuvent être redéposés pour rattraper l\'historique.'}</p>`;
+  });
 }
 function renderBankroll(){
   const ME=VIEW;   // lecture seule : suit le joueur consulté
@@ -1928,7 +1948,16 @@ function inferPos(seats){
   });
 }
 function applySummary(t,s){
-  t.finish=s.finish; t.won=s.won||0; t.field=s.players||0;
+  t.finish=s.finish;
+  /* Meme convention que l'adaptateur Betclic : `won` INCLUT les primes — c'est
+     ce montant que lisent le net, le ROI et le graphe — et `bounty` les isole
+     pour l'affichage PKO. Le fichier de mains Winamax ne portant aucune prime,
+     meme en knockout, le resume en est la seule source : sans cette ligne, tout
+     un historique PKO se lit ampute du montant des primes.
+     `ko` reste inconnu — le resume ne dit pas combien d'eliminations. */
+  t.bounty=+s.bounty||0;
+  t.won=(+s.won||0)+t.bounty;
+  t.field=s.players||0;
   if(s.buyin)t.buyin=s.buyin;
   if(s.date&&!t.date)t.date=s.date;
   t.res=true;
@@ -1960,6 +1989,125 @@ function posKey(seat){
   return tags.length?tags[tags.length-1]:null;
 }
 
+/* ============ MAINS COMPLÈTES ============
+   localStorage plafonne a 5 Mo par origine. C'est ce plafond, et rien d'autre,
+   qui a dicte REP_PER_T = 5 : cinq mains par tournoi, choisies sur l'amplitude
+   du mouvement de jetons. Or ce tri est le plus defavorable qui soit pour
+   auditer des ranges — l'erreur preflop typique coute deux blindes et demie et
+   ne fait jamais un gros pot, donc elle n'est jamais retenue. Sur le tournoi
+   qui a servi de test, 444 mains jouees, 5 conservees.
+
+   IndexedDB leve la contrainte sans rien ajouter au projet : natif au
+   navigateur, donc toujours zero build, zero dependance.
+
+   TOUT CE QUI SUIT EST ADDITIF. Si la base est indisponible, refusee, pleine ou
+   bloquee par un autre onglet, l'import se deroule exactement comme avant et
+   aucune lecture du carnet n'en depend. C'est la condition pour qu'un stockage
+   experimental ne puisse pas casser un carnet qui marche.
+
+   Ces mains ne sont PAS synchronisees : plusieurs centaines de Ko par tournoi
+   n'ont rien a faire dans une ligne Supabase, et l'analyse fine se fait la ou
+   l'on importe. Le telephone continue de recevoir agregats et fiches. */
+const MDB_NOM=KEY.replace(/-v\d+$/,'')+'-mains', MDB_VER=1, MDB_STORE='mains';
+let mdb=null, mdbKO=false;
+
+function ouvreMains(){
+  if(mdb)return Promise.resolve(mdb);
+  if(mdbKO||!window.indexedDB)return Promise.resolve(null);
+  return new Promise(res=>{
+    let rq;
+    try{rq=indexedDB.open(MDB_NOM,MDB_VER);}catch(e){mdbKO=true;return res(null);}
+    rq.onupgradeneeded=()=>{
+      const d=rq.result;
+      if(!d.objectStoreNames.contains(MDB_STORE)){
+        const s=d.createObjectStore(MDB_STORE,{keyPath:'k'});
+        s.createIndex('pid','pid');
+        s.createIndex('tid','tid');
+        s.createIndex('date','date');
+      }
+    };
+    rq.onsuccess=()=>{mdb=rq.result;res(mdb);};
+    // Un echec n'est jamais fatal : on le note une fois et on n'y revient pas.
+    rq.onerror=()=>{mdbKO=true;res(null);};
+    rq.onblocked=()=>{mdbKO=true;res(null);};
+  });
+}
+function txMains(mode,fn){
+  return ouvreMains().then(d=>{
+    if(!d)return null;
+    return new Promise(res=>{
+      let tx;
+      try{tx=d.transaction(MDB_STORE,mode);}catch(e){return res(null);}
+      let sortie=null;
+      try{sortie=fn(tx.objectStore(MDB_STORE));}catch(e){}
+      // `== null` attrape null ET undefined : une fonction d'ecriture ne rend
+      // rien, et sans ca la transaction reussie serait rapportee comme un echec.
+      tx.oncomplete=()=>res(sortie==null?true:sortie);
+      tx.onerror=()=>res(null);
+      tx.onabort=()=>res(null);
+    });
+  }).catch(()=>null);
+}
+function ecritMains(liste){
+  if(!liste||!liste.length)return Promise.resolve(0);
+  return txMains('readwrite',st=>{liste.forEach(m=>{try{st.put(m);}catch(e){}});})
+    .then(ok=>ok?liste.length:0);
+}
+function compteMains(){
+  return txMains('readonly',st=>{
+    const r=st.count();const box={};r.onsuccess=()=>box.n=r.result;return box;})
+    .then(b=>b&&b.n!==undefined?b.n:null);
+}
+/* Suppression d'un tournoi : ses mains partent avec lui, sinon la base
+   grossirait de fantomes que plus rien ne reference. */
+function supprimeMainsDe(pid,tid){
+  return txMains('readwrite',st=>{
+    const i=st.index('tid'), r=i.openCursor(IDBKeyRange.only(String(tid)));
+    r.onsuccess=()=>{const c=r.result;if(!c)return;
+      if(c.value&&c.value.pid===pid)c.delete();c.continue();};
+  });
+}
+function videMains(){return txMains('readwrite',st=>{st.clear();});}
+
+/* Une main telle qu'elle sera relue par l'atelier de review. On garde ce qui
+   sert a analyser, pas le texte d'origine : environ deux fois plus leger, et
+   deja exploitable sans reparser.
+   `chipOk` a false signale que la reconstitution des jetons n'est pas bouclee.
+   La main est conservee quand meme — l'analyse preflop n'en depend pas, et
+   l'ecarter la ferait disparaitre d'un audit de range. */
+function mainComplete(H,hero,me,t,bb,dChips,C){
+  const FIN=/^(.+?) finished (\d+)\w*(?: and wins €?\s*([\d.,]+)(?: EUR)?)?/;
+  const elim=[];
+  H.summary.forEach(l=>{const m=l.match(FIN);
+    if(m)elim.push({n:m[1]===hero?'moi':m[1],place:+m[2],
+      gain:m[3]?parseFloat(String(m[3]).replace(',','.')):0});});
+  return{
+    k:OWNER()+'|'+t.id+'|'+(H.hdr['Hand ID']||''),
+    pid:OWNER(), tid:String(t.id), hid:H.hdr['Hand ID']||'',
+    date:String(H.hdr['Date & Time']||'').slice(0,10),
+    ts:String(H.hdr['Date & Time']||'').slice(11,19),
+    site:t.site, game:t.game, fmt:t.fmt, buyin:t.buyin,
+    // Niveau : Winamax l'ecrit dans l'en-tete de chaque main. Betclic ne le
+    // donne pas, mais ses blindes et son ante le situent tout aussi bien.
+    lvl:+H.hdr['Level']||null, ante:+H.hdr['Ante']||0, bb,
+    pos:(me.pos||[]).join(' '), posInf:!!me.inferred,
+    stack:me.stack, prime:+me.bounty||0,
+    hole:H.hole[hero]||'', board:H.board.join(' '),
+    d:Math.round(dChips/bb*10)/10, chipOk:!!C.ok,
+    sd:H.summary.some(l=>/shows/.test(l)),
+    // La prime de chaque adversaire est la clef du PSR en PKO. Betclic la donne
+    // a chaque main ; le format agrege la jetait, elle est conservee ici.
+    seats:H.seats.map(s=>({n:s.name===hero?'moi':s.name,s:s.stack,
+      p:(s.pos||[]).join(' '),b:+s.bounty||0})),
+    a:H.actions.filter(x=>!/^(Sits|Disconnected|Reconnected)/.test(x.act))
+      .map(x=>({s:x.street[0]+(x.street==='PRE-FLOP'?'F':''),
+        p:x.p===hero?'moi':x.p,v:x.act,m:x.amt,ai:x.allin,t:x.t||''})),
+    // Eliminations vues a cette table : chacune date le tournoi (« a cet
+    // instant il restait N joueurs ») et revele le gain de la place.
+    fin:elim
+  };
+}
+
 /* Chaque tournoi porte ses propres compteurs : le dédoublonnage protège
    les statistiques autant que le registre. */
 function aggregate(hands){
@@ -1967,6 +2115,10 @@ function aggregate(hands){
   for(const H of hands){const s=H.seats.find(x=>x.hero);if(s){hero=s.name;break;}}
   const esc2=s=>String(s).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
   const tour={};
+  // Toutes les mains, sans plafond : elles partiront dans IndexedDB. `rep`
+  // continue de recevoir les cinq plus gros mouvements pour le rejeu du
+  // carnet, qui lui vit dans localStorage.
+  const pleines=[];
   hands.forEach(H=>{
     const g=H.hdr['Game ID']||H.hdr['Tournament ID']||'?';
     const mode=(H.hdr['Game Mode']||'').toLowerCase();
@@ -1992,6 +2144,7 @@ function aggregate(hands){
     if(!C.ok)t.chipErr++;
     const bb=parseFloat(String(H.hdr['Blinds']||'0/0').split('/')[1])||0;
     const dChips=(C.won[hero]||0)-(C.put[hero]||0);
+    if(bb>0)pleines.push(mainComplete(H,hero,me,t,bb,dChips,C));
     if(C.ok&&bb>0){
       t.rep.push({i:(H.hdr['Hand ID']||'').slice(-6),
         ts:(H.hdr['Date & Time']||'').slice(11,19),
@@ -2047,7 +2200,7 @@ function aggregate(hands){
   // on ne garde que les plus gros mouvements de jetons de chaque tournoi
   out.forEach(t=>{t.rep.sort((a,b)=>Math.abs(b.d)-Math.abs(a.d));
     t.rep=t.rep.slice(0,REP_PER_T);});
-  return{hero,tournaments:out};
+  return{hero,tournaments:out,mains:pleines};
 }
 
 function diagnose(txt,name){
@@ -2100,6 +2253,10 @@ function parseWinamax(txt){
         H.hdr['Blinds']=(bl.length===3?bl[1]+'/'+bl[2]:bl[0]+'/'+bl[1]);
         H.hdr['Date & Time']=head[6].replace(/\//g,'-');
         H.hdr['Game Mode']='Tournament';
+        // Niveau de blindes, ecrit dans chaque en-tete Winamax. Combine a la
+        // structure complete que porte le fichier _summary, il situe la main
+        // dans le tournoi sans avoir besoin du nombre de joueurs restants.
+        H.hdr['Level']=+head[3]||null;
         continue;
       }
       const tbl=line.match(/^Table:\s*'(.+?)\((\d+)\)#\S*'\s+(\d+)-max.*?Seat #(\d+) is the button/);
@@ -2176,12 +2333,21 @@ function parseWinamaxSummary(txt){
     const fin=b.match(/You finished in (\d+)\w*\s+place/i);
     const pp=b.match(/Prizepool\s*:\s*([\d.,]+)/);
     const reg=b.match(/Registered players\s*:\s*(\d+)/);
-    const won=b.match(/You won\s*([\d.,]+)/i);
+    /* En knockout, la ligne de gain porte DEUX montants :
+         « You won 600.58€ + Bounty 51.50€ »
+       L'expression precedente s'arretait au premier et jetait les primes. Sur
+       un PKO elles font couramment la moitie du resultat — le net et le ROI
+       etaient donc sous-estimes sur tout l'historique Winamax. On isole la
+       ligne, puis on y lit les deux montants separement. */
+    const lg=(b.match(/^You won.*$/mi)||[''])[0];
+    const won=lg.match(/You won\s*([\d.,]+)/i);
+    const bty=lg.match(/Bounty\s*([\d.,]+)/i);
     const st=b.match(/Tournament started\s+(\d{4}\/\d\d\/\d\d \d\d:\d\d:\d\d)/);
     out.push({tid:id[2],game:id[1].trim(),
       buyin:bi?sommeEuros(bi[1]):0,
       finish:fin?+fin[1]:null, prizepool:pp?parseFloat(pp[1].replace(',','.')):0,
       players:reg?+reg[1]:0, won:won?parseFloat(won[1].replace(',','.')):0,
+      bounty:bty?parseFloat(bty[1].replace(',','.')):0,
       date:st?st[1].replace(/\//g,'-').slice(0,16):''});
   });
   return out;
@@ -2219,6 +2385,9 @@ function recalcTour(ex,t,nomFichier,batch,src){
 }
 async function handleFiles(files){
   const rep=[];LAST_DIAG=[];
+  // Mains completes de tous les fichiers du lot, ecrites en une fois a la fin :
+  // une transaction plutot qu'une par fichier.
+  const TOUTES=[];
   const batch=(DATA.batch||0)+1;DATA.batch=batch;
   for(const f of files){
     let txt='';try{txt=await f.text();}catch(e){rep.push(`<div class="notice"><b>${esc(f.name)}</b> — fichier illisible.</div>`);continue;}
@@ -2246,7 +2415,7 @@ async function handleFiles(files){
       rep.push(`<div class="notice"><b>${esc(f.name)}</b> — format « ${fmt} » non pris en charge. Structure relevée dans le diagnostic, en bas de page.</div>`);continue;}
     const hands=fmt==='winamax'?parseWinamax(txt):parseBetclic(txt);
     if(!hands.length){rep.push(`<div class="notice"><b>${esc(f.name)}</b> — aucune main reconnue.</div>`);continue;}
-    const {hero,tournaments}=aggregate(hands);
+    const {hero,tournaments,mains:pleines}=aggregate(hands);
     // Le pseudo du fichier doit correspondre a celui de l'appareil.
     // Cela intercepte l'import de l'historique d'un autre, ce qu'aucun
     // choix manuel de joueur ne saurait detecter.
@@ -2262,6 +2431,10 @@ async function handleFiles(files){
         if(!DATA.pseudos[OWNER()].includes(hero))DATA.pseudos[OWNER()].push(hero);
       }
     }
+    /* APRES le controle de pseudo, jamais avant : un fichier refuse parce
+       qu'il appartient a un autre joueur ne doit pas laisser ses mains dans
+       la base de celui-ci. Le refus serait sans effet. */
+    TOUTES.push(...pleines);
     let added=0,dup=0,noSeat=0,repaired=0,recalcule=0;
     tournaments.forEach(t=>{
       const ex=DATA.tournaments.find(x=>x.id===t.id&&x.pid===ME);
@@ -2286,6 +2459,17 @@ async function handleFiles(files){
     rep.push(`<div class="notice ${warn.length?'':'good'}"><b>${esc(f.name)}</b> — ${hands.length} mains, hero « ${esc(hero||'?')} ». ${added} tournoi${added>1?'s':''} ajouté${added>1?'s':''}${dup?`, ${dup} doublon${dup>1?'s':''} ignoré${dup>1?'s':''} (registre et statistiques)`:''}${recalcule?`, ${recalcule} tournoi${recalcule>1?'s':''} recalculé${recalcule>1?'s':''}${fmt==='winamax'?' (classement et gain du résumé préservés)':''}`:''}${repaired?`, ${repaired} tournoi${repaired>1?'s':''} complété${repaired>1?'s':''} avec ses statistiques`:''}${warn.length?`. À vérifier : ${warn.join(', ')}.`:'.'}</div>`);
   }
   pruneReplays();
+  /* Ecriture des mains completes, apres coup et sans bloquer : le carnet est
+     deja a jour a ce stade. Un echec ne remonte donc pas en erreur d'import —
+     on le dit dans le rapport, et c'est tout. Elles sont ecrites meme pour les
+     tournois ignores comme doublons : c'est ce qui permet de rattraper
+     l'historique d'avant cette version en redeposant les memes fichiers. */
+  if(TOUTES.length){
+    const n=await ecritMains(TOUTES);
+    rep.push(n
+      ? `<div class="notice good"><b>${n} main${n>1?'s':''} conservée${n>1?'s':''} en entier.</b> Elles alimentent l'atelier de ranges — le carnet, lui, n'en garde que les plus gros mouvements de jetons.</div>`
+      : `<div class="notice"><b>Mains complètes non enregistrées.</b> Le stockage étendu du navigateur n'a pas répondu : navigation privée, espace saturé, ou carnet ouvert dans un autre onglet. Le reste de l'import est intact — seul l'atelier de ranges sera moins fourni.</div>`);
+  }
   save();$('impReport').innerHTML=rep.join('');renderAll();
 }
 function pruneReplays(){
@@ -2396,10 +2580,15 @@ function renderImport(){
       + gate(mults.length>=1000,`<div class="kpi-label">Seuil de rentabilité</div>
           <div class="kpi-value">${mults.length>=1000?seuil.toFixed(1)+'<span class="unit">%</span>':'—'}</div>`,
           mults.length>=1000?`multiplicateur moyen ${eM.toFixed(2)}`:`n = ${mults.length} / 1000 requis · estimateur à queue lourde`)
-      : (T.some(t=>t.ko)
-        ? `<div class="kpi olive"><div class="kpi-label">Primes encaissées</div>
-            <div class="kpi-value">${T.reduce((a,t)=>a+(+t.bounty||0),0).toFixed(2)}<span class="unit">€</span></div>
-            <div class="kpi-sub">${T.reduce((a,t)=>a+(+t.ko||0),0)} élimination(s) · ${(T.reduce((a,t)=>a+(+t.bounty||0),0)/Math.max(1,inv)*100).toFixed(0)} % des mises</div></div>`
+      /* Declenche sur les primes, pas sur le nombre d'eliminations : Winamax
+         donne le montant encaisse mais jamais le compte des KO, et se fier a
+         `ko` masquait la carte sur tout un historique PKO. */
+      : (T.some(t=>+t.bounty>0)
+        ? (()=>{const bt=T.reduce((a,t)=>a+(+t.bounty||0),0),
+                      ko=T.reduce((a,t)=>a+(+t.ko||0),0);
+            return `<div class="kpi olive"><div class="kpi-label">Primes encaissées</div>
+            <div class="kpi-value">${bt.toFixed(2)}<span class="unit">€</span></div>
+            <div class="kpi-sub">${ko?ko+' élimination(s) · ':''}${(bt/Math.max(1,inv)*100).toFixed(0)} % des mises</div></div>`;})()
         : gate(n>=200,`<div class="kpi-label">ROI</div>
           <div class="kpi-value">${n>=200?roi.toFixed(0)+'<span class="unit">%</span>':'—'}</div>`,
           n>=200?`± ${ciR.toFixed(0)} pts à 95 %`:`n = ${n} / 200 requis`))
@@ -2421,20 +2610,23 @@ function renderImport(){
     +`<p class="verdict" style="font-size:15px;margin-top:16px">${v}</p>`;
 
   const rows=Tous.slice().reverse().slice(0,40);
-  const pko=T.some(t=>t.ko);
+  const pko=T.some(t=>+t.bounty>0);
   $('ldTable').innerHTML=`<tr><th>Date</th><th>Épreuve</th><th class="num">À table</th><th class="num">Champ</th><th class="num">Buy-in</th>
     <th class="num">Place</th>${pko?'<th class="num">Primes</th>':''}<th class="num">Gain</th><th class="num">Net</th><th class="num">Mains</th><th></th></tr>`+
     (rows.length?rows.map(t=>{const net=(+t.won||0)-(+t.buyin||0);
       void net;
       return `<tr><td class="num">${esc(String(t.date).slice(0,10))}</td><td>${esc(t.game)}${t.mult?' '+esc(t.mult):''}</td>
       <td class="num">${t.seats||'—'}</td><td class="num">${t.field||'—'}</td><td class="num">${(+t.buyin).toFixed(2)} €</td>
-      <td class="num">${t.finish||'—'}</td>${pko?`<td class="num">${t.ko?`${(+t.bounty).toFixed(2)} € · ${t.ko} KO`:'—'}</td>`:''}<td class="num">${t.res===false?'<span class="row-meta">résumé manquant</span>':(+t.won).toFixed(2)+' €'}</td>
+      <td class="num">${t.finish||'—'}</td>${pko?`<td class="num">${+t.bounty?`${(+t.bounty).toFixed(2)} €${t.ko?' · '+t.ko+' KO':''}`:'—'}</td>`:''}<td class="num">${t.res===false?'<span class="row-meta">résumé manquant</span>':(+t.won).toFixed(2)+' €'}</td>
       <td class="num ${t.res===false?'':(net>=0?'pos':'neg')}">${t.res===false?'—':eur(net)}</td><td class="num">${t.hands}</td>
       <td>${ME===OWNER()?`<button class="btn-mini" data-del-t="${esc(t.id)}">×</button>`:''}</td></tr>`;}).join('')
      :`<tr><td colspan="11" class="empty">Aucun tournoi de ce format. Dépose un fichier d'historique ci-dessus.</td></tr>`);
   $('ldTable').querySelectorAll('[data-del-t]').forEach(b=>b.onclick=()=>{
     if(VIEW!==OWNER())return;
     GONE.add(OWNER()+'|'+b.dataset.delT);
+    // Les mains completes suivent le tournoi : sans ca la base garderait des
+    // fantomes que plus rien ne reference, et l'atelier les analyserait encore.
+    supprimeMainsDe(OWNER(),b.dataset.delT);
     DATA.tournaments=DATA.tournaments.filter(x=>!(x.id===b.dataset.delT&&x.pid===OWNER()));
     save();renderImport();renderDash();});
 
@@ -2762,8 +2954,9 @@ async function init(){
       // Une sauvegarde peut dater d'un schema anterieur : meme chemin qu'au chargement.
       DATA=migrate(d);rebuildDirty();save();renderAll();}
       catch(err){alert("Fichier illisible. Attendu : un export JSON de ce carnet.");}};r.readAsText(f);};
-  $('resetBtn').onclick=()=>{if(!confirm("Effacer les données des trois joueurs ? L'action est définitive."))return;
+  $('resetBtn').onclick=()=>{if(!confirm("Effacer les données des trois joueurs, y compris les mains conservées pour l'atelier de ranges ? L'action est définitive."))return;
     DATA.tournaments.forEach(t=>GONE.add(TK(t)));
+    videMains();     // sinon le carnet repart a vide mais la base reste pleine
     DIRTY.clear();DATA=blank();save();renderAll();};
 
   setInterval(()=>{if(sb&&GROUP)pullCloud(false).then(ok=>{if(ok)renderAll();});},45000);
